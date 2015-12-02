@@ -1,3 +1,17 @@
+
+# Created by https://www.gitignore.io/api/netbeans,c++
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+.nb-gradle/
+
+
+### C++ ###
 # Compiled Object files
 *.slo
 *.lo
