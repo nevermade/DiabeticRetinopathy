@@ -54,10 +54,28 @@ void backgroundSegmentation(const Mat& src, Mat dest) {
     }
 
     //dilate
-    Mat result;
+    Mat result, eqH(src.rows, src.cols, src.type()), gray, medianFilter;
     src.copyTo(result, dest);
     imwrite("img/background_mask.tif", dest);
     imwrite("img/result.tif", result);
+
+    Mat ycrcb;
+    cvtColor(src, ycrcb, CV_BGR2YCrCb);
+
+    vector<Mat> channels;
+    split(ycrcb, channels);
+
+    equalizeHist(channels[0], channels[0]);
+
+    Mat result2;
+    merge(channels, ycrcb);
+    cvtColor(ycrcb, eqH, CV_YCrCb2BGR);
+
+    /*cvtColor(src, gray, CV_BGR2GRAY);
+    equalizeHist(gray, eqH);*/
+    imwrite("img/equalized_histogram.tif", eqH);
+    medianBlur(eqH, medianFilter, 3);
+    imwrite("img/median_filter.tif", medianFilter);
     /*namedWindow("Original Image", CV_WINDOW_AUTOSIZE);
     namedWindow("BackGround Segmentation", CV_WINDOW_AUTOSIZE);
     imshow("Original Image",src);
@@ -77,7 +95,7 @@ void retrieveBackground(Mat dest, Scalar stdDev) {
     if (calculateDistance(stdDev) >= 7.3) {//7.3
         blankBlock.copyTo(dest);
     }
-    
+
     /*if (stdDev.val[2] >= 1.9) {//7.3
         blankBlock.copyTo(dest);
     }*/
@@ -150,9 +168,9 @@ void bgrToHsi(Mat src, Mat& hsi) {
             } else {
                 int min_val = 0;
                 min_val = std::min(r, std::min(b, g));
-              
+
                 s = 1 - 3 * (min_val / (b + g + r));
-                
+
                 if (s < 0.00001) {
                     s = 0;
                 } else if (s > 0.99999) {
@@ -160,7 +178,7 @@ void bgrToHsi(Mat src, Mat& hsi) {
                 }
 
                 if (s != 0) {
-                    h = (r-0.5*g-0.5*b) / sqrt(r*r+g*g+b*b-r*g-r*b-g*b);                    
+                    h = (r - 0.5 * g - 0.5 * b) / sqrt(r * r + g * g + b * b - r * g - r * b - g * b);
                     //h = 0.5 * ((r - g) + (r - b)) / sqrt(((r - g)*(r - g)) + ((r - b)*(g - b)));
                     h = acos(h);
                     //cout <<"i:"<< i <<"j:"<<j<< endl;                   
