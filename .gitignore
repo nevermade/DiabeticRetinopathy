@@ -40,3 +40,6 @@ nbactions.xml
 *.exe
 *.out
 *.app
+
+*.mk
+*.xml
