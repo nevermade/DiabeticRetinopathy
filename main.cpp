@@ -32,12 +32,15 @@ int main(int argc, char** argv) {
         return -1;
     }
     Mat backGroundMask;
+    //Mat hsiImage;
     
+    //bgrToHsi(image,hsiImage);
     backgroundSegmentation(image, backGroundMask);
     
+    //mwrite("img/hsi.tif",hsiImage);
     
-    //namedWindow("Image", CV_WINDOW_AUTOSIZE);
-    //imshow("Image", noBg);
+    /*namedWindow("Image", CV_WINDOW_AUTOSIZE);
+    imshow("Image", hsiImage);*/
     waitKey(0);
     return 0;
 }

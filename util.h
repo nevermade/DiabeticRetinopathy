@@ -20,5 +20,6 @@ void backgroundSegmentation(const Mat& src, Mat dest);
 Scalar calculateStdDev(Mat& block);
 void retrieveBackground(Mat dest,Scalar stdDev);
 double calculateDistance(Scalar stdDev);
+void  bgrToHsi(Mat src, Mat& dest);
 #endif /* UTIL_H */
 
