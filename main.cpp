@@ -31,16 +31,15 @@ int main(int argc, char** argv) {
         printf(" No image data \n ");
         return -1;
     }
-    Mat backGroundMask;
-    //Mat hsiImage;
+    Mat backGroundMask,noiseMask,result;
     
-    //bgrToHsi(image,hsiImage);
     backgroundSegmentation(image, backGroundMask);
-    
-    //mwrite("img/hsi.tif",hsiImage);
+    noiseSegmentation(image,noiseMask);
+    finalSegmentation(image,backGroundMask,noiseMask,result);
+    //imwrite("img/noise_mask.tif",noiseMask);
     
     /*namedWindow("Image", CV_WINDOW_AUTOSIZE);
-    imshow("Image", hsiImage);*/
+    imshow("Image", backGroundMask);*/
     waitKey(0);
     return 0;
 }

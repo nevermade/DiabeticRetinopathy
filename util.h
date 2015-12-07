@@ -16,10 +16,16 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 using namespace cv;
-void backgroundSegmentation(const Mat& src, Mat dest);
+void backgroundSegmentation(const Mat& src, Mat& dest);
 Scalar calculateStdDev(Mat& block);
-void retrieveBackground(Mat dest,Scalar stdDev);
-double calculateDistance(Scalar stdDev);
+void retrieveBackgroundMask(Mat src, Mat dest);
+double calculateDistance(Scalar mean);
 void  bgrToHsi(Mat src, Mat& dest);
+double calculateNoiseFactor(Mat& block);
+void noiseSegmentation(const Mat& src, Mat& dest);
+void retrieveNoiseMask(Mat src, Mat dest);
+void fineBackGroundSegmentation(Mat& dest);
+void fineNoiseSegmentation(Mat& dest);
+void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask, Mat& result);
 #endif /* UTIL_H */
 
