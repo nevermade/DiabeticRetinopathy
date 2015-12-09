@@ -33,13 +33,15 @@ int main(int argc, char** argv) {
     }
     Mat backGroundMask,noiseMask,result;
     
+    //Preprocessing
     backgroundSegmentation(image, backGroundMask);
     noiseSegmentation(image,noiseMask);
     finalSegmentation(image,backGroundMask,noiseMask,result);
-    //imwrite("img/noise_mask.tif",noiseMask);
     
-    /*namedWindow("Image", CV_WINDOW_AUTOSIZE);
-    imshow("Image", backGroundMask);*/
+    //Vessel segmentation
+    imageVesselEnhancement(result);
+    
+    
     waitKey(0);
     return 0;
 }

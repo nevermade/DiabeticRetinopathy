@@ -70,7 +70,7 @@ void noiseSegmentation(const Mat& src, Mat& dest){
     cvtColor(ycrcb, eqH, CV_YCrCb2BGR);
     medianBlur(eqH, medianFilter, 3);
     bgrToHsi(medianFilter,hsi);
-    imwrite("img/noise_hsi.tif", hsi);    
+    //imwrite("img/noise_hsi.tif", hsi);    
     //imwrite("img/median_filter.tif", medianFilter);
     
     for (int i = 0; i < nRows; i++) {
@@ -93,7 +93,7 @@ void fineNoiseSegmentation(Mat& dest){
     imshow( "Fine Segmentation Noise Mask", dest);*/
 }
 void retrieveNoiseMask(Mat src, Mat dest){
-    if(calculateNoiseFactor(src)<=0.275){
+    if(calculateNoiseFactor(src)<=0.315){
          blankBlock.copyTo(dest);
     }
     //cout<<"Bloque ("<<j+1<<","<<i+1<<") prom:"<<calculateNoiseFactor(dest)<<endl;
@@ -237,9 +237,23 @@ double calculateNoiseFactor(Mat& block){
 }
 
 void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask, Mat& result){
-    bitwise_and(bgMask,noiseMask,result);
-    imwrite("img/final_mask.tiff",result);
+    Mat finalmask;
+    bitwise_and(bgMask,noiseMask,finalmask);
+    src.copyTo(result,finalmask);
+    //imwrite("img/final_result.tiff",result);
+    
 }
 
-
+void imageVesselEnhancement(Mat& result){
+    double sig = 3, th = 15, lm = 1.0, gm = 0.02, ps = 0;
+    vector<Mat> channels;
+    split(result, channels);    
+    //invert(channels[1],result);
+    bitwise_not(channels[1],result);
+    
+    Mat kernel=getGaborKernel(Size(2,2), sig, th, lm, gm, ps);
+    filter2D(result,result,CV_8UC3,kernel);
+    namedWindow("Green inverted channel", CV_WINDOW_AUTOSIZE);
+    imshow( "Green inverted channel", result);
+}
 
