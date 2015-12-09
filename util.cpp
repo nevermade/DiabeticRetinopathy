@@ -89,8 +89,8 @@ void fineNoiseSegmentation(Mat& dest){
     Mat element = getStructuringElement( MORPH_RECT,Size( morph_element_size, morph_element_size ));
     morphologyEx( dest, dest, MORPH_OPEN, element );
     erode(dest,dest,element);
-    namedWindow("Fine Segmentation Noise Mask", CV_WINDOW_AUTOSIZE);
-    imshow( "Fine Segmentation Noise Mask", dest);
+    /*namedWindow("Fine Segmentation Noise Mask", CV_WINDOW_AUTOSIZE);
+    imshow( "Fine Segmentation Noise Mask", dest);*/
 }
 void retrieveNoiseMask(Mat src, Mat dest){
     if(calculateNoiseFactor(src)<=0.275){
@@ -234,6 +234,11 @@ double calculateNoiseFactor(Mat& block){
     }
     noiseFactorTotal/=(w*w);
     return noiseFactorTotal;
+}
+
+void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask, Mat& result){
+    bitwise_and(bgMask,noiseMask,result);
+    imwrite("img/final_mask.tiff",result);
 }
 
 
