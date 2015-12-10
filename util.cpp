@@ -14,7 +14,7 @@
 #include "util.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
-
+#include "opencv2/imgproc/imgproc.hpp"
 using namespace std;
 int w = 8;
 int morph_element_size=5;
@@ -61,7 +61,7 @@ void noiseSegmentation(const Mat& src, Mat& dest){
     nCols /= w;
     Mat block;
     //Equalization
-    Mat result, eqH(src.rows, src.cols, src.type()),medianFilter,ycrcb,d,hsi;    
+    Mat eqH(src.rows, src.cols, src.type()),medianFilter,ycrcb,d,hsi;    
     cvtColor(src, ycrcb, CV_BGR2YCrCb);
     vector<Mat> channels;
     split(ycrcb, channels);
@@ -255,5 +255,6 @@ void imageVesselEnhancement(Mat& result){
     filter2D(result,result,CV_8UC3,kernel);
     namedWindow("Green inverted channel", CV_WINDOW_AUTOSIZE);
     imshow( "Green inverted channel", result);
+    
 }
 
