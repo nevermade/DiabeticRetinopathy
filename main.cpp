@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include "util.h"
+#include "preprocessing.h"
 using namespace std;
 using namespace cv;
 
@@ -31,15 +31,15 @@ int main(int argc, char** argv) {
         printf(" No image data \n ");
         return -1;
     }
-    Mat backGroundMask,noiseMask,result;
+    Mat backGroundMask,noiseMask,finalMask,result;
     
     //Preprocessing
     backgroundSegmentation(image, backGroundMask);
     noiseSegmentation(image,noiseMask);
-    finalSegmentation(image,backGroundMask,noiseMask,result);
+    finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
     
     //Vessel segmentation
-    imageVesselEnhancement(result);
+    imageVesselEnhancement(result,finalMask);
     
     
     waitKey(0);

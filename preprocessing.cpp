@@ -11,7 +11,7 @@
  * Created on 3 de diciembre de 2015, 02:17 PM
  */
 #include <cstdlib>
-#include "util.h"
+#include "preprocessing.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -236,25 +236,27 @@ double calculateNoiseFactor(Mat& block){
     return noiseFactorTotal;
 }
 
-void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask, Mat& result){
-    Mat finalmask;
-    bitwise_and(bgMask,noiseMask,finalmask);
-    src.copyTo(result,finalmask);
-    //imwrite("img/final_result.tiff",result);
+void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask, Mat& result){
+   
+    bitwise_or(bgMask,noiseMask,finalMask);
+    src.copyTo(result,finalMask);
+    imwrite("img/final_result.tiff",result);
     
 }
 
-void imageVesselEnhancement(Mat& result){
-    double sig = 3, th = 15, lm = 1.0, gm = 0.02, ps = 0;
+void imageVesselEnhancement(Mat& result,Mat& finalMask){
+   
     vector<Mat> channels;
+    vector<Mat> maskChannels;
+    split(finalMask,maskChannels);
     split(result, channels);    
-    //invert(channels[1],result);
-    bitwise_not(channels[1],result);
+    //channels[0]=Mat(result.rows, result.cols, CV_8UC1,Scalar(0));
+    //channels[2]=Mat(result.rows, result.cols, CV_8UC1,Scalar(0));
+    //bitwise_not(maskChannels[1],maskChannels[1]);
+    bitwise_not(channels[1],channels[1],maskChannels[1]);   
     
-    Mat kernel=getGaborKernel(Size(2,2), sig, th, lm, gm, ps);
-    filter2D(result,result,CV_8UC3,kernel);
-    namedWindow("Green inverted channel", CV_WINDOW_AUTOSIZE);
-    imshow( "Green inverted channel", result);
+    //merge(channels,result);     
+    imwrite("img/green_inverted_image.tiff",channels[1]);
     
 }
 

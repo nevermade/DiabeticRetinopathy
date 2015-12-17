@@ -26,7 +26,7 @@ void noiseSegmentation(const Mat& src, Mat& dest);
 void retrieveNoiseMask(Mat src, Mat dest);
 void fineBackGroundSegmentation(Mat& dest);
 void fineNoiseSegmentation(Mat& dest);
-void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask, Mat& result);
-void imageVesselEnhancement(Mat& result);
+void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask, Mat& result);
+void imageVesselEnhancement(Mat& result,Mat& finalMask);
 #endif /* UTIL_H */
 
