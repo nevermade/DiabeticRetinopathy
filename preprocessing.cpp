@@ -238,7 +238,7 @@ double calculateNoiseFactor(Mat& block){
 
 void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask, Mat& result){
    
-    bitwise_or(bgMask,noiseMask,finalMask);
+    bitwise_and(bgMask,noiseMask,finalMask);
     src.copyTo(result,finalMask);
     imwrite("img/final_result.tiff",result);
     
@@ -249,13 +249,8 @@ void imageVesselEnhancement(Mat& result,Mat& finalMask){
     vector<Mat> channels;
     vector<Mat> maskChannels;
     split(finalMask,maskChannels);
-    split(result, channels);    
-    //channels[0]=Mat(result.rows, result.cols, CV_8UC1,Scalar(0));
-    //channels[2]=Mat(result.rows, result.cols, CV_8UC1,Scalar(0));
-    //bitwise_not(maskChannels[1],maskChannels[1]);
-    bitwise_not(channels[1],channels[1],maskChannels[1]);   
-    
-    //merge(channels,result);     
+    split(result, channels);        
+    bitwise_not(channels[1],channels[1],maskChannels[1]);       
     imwrite("img/green_inverted_image.tiff",channels[1]);
     
 }
