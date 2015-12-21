@@ -12,9 +12,6 @@
  */
 #include <cstdlib>
 #include "preprocessing.h"
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
 using namespace std;
 int w = 8;
 int morph_element_size=5;
@@ -244,14 +241,5 @@ void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask
     
 }
 
-void imageVesselEnhancement(Mat& result,Mat& finalMask){
-   
-    vector<Mat> channels;
-    vector<Mat> maskChannels;
-    split(finalMask,maskChannels);
-    split(result, channels);        
-    bitwise_not(channels[1],channels[1],maskChannels[1]);       
-    imwrite("img/green_inverted_image.tiff",channels[1]);
-    
-}
+
 

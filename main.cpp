@@ -15,6 +15,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "preprocessing.h"
+#include "feature_extraction.h"
 using namespace std;
 using namespace cv;
 

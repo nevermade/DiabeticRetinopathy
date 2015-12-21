@@ -13,8 +13,18 @@
 
 #ifndef FEATURE_EXTRACTION_H
 #define FEATURE_EXTRACTION_H
-
-
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+using namespace cv;
+void imageVesselEnhancement(Mat& result,Mat& finalMask);
+void fourierTransform(const Mat& invGC, Mat& complexI);
+void apply2DCWT(Mat& complexI);
+void printMatrix(const Mat& m);
+template<typename _Tp>
+void printMatrix(Mat& m);
+Mat apply2DMorletWavelet(Mat K, Mat inv);
+void complexExp(Mat& mx);
 
 #endif /* FEATURE_EXTRACTION_H */
 

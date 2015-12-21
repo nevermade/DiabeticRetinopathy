@@ -4,7 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>util.h</itemPath>
+      <itemPath>feature_extraction.h</itemPath>
+      <itemPath>preprocessing.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -13,8 +14,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>feature_extraction.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
-      <itemPath>util.cpp</itemPath>
+      <itemPath>preprocessing.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -112,11 +114,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="feature_extraction.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="feature_extraction.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="util.cpp" ex="false" tool="1" flavor2="0">
+      <item path="preprocessing.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="util.h" ex="false" tool="3" flavor2="0">
+      <item path="preprocessing.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -139,11 +145,15 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="feature_extraction.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="feature_extraction.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="util.cpp" ex="false" tool="1" flavor2="0">
+      <item path="preprocessing.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="util.h" ex="false" tool="3" flavor2="0">
+      <item path="preprocessing.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

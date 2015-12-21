@@ -15,6 +15,7 @@
 #define UTIL_H
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 using namespace cv;
 void backgroundSegmentation(const Mat& src, Mat& dest);
 Scalar calculateStdDev(Mat& block);
@@ -27,6 +28,6 @@ void retrieveNoiseMask(Mat src, Mat dest);
 void fineBackGroundSegmentation(Mat& dest);
 void fineNoiseSegmentation(Mat& dest);
 void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask, Mat& result);
-void imageVesselEnhancement(Mat& result,Mat& finalMask);
+
 #endif /* UTIL_H */
 
