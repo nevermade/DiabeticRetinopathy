@@ -98,10 +98,33 @@ void apply2DCWT(Mat& complexI) {
     K.ptr<float>(0)[0] = complexI.ptr<float>(0)[0];
     K.ptr<float>(1)[0] = complexI.ptr<float>(0)[1];
     morletWavelet=apply2DMorletWavelet(K,inv);
-    
+    //apply conjugate
+    morletWavelet.ptr<float>(0)[1]*=-1;
+       
     //imaginary uni j
-    Mat j(2,1,CV_32FC1,Scalar(0));
+    Mat j(2,1,CV_32FC1);
+    j.ptr<float>(0)[0]=0;
     j.ptr<float>(1)[0]=1;
+    //displacement vector b
+    Mat b(2,1,CV_32FC1,Scalar(0));
+    b.ptr<float>(0)[0]=0;
+    b.ptr<float>(1)[0]=0;
+    
+    Mat cwt;
+    cwt=j*K;
+    complexExp(cwt);
+    
+}
+
+Mat imagMul(Mat& a, Mat& b){
+    Mat result(2,1,CV_32FC1);
+    float a1=a.ptr<float>(0)[0];
+    float a2=a.ptr<float>(1)[0];
+    float b1=b.ptr<float>(0)[0];
+    float b2=b.ptr<float>(1)[0];
+    result.ptr<float>(0)[0]=a1*b1+a2*b2*-1;
+    result.ptr<float>(1)[1]=
+    
 }
 
 template<typename _Tp>
@@ -128,7 +151,6 @@ Mat apply2DMorletWavelet(Mat K, Mat inv) {
     //complexExp(morletWavelet);//Complex Exponential
     exp(morletWavelet,morletWavelet);
     morletWavelet = sqrt(elongation) * morletWavelet;    
-    morletWavelet.ptr<float>(0)[1]*=-1;
     printMatrix<float>(morletWavelet);
     return morletWavelet;
 }
