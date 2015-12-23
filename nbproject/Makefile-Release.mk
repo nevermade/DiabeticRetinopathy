@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/ComplexNum.o \
 	${OBJECTDIR}/feature_extraction.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/preprocessing.o
@@ -63,6 +64,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/ComplexNum.o: ComplexNum.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComplexNum.o ComplexNum.cpp
 
 ${OBJECTDIR}/feature_extraction.o: feature_extraction.cpp 
 	${MKDIR} -p ${OBJECTDIR}

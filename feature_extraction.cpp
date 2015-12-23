@@ -6,9 +6,9 @@
 #include <cstdlib>
 #include "feature_extraction.h"
 
-using namespace std;
-double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4,theta=0;
 
+using namespace std;
+double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
 void imageVesselEnhancement(Mat& result, Mat& finalMask) {
 
@@ -81,8 +81,8 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
 }
 
 void apply2DCWT(Mat& complexI) {
-    
-    
+
+
     Mat A(2, 2, CV_32FC1);
 
 
@@ -92,41 +92,28 @@ void apply2DCWT(Mat& complexI) {
     A.ptr<float>(1)[0] = 0;
     A.ptr<float>(1)[1] = 1;
     //A.inv();
-    Mat inv = A.inv(),K=Mat(2, 1, CV_32FC1),morletWavelet;   
-
-    //Set K    
-    K.ptr<float>(0)[0] = complexI.ptr<float>(0)[0];
-    K.ptr<float>(1)[0] = complexI.ptr<float>(0)[1];
-    morletWavelet=apply2DMorletWavelet(K,inv);
+    Mat inv = A.inv(), morletWavelet;
+    ComplexNum K(complexI.ptr<float>(0)[0],complexI.ptr<float>(0)[1]);
+      
+    
+    morletWavelet = apply2DMorletWavelet(K, inv);
     //apply conjugate
-    morletWavelet.ptr<float>(0)[1]*=-1;
-       
+   /* morletWavelet.ptr<float>(0)[1] *= -1;
+
     //imaginary uni j
-    Mat j(2,1,CV_32FC1);
-    j.ptr<float>(0)[0]=0;
-    j.ptr<float>(1)[0]=1;
+    Mat j(2, 1, CV_32FC1);
+    j.ptr<float>(0)[0] = 0;
+    j.ptr<float>(1)[0] = 1;
     //displacement vector b
-    Mat b(2,1,CV_32FC1,Scalar(0));
-    b.ptr<float>(0)[0]=0;
-    b.ptr<float>(1)[0]=0;
-    
+    Mat b(2, 1, CV_32FC1, Scalar(0));
+    b.ptr<float>(0)[0] = 0;
+    b.ptr<float>(1)[0] = 0;
+
     Mat cwt;
-    cwt=j*K;
-    complexExp(cwt);
-    
-}
+    cwt = j*K;
+    complexExp(cwt)*/;
 
-Mat imagMul(Mat& a, Mat& b){
-    Mat result(2,1,CV_32FC1);
-    float a1=a.ptr<float>(0)[0];
-    float a2=a.ptr<float>(1)[0];
-    float b1=b.ptr<float>(0)[0];
-    float b2=b.ptr<float>(1)[0];
-    result.ptr<float>(0)[0]=a1*b1+a2*b2*-1;
-    result.ptr<float>(1)[1]=
-    
 }
-
 template<typename _Tp>
 void printMatrix(Mat& m) {
     int rows = m.rows;
@@ -141,23 +128,30 @@ void printMatrix(Mat& m) {
     }
 }
 
-Mat apply2DMorletWavelet(Mat K, Mat inv) {
-    Mat K0(2, 1, CV_32FC1),morletWavelet;    
-    //Set K0
-    K0.ptr<float>(0)[0] = 0;
-    K0.ptr<float>(1)[0] = 3;
-    morletWavelet = K - K0;
-    morletWavelet = -0.5 * inv*morletWavelet;
-    //complexExp(morletWavelet);//Complex Exponential
-    exp(morletWavelet,morletWavelet);
-    morletWavelet = sqrt(elongation) * morletWavelet;    
-    printMatrix<float>(morletWavelet);
+Mat apply2DMorletWavelet(ComplexNum K, Mat inv) {
+    Mat morletWavelet;
+    ComplexNum K0(0,3);    
+    morletWavelet = -0.5 *((K-K0)*inv);
+    //complexExp(morletWavelet);//Complex Exponential    
+    morletWavelet = sqrt(elongation) * matrixComplexExp(morletWavelet);;
+    printMatrix<Vec2f>(morletWavelet);
     return morletWavelet;
 }
-//Complex Exponential
-void complexExp(Mat& mx){
-    float a=exp(mx.ptr<float>(0)[0]);
-    float b=exp(mx.ptr<float>(1)[0]);
-    mx.ptr<float>(0)[0]=exp(a)*cos(b);//real part
-    mx.ptr<float>(1)[0]=exp(a)*sin(b);//img part
+
+Mat matrixComplexExp(Mat matrix){
+    int nrows = matrix.rows;
+    int ncols = matrix.cols;
+    Vec2f* ptr;
+    for (int i = 0; i < nrows; i++) {
+        ptr = matrix.ptr<Vec2f>(i);
+        for (int j = 0; i < ncols; i++) {
+            ComplexNum a(ptr[j][0],ptr[j][1]);
+            ComplexNum result=a.complexExp();
+            ptr[j][0]=result.getReal();
+            ptr[j][1]=result.getImg();
+        }
+    }
+    return matrix;
 }
+
+
