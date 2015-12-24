@@ -80,24 +80,53 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
 
 }
 
+Mat getRotationMatrix(double theta){
+    Mat rot(2,2,CV_32FC1);
+    rot.ptr<float>(0)[0] = cos(theta);
+    rot.ptr<float>(0)[1] = -sin(theta);
+    rot.ptr<float>(1)[0] = sin(theta);
+    rot.ptr<float>(1)[1] = cos(theta);
+    return rot;
+}
 void apply2DCWT(Mat& complexI) {
 
 
     Mat A(2, 2, CV_32FC1);
-
-
+    Mat rotMtrx;//rotation matrix
+    
     //Set A
     A.ptr<float>(0)[0] = pow(elongation, -0.5);
     A.ptr<float>(0)[1] = 0;
     A.ptr<float>(1)[0] = 0;
     A.ptr<float>(1)[1] = 1;
+    
+    //Set rotation matrix
+    rotMtrx=getRotationMatrix(-theta);    
     //A.inv();
     Mat inv = A.inv(), morletWavelet;
-    ComplexNum K(complexI.ptr<float>(0)[0], complexI.ptr<float>(0)[1]);
+    /*ComplexNum K(complexI.ptr<float>(0)[0], complexI.ptr<float>(0)[1]);
 
-    K.printComplexNum();
-    morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();
+    K.printComplexNum();*/
+    //morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();//Apply conjugate
     
+    /*Mat complexExponential;
+    ComplexNum complexUnit(0,1);
+    
+    complexExponential=((ComplexNum)(complexUnit*K)).toMat();*/
+    
+    int nrows=complexI.rows;
+    int ncols=complexI.cols;
+    Vec2f *ptr;
+    
+    for(int i=0;i<nrows;i++){
+        ptr=complexI.ptr<Vec2f>(i);
+        for(int j=0;i<ncols;i++){
+            ComplexNum K(ptr[j][0],ptr[j][1]);
+            K.printComplexNum();
+            //morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();
+            
+        }
+    }
     
     //apply conjugate
     /* morletWavelet.ptr<float>(0)[1] *= -1;
@@ -134,7 +163,7 @@ void printMatrix(Mat& m) {
 Mat apply2DMorletWavelet(ComplexNum& K, Mat inv) {
     Mat morletWavelet;
     ComplexNum K0(0, 3);
-    K0.printComplexNum();
+    //K0.printComplexNum();
     morletWavelet = ((ComplexNum) (K - K0)).toMat();
     morletWavelet = -0.5 * (inv * morletWavelet);
     //complexExp(morletWavelet);//Complex Exponential    
