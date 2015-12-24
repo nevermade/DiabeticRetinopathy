@@ -93,27 +93,30 @@ void apply2DCWT(Mat& complexI) {
     A.ptr<float>(1)[1] = 1;
     //A.inv();
     Mat inv = A.inv(), morletWavelet;
-    ComplexNum K(complexI.ptr<float>(0)[0],complexI.ptr<float>(0)[1]);
-      
+    ComplexNum K(complexI.ptr<float>(0)[0], complexI.ptr<float>(0)[1]);
+
+    K.printComplexNum();
+    morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();
     
-    morletWavelet = apply2DMorletWavelet(K, inv);
+    
     //apply conjugate
-   /* morletWavelet.ptr<float>(0)[1] *= -1;
+    /* morletWavelet.ptr<float>(0)[1] *= -1;
 
-    //imaginary uni j
-    Mat j(2, 1, CV_32FC1);
-    j.ptr<float>(0)[0] = 0;
-    j.ptr<float>(1)[0] = 1;
-    //displacement vector b
-    Mat b(2, 1, CV_32FC1, Scalar(0));
-    b.ptr<float>(0)[0] = 0;
-    b.ptr<float>(1)[0] = 0;
+     //imaginary uni j
+     Mat j(2, 1, CV_32FC1);
+     j.ptr<float>(0)[0] = 0;
+     j.ptr<float>(1)[0] = 1;
+     //displacement vector b
+     Mat b(2, 1, CV_32FC1, Scalar(0));
+     b.ptr<float>(0)[0] = 0;
+     b.ptr<float>(1)[0] = 0;
 
-    Mat cwt;
-    cwt = j*K;
-    complexExp(cwt)*/;
+     Mat cwt;
+     cwt = j*K;
+     complexExp(cwt)*/;
 
 }
+
 template<typename _Tp>
 void printMatrix(Mat& m) {
     int rows = m.rows;
@@ -128,30 +131,34 @@ void printMatrix(Mat& m) {
     }
 }
 
-Mat apply2DMorletWavelet(ComplexNum K, Mat inv) {
+Mat apply2DMorletWavelet(ComplexNum& K, Mat inv) {
     Mat morletWavelet;
-    ComplexNum K0(0,3);    
-    morletWavelet = -0.5 *((K-K0)*inv);
+    ComplexNum K0(0, 3);
+    K0.printComplexNum();
+    morletWavelet = ((ComplexNum) (K - K0)).toMat();
+    morletWavelet = -0.5 * (inv * morletWavelet);
     //complexExp(morletWavelet);//Complex Exponential    
-    morletWavelet = sqrt(elongation) * matrixComplexExp(morletWavelet);;
-    printMatrix<Vec2f>(morletWavelet);
+    morletWavelet = ((ComplexNum) (toComplexNum(morletWavelet).complexExp()*(float) sqrt(elongation))).toMat();
+    printMatrix<float>(morletWavelet);
     return morletWavelet;
 }
 
-Mat matrixComplexExp(Mat matrix){
+Mat matrixComplexExp(Mat matrix) {
     int nrows = matrix.rows;
     int ncols = matrix.cols;
     Vec2f* ptr;
     for (int i = 0; i < nrows; i++) {
         ptr = matrix.ptr<Vec2f>(i);
         for (int j = 0; i < ncols; i++) {
-            ComplexNum a(ptr[j][0],ptr[j][1]);
-            ComplexNum result=a.complexExp();
-            ptr[j][0]=result.getReal();
-            ptr[j][1]=result.getImg();
+            ComplexNum a(ptr[j][0], ptr[j][1]);
+            ComplexNum result = a.complexExp();
+            ptr[j][0] = result.getReal();
+            ptr[j][1] = result.getImg();
         }
     }
     return matrix;
 }
 
-
+ComplexNum toComplexNum(Mat a) {
+    return ComplexNum(a);
+}

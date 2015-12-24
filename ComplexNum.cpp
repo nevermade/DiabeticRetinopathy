@@ -16,76 +16,81 @@
 ComplexNum::ComplexNum() {
 }
 
-ComplexNum::ComplexNum(const ComplexNum& orig) {
+ComplexNum::ComplexNum(const ComplexNum& orig) {    
+    this->imag=orig.imag;
 }
 ComplexNum::~ComplexNum(){
     
 }
 ComplexNum::ComplexNum(float a){
-    imag[0]=a;
-    imag[1]=0;
+    imag=Mat(2,1,CV_32FC1);
+    imag.ptr<float>(0)[0]=a;
+    imag.ptr<float>(1)[0]=0;
 }
-ComplexNum::ComplexNum(Vec2f a){
-    imag[0]=a[0];
-    imag[1]=a[1];
+ComplexNum::ComplexNum(Mat a){
+    imag=a;
+    /*imag.ptr<float>(0)[0]=a.ptr<float>(0)[0];
+    imag.ptr<float>(1)[0]=a.ptr<float>(1)[0];*/
 }
 
 ComplexNum::ComplexNum(float a, float b) {
-    imag[0] = a;
-    imag[1] = b;
+    imag=Mat(2,1,CV_32FC1);
+    imag.ptr<float>(0)[0]=a;
+    imag.ptr<float>(1)[0]=b;
     
 }
 
 float ComplexNum::getReal(){
-    return this->imag[0];
+    return this->imag.ptr<float>(0)[0];
 }
 
 float ComplexNum::getImg(){
-    return this->imag[1];
+    return this->imag.ptr<float>(1)[0];
 }
 
-ComplexNum ComplexNum::operator+(ComplexNum b) {
-    this->imag[0] += b.imag[0];
-    this->imag[1] += b.imag[1];
+ComplexNum ComplexNum::operator+(ComplexNum& b) {
+    this->imag.ptr<float>(0)[0] += b.imag.ptr<float>(0)[0];
+    this->imag.ptr<float>(1)[0] += b.imag.ptr<float>(1)[0];
     return *this;
 }
 
-ComplexNum ComplexNum::operator-(ComplexNum b) {
-    this->imag[0] -= b.imag[0];
-    this->imag[1] -= b.imag[1];
+ComplexNum ComplexNum::operator-(ComplexNum& b) {
+    this->imag.ptr<float>(0)[0] -= b.imag.ptr<float>(0)[0];
+    this->imag.ptr<float>(1)[0] -= b.imag.ptr<float>(1)[0];
     return *this;
 }
 
-ComplexNum ComplexNum::operator*(ComplexNum x) {
-    int a = this->imag[0];
-    int b = this->imag[1];
-    int c = x.imag[0];
-    int d = x.imag[1];
+ComplexNum ComplexNum::operator*(ComplexNum& x) {
+    int a = this->imag.ptr<float>(0)[0];
+    int b = this->imag.ptr<float>(1)[0];
+    int c = x.imag.ptr<float>(0)[0];
+    int d = x.imag.ptr<float>(1)[0];
 
-    this->imag[0] = a * c - b*d;
-    this->imag[0] = a * d + b*c;
+    this->imag.ptr<float>(0)[0] = a * c - b*d;
+    this->imag.ptr<float>(1)[0] = a * d + b*c;
     return *this;
 }
 
 ComplexNum ComplexNum::operator*(float b) {
-    this->imag[0]*=b;
-    this->imag[1]*=b;
+    this->imag.ptr<float>(0)[0]*=b;
+    this->imag.ptr<float>(1)[0]*=b;
     return *this;
 }
 ComplexNum ComplexNum::complexExp(){
-    float a = this->imag[0];
-    float b = this->imag[1];
-    this->imag[0] = exp(a) * cos(b); //real part
-    this->imag[1] = exp(a) * sin(b); //img part
-}
-
-
-ComplexNum ComplexNum::operator = (ComplexNum b){
-    this->imag[0]=b.imag[0];
-    this->imag[1]=b.imag[1];
+    float a = this->imag.ptr<float>(0)[0];
+    float b = this->imag.ptr<float>(1)[0];
+    this->imag.ptr<float>(0)[0] = exp(a) * cos(b); //real part
+    this->imag.ptr<float>(1)[0] = exp(a) * sin(b); //img part
     return *this;
 }
 
+
+ComplexNum ComplexNum::operator = (ComplexNum& b){
+    this->imag.ptr<float>(0)[0] = b.imag.ptr<float>(0)[0];
+    this->imag.ptr<float>(1)[0] = b.imag.ptr<float>(1)[0];
+    return *this;
+}
+/*
 Mat ComplexNum::operator *(Mat matrix){
     int nrows = matrix.rows;
     int ncols = matrix.cols;
@@ -103,9 +108,18 @@ Mat ComplexNum::operator *(Mat matrix){
     }
 
     return matrix;
-}
+}*/
 
 ComplexNum ComplexNum::conj(){
-    this->imag[1]*=-1;
+    this->imag.ptr<float>(1)[0]*=-1;
     return *this;
+}
+
+
+Mat ComplexNum::toMat(){
+       
+    return this->imag;
+}
+void ComplexNum::printComplexNum(){
+    cout<<"["<<this->imag.ptr<float>(0)[0]<<","<<this->imag.ptr<float>(1)[0]<<"]"<<endl;
 }
