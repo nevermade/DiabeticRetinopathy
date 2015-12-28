@@ -38,7 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/ComplexNum.o \
 	${OBJECTDIR}/feature_extraction.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/preprocessing.o
+	${OBJECTDIR}/preprocessing.o \
+	${OBJECTDIR}/util.o
 
 
 # C Compiler Flags
@@ -208,6 +209,11 @@ ${OBJECTDIR}/preprocessing.o: preprocessing.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/preprocessing.o preprocessing.cpp
+
+${OBJECTDIR}/util.o: util.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/util.o util.cpp
 
 # Subprojects
 .build-subprojects:

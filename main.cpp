@@ -16,13 +16,24 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "preprocessing.h"
 #include "feature_extraction.h"
+#include <fstream>
+#include <iostream>
 using namespace std;
 using namespace cv;
 
 /*
  * 
  */
+ofstream myFile;
+
+void initialize();
+void finish();
+
+
 int main(int argc, char** argv) {
+    
+    
+    initialize();
     Mat image;
     
     image = imread("img/eye_test.tif", 1);
@@ -44,6 +55,15 @@ int main(int argc, char** argv) {
     
     
     waitKey(0);
+    
+    finish();
     return 0;
 }
 
+void initialize(){
+    myFile.open("output.txt");
+}
+
+void finish(){
+    myFile.close();
+}

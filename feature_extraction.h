@@ -24,9 +24,9 @@ void apply2DCWT(Mat& complexI);
 void printMatrix(const Mat& m);
 template<typename _Tp>
 void printMatrix(Mat& m);
-Mat apply2DMorletWavelet(ComplexNum& K, Mat inv);
-Mat matrixComplexExp(Mat matrix);
-ComplexNum toComplexNum(Mat a);
+void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet);
+void matrixComplexExp(Mat& matrix);
+ComplexNum toComplexNum(Mat& a);
 Mat getRotationMatrix(double theta);
 
 #endif /* FEATURE_EXTRACTION_H */

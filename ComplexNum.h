@@ -16,29 +16,30 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include <limits>
 using namespace cv;
 using namespace std;
 class ComplexNum {
     Mat imag;
 public:    
     ComplexNum();
-    ComplexNum(float a, float b);
-    ComplexNum(float a);
+    ComplexNum(double a, double b);
+    ComplexNum(double a);
     
-    ComplexNum(Mat a);
+    ComplexNum(Mat& a);
     ComplexNum(const ComplexNum& orig);
     virtual ~ComplexNum();
-    ComplexNum operator + (ComplexNum& b);
-    ComplexNum operator - (ComplexNum& b);
-    ComplexNum operator * (ComplexNum& b);
-    ComplexNum operator * (float b);
+    ComplexNum operator + (const ComplexNum& b);
+    ComplexNum operator - (const ComplexNum& b);
+    ComplexNum operator * (const ComplexNum& b);
+    ComplexNum operator * (double b);
    // Mat operator * (Mat m);
-    ComplexNum operator = (ComplexNum& b);
+    void operator = (const ComplexNum &b);
     ComplexNum complexExp();
     ComplexNum conj();
     Mat toMat();    
-    float getReal();
-    float getImg();
+    double getReal();
+    double getImg();
     void printComplexNum();
 private:
     

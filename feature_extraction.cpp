@@ -5,9 +5,10 @@
  */
 #include <cstdlib>
 #include "feature_extraction.h"
-
+#include "util.h"
 
 using namespace std;
+
 double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
 void imageVesselEnhancement(Mat& result, Mat& finalMask) {
@@ -32,7 +33,7 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
     int m = getOptimalDFTSize(invGC.rows);
     int n = getOptimalDFTSize(invGC.cols); // on the border add zero values
     copyMakeBorder(invGC, padded, 0, m - invGC.rows, 0, n - invGC.cols, BORDER_CONSTANT, Scalar::all(0));
-    Mat planes[] = {Mat_<float>(padded), Mat::zeros(padded.size(), CV_32F)};
+    Mat planes[] = {Mat_<double>(padded), Mat::zeros(padded.size(), CV_64F)};
     //Mat complexI;
     merge(planes, 2, complexI); // Add to the expanded another plane with zeros
 
@@ -68,8 +69,8 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
     q2.copyTo(q1);
     tmp.copyTo(q2);
 
-    normalize(magI, magI, 0, 1, CV_MINMAX); // Transform the matrix with float values into a
-    // viewable image form (float between values 0 and 1).
+    normalize(magI, magI, 0, 1, CV_MINMAX); // Transform the matrix with double values into a
+    // viewable image form (double between values 0 and 1).
 
     // imshow("Input Image"       , invGC   );    // Show the result
     //imshow("spectrum magnitude", magI);
@@ -82,10 +83,10 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
 
 Mat getRotationMatrix(double theta){
     Mat rot(2,2,CV_32FC1);
-    rot.ptr<float>(0)[0] = cos(theta);
-    rot.ptr<float>(0)[1] = -sin(theta);
-    rot.ptr<float>(1)[0] = sin(theta);
-    rot.ptr<float>(1)[1] = cos(theta);
+    rot.ptr<double>(0)[0] = cos(theta);
+    rot.ptr<double>(0)[1] = -sin(theta);
+    rot.ptr<double>(1)[0] = sin(theta);
+    rot.ptr<double>(1)[1] = cos(theta);
     return rot;
 }
 void apply2DCWT(Mat& complexI) {
@@ -95,16 +96,16 @@ void apply2DCWT(Mat& complexI) {
     Mat rotMtrx;//rotation matrix
     
     //Set A
-    A.ptr<float>(0)[0] = pow(elongation, -0.5);
-    A.ptr<float>(0)[1] = 0;
-    A.ptr<float>(1)[0] = 0;
-    A.ptr<float>(1)[1] = 1;
+    A.ptr<double>(0)[0] = pow(elongation, -0.5);
+    A.ptr<double>(0)[1] = 0;
+    A.ptr<double>(1)[0] = 0;
+    A.ptr<double>(1)[1] = 1;
     
     //Set rotation matrix
     rotMtrx=getRotationMatrix(-theta);    
     //A.inv();
     Mat inv = A.inv(), morletWavelet;
-    /*ComplexNum K(complexI.ptr<float>(0)[0], complexI.ptr<float>(0)[1]);
+    /*ComplexNum K(complexI.ptr<double>(0)[0], complexI.ptr<double>(0)[1]);
 
     K.printComplexNum();*/
     //morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();//Apply conjugate
@@ -116,29 +117,31 @@ void apply2DCWT(Mat& complexI) {
     
     int nrows=complexI.rows;
     int ncols=complexI.cols;
-    Vec2f *ptr;
+    Vec2d *ptr;
     
-    for(int i=0;i<nrows;i++){
-        ptr=complexI.ptr<Vec2f>(i);
-        for(int j=0;i<ncols;i++){
+    for(int i=500;;i++){
+        ptr=complexI.ptr<Vec2d>(i);
+        for(int j=0;j<ncols;j++){
             ComplexNum K(ptr[j][0],ptr[j][1]);
-            K.printComplexNum();
-            //morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();
-            
+            //K.printComplexNum();
+            apply2DMorletWavelet(K, inv,morletWavelet);
+            toComplexNum(morletWavelet).conj().toMat();
+            printMatrix<double>(morletWavelet);
         }
+        
     }
     
     //apply conjugate
-    /* morletWavelet.ptr<float>(0)[1] *= -1;
+    /* morletWavelet.ptr<double>(0)[1] *= -1;
 
      //imaginary uni j
      Mat j(2, 1, CV_32FC1);
-     j.ptr<float>(0)[0] = 0;
-     j.ptr<float>(1)[0] = 1;
+     j.ptr<double>(0)[0] = 0;
+     j.ptr<double>(1)[0] = 1;
      //displacement vector b
      Mat b(2, 1, CV_32FC1, Scalar(0));
-     b.ptr<float>(0)[0] = 0;
-     b.ptr<float>(1)[0] = 0;
+     b.ptr<double>(0)[0] = 0;
+     b.ptr<double>(1)[0] = 0;
 
      Mat cwt;
      cwt = j*K;
@@ -160,24 +163,31 @@ void printMatrix(Mat& m) {
     }
 }
 
-Mat apply2DMorletWavelet(ComplexNum& K, Mat inv) {
-    Mat morletWavelet;
-    ComplexNum K0(0, 3);
+void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet) {    
+    ComplexNum K0(0, 3),temp;
     //K0.printComplexNum();
-    morletWavelet = ((ComplexNum) (K - K0)).toMat();
-    morletWavelet = -0.5 * (inv * morletWavelet);
-    //complexExp(morletWavelet);//Complex Exponential    
-    morletWavelet = ((ComplexNum) (toComplexNum(morletWavelet).complexExp()*(float) sqrt(elongation))).toMat();
-    printMatrix<float>(morletWavelet);
-    return morletWavelet;
+    temp=K-K0;
+    //temp.printComplexNum();
+    temp=temp*temp;
+    morletWavelet = temp.toMat();
+    //printMatrix<double>(morletWavelet);
+    //printMatrix<double>(inv);
+    //printMatrix<double>(morletWavelet);
+    morletWavelet =-0.5* (inv * morletWavelet);
+    //printMatrix<double>(morletWavelet);
+    temp = toComplexNum(morletWavelet);
+    temp= temp.complexExp();
+    morletWavelet=temp.toMat()*sqrt(elongation);
+    //printMatrix<double>(morletWavelet);    
+    
 }
 
-Mat matrixComplexExp(Mat matrix) {
+void matrixComplexExp(Mat& matrix) {
     int nrows = matrix.rows;
     int ncols = matrix.cols;
-    Vec2f* ptr;
+    Vec2d* ptr;
     for (int i = 0; i < nrows; i++) {
-        ptr = matrix.ptr<Vec2f>(i);
+        ptr = matrix.ptr<Vec2d>(i);
         for (int j = 0; i < ncols; i++) {
             ComplexNum a(ptr[j][0], ptr[j][1]);
             ComplexNum result = a.complexExp();
@@ -185,9 +195,9 @@ Mat matrixComplexExp(Mat matrix) {
             ptr[j][1] = result.getImg();
         }
     }
-    return matrix;
+    
 }
 
-ComplexNum toComplexNum(Mat a) {
+ComplexNum toComplexNum(Mat& a) {
     return ComplexNum(a);
 }

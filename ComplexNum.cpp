@@ -22,73 +22,77 @@ ComplexNum::ComplexNum(const ComplexNum& orig) {
 ComplexNum::~ComplexNum(){
     
 }
-ComplexNum::ComplexNum(float a){
+ComplexNum::ComplexNum(double a){
     imag=Mat(2,1,CV_32FC1);
-    imag.ptr<float>(0)[0]=a;
-    imag.ptr<float>(1)[0]=0;
+    imag.ptr<double>(0)[0]=a;
+    imag.ptr<double>(1)[0]=0;
 }
-ComplexNum::ComplexNum(Mat a){
+ComplexNum::ComplexNum(Mat& a){
     imag=a;
-    /*imag.ptr<float>(0)[0]=a.ptr<float>(0)[0];
-    imag.ptr<float>(1)[0]=a.ptr<float>(1)[0];*/
+    /*imag.ptr<double>(0)[0]=a.ptr<double>(0)[0];
+    imag.ptr<double>(1)[0]=a.ptr<double>(1)[0];*/
 }
 
-ComplexNum::ComplexNum(float a, float b) {
+ComplexNum::ComplexNum(double a, double b) {
     imag=Mat(2,1,CV_32FC1);
-    imag.ptr<float>(0)[0]=a;
-    imag.ptr<float>(1)[0]=b;
+    imag.ptr<double>(0)[0]=a;
+    imag.ptr<double>(1)[0]=b;
     
 }
 
-float ComplexNum::getReal(){
-    return this->imag.ptr<float>(0)[0];
+double ComplexNum::getReal(){
+    return this->imag.ptr<double>(0)[0];
 }
 
-float ComplexNum::getImg(){
-    return this->imag.ptr<float>(1)[0];
+double ComplexNum::getImg(){
+    return this->imag.ptr<double>(1)[0];
 }
 
-ComplexNum ComplexNum::operator+(ComplexNum& b) {
-    this->imag.ptr<float>(0)[0] += b.imag.ptr<float>(0)[0];
-    this->imag.ptr<float>(1)[0] += b.imag.ptr<float>(1)[0];
+ComplexNum ComplexNum::operator+(const ComplexNum& b) {
+    this->imag.ptr<double>(0)[0] += b.imag.ptr<double>(0)[0];
+    this->imag.ptr<double>(1)[0] += b.imag.ptr<double>(1)[0];
     return *this;
 }
 
-ComplexNum ComplexNum::operator-(ComplexNum& b) {
-    this->imag.ptr<float>(0)[0] -= b.imag.ptr<float>(0)[0];
-    this->imag.ptr<float>(1)[0] -= b.imag.ptr<float>(1)[0];
+ComplexNum ComplexNum::operator-(const ComplexNum& b) {
+    this->imag.ptr<double>(0)[0] -= b.imag.ptr<double>(0)[0];
+    this->imag.ptr<double>(1)[0] -= b.imag.ptr<double>(1)[0];
     return *this;
 }
 
-ComplexNum ComplexNum::operator*(ComplexNum& x) {
-    int a = this->imag.ptr<float>(0)[0];
-    int b = this->imag.ptr<float>(1)[0];
-    int c = x.imag.ptr<float>(0)[0];
-    int d = x.imag.ptr<float>(1)[0];
+ComplexNum ComplexNum::operator*(const ComplexNum& x) {
+    int a = this->imag.ptr<double>(0)[0];
+    int b = this->imag.ptr<double>(1)[0];
+    int c = x.imag.ptr<double>(0)[0];
+    int d = x.imag.ptr<double>(1)[0];
 
-    this->imag.ptr<float>(0)[0] = a * c - b*d;
-    this->imag.ptr<float>(1)[0] = a * d + b*c;
+    this->imag.ptr<double>(0)[0] = a * c - b*d;
+    this->imag.ptr<double>(1)[0] = a * d + b*c;
     return *this;
 }
 
-ComplexNum ComplexNum::operator*(float b) {
-    this->imag.ptr<float>(0)[0]*=b;
-    this->imag.ptr<float>(1)[0]*=b;
+ComplexNum ComplexNum::operator*(double b) {
+    this->imag.ptr<double>(0)[0]*=b;
+    this->imag.ptr<double>(1)[0]*=b;
     return *this;
 }
 ComplexNum ComplexNum::complexExp(){
-    float a = this->imag.ptr<float>(0)[0];
-    float b = this->imag.ptr<float>(1)[0];
-    this->imag.ptr<float>(0)[0] = exp(a) * cos(b); //real part
-    this->imag.ptr<float>(1)[0] = exp(a) * sin(b); //img part
+    double a = this->imag.ptr<double>(0)[0];
+    double b = this->imag.ptr<double>(1)[0];
+    this->imag.ptr<double>(0)[0] = exp(a) * cos(b); //real part
+    this->imag.ptr<double>(1)[0] = exp(a) * sin(b); //img part
+    
+    
     return *this;
 }
 
 
-ComplexNum ComplexNum::operator = (ComplexNum& b){
-    this->imag.ptr<float>(0)[0] = b.imag.ptr<float>(0)[0];
-    this->imag.ptr<float>(1)[0] = b.imag.ptr<float>(1)[0];
-    return *this;
+void ComplexNum::operator= (const ComplexNum& b){
+    if(this->imag.empty())
+        imag=Mat(2,1,CV_32FC1);
+    this->imag.ptr<double>(0)[0] = b.imag.ptr<double>(0)[0];
+    this->imag.ptr<double>(1)[0] = b.imag.ptr<double>(1)[0];
+    //return *this;
 }
 /*
 Mat ComplexNum::operator *(Mat matrix){
@@ -111,7 +115,7 @@ Mat ComplexNum::operator *(Mat matrix){
 }*/
 
 ComplexNum ComplexNum::conj(){
-    this->imag.ptr<float>(1)[0]*=-1;
+    this->imag.ptr<double>(1)[0]*=-1;
     return *this;
 }
 
@@ -121,5 +125,5 @@ Mat ComplexNum::toMat(){
     return this->imag;
 }
 void ComplexNum::printComplexNum(){
-    cout<<"["<<this->imag.ptr<float>(0)[0]<<","<<this->imag.ptr<float>(1)[0]<<"]"<<endl;
+    cout<<"["<<this->imag.ptr<double>(0)[0]<<","<<this->imag.ptr<double>(1)[0]<<"]"<<endl;
 }
