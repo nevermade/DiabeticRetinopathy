@@ -81,56 +81,57 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
 
 }
 
-Mat getRotationMatrix(double theta){
-    Mat rot(2,2,CV_32FC1);
+Mat getRotationMatrix(double theta) {
+    Mat rot(2, 2, CV_32FC1);
     rot.ptr<double>(0)[0] = cos(theta);
     rot.ptr<double>(0)[1] = -sin(theta);
     rot.ptr<double>(1)[0] = sin(theta);
     rot.ptr<double>(1)[1] = cos(theta);
     return rot;
 }
+
 void apply2DCWT(Mat& complexI) {
 
 
     Mat A(2, 2, CV_32FC1);
-    Mat rotMtrx;//rotation matrix
-    
+    Mat rotMtrx; //rotation matrix
+
     //Set A
     A.ptr<double>(0)[0] = pow(elongation, -0.5);
     A.ptr<double>(0)[1] = 0;
     A.ptr<double>(1)[0] = 0;
     A.ptr<double>(1)[1] = 1;
-    
+
     //Set rotation matrix
-    rotMtrx=getRotationMatrix(-theta);    
+    rotMtrx = getRotationMatrix(-theta);
     //A.inv();
     Mat inv = A.inv(), morletWavelet;
     /*ComplexNum K(complexI.ptr<double>(0)[0], complexI.ptr<double>(0)[1]);
 
     K.printComplexNum();*/
     //morletWavelet = toComplexNum(apply2DMorletWavelet(K, inv)).conj().toMat();//Apply conjugate
-    
+
     /*Mat complexExponential;
     ComplexNum complexUnit(0,1);
     
     complexExponential=((ComplexNum)(complexUnit*K)).toMat();*/
-    
-    int nrows=complexI.rows;
-    int ncols=complexI.cols;
+
+    int nrows = complexI.rows;
+    int ncols = complexI.cols;
     Vec2d *ptr;
-    
-    for(int i=500;;i++){
-        ptr=complexI.ptr<Vec2d>(i);
-        for(int j=0;j<ncols;j++){
-            ComplexNum K(ptr[j][0],ptr[j][1]);
+
+    for (int i = 500;; i++) {
+        ptr = complexI.ptr<Vec2d>(i);
+        for (int j = 0; j < ncols; j++) {
+            ComplexNum K(ptr[j][0], ptr[j][1]);
             //K.printComplexNum();
-            apply2DMorletWavelet(K, inv,morletWavelet);
+            apply2DMorletWavelet(K, inv, morletWavelet);
             toComplexNum(morletWavelet).conj().toMat();
             printMatrix<double>(morletWavelet);
         }
-        
+
     }
-    
+
     //apply conjugate
     /* morletWavelet.ptr<double>(0)[1] *= -1;
 
@@ -163,23 +164,23 @@ void printMatrix(Mat& m) {
     }
 }
 
-void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet) {    
-    ComplexNum K0(0, 3),temp;
+void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet) {
+    ComplexNum K0(0, 3), temp;
     //K0.printComplexNum();
-    temp=K-K0;
+    temp = K - K0;
     //temp.printComplexNum();
-    temp=temp*temp;
+    temp = temp*temp;
     morletWavelet = temp.toMat();
     //printMatrix<double>(morletWavelet);
     //printMatrix<double>(inv);
     //printMatrix<double>(morletWavelet);
-    morletWavelet =-0.5* (inv * morletWavelet);
+    morletWavelet = -0.5 * (inv * morletWavelet);
     //printMatrix<double>(morletWavelet);
     temp = toComplexNum(morletWavelet);
-    temp= temp.complexExp();
-    morletWavelet=temp.toMat()*sqrt(elongation);
+    temp = temp.complexExp();
+    morletWavelet = temp.toMat() * sqrt(elongation);
     //printMatrix<double>(morletWavelet);    
-    
+
 }
 
 void matrixComplexExp(Mat& matrix) {
@@ -195,9 +196,43 @@ void matrixComplexExp(Mat& matrix) {
             ptr[j][1] = result.getImg();
         }
     }
-    
+
 }
 
 ComplexNum toComplexNum(Mat& a) {
     return ComplexNum(a);
+}
+
+void opticDiscSegmentation() {
+    Mat image,src_gray,roi;
+
+    image = imread("image/1-background/image1.tif", 1);
+
+    cvtColor(image, src_gray, CV_BGR2GRAY);
+
+    /// Reduce the noise so we avoid false circle detection
+    GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
+    
+    getOpticDiscRoi(src_gray,roi);
+    
+    vector<Vec3f> circles;
+
+    /// Apply the Hough Transform to find the circles
+    HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, 100, 0, 0);
+
+    /// Draw the circles detected
+    for (size_t i = 0; i < circles.size(); i++) {
+        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        int radius = cvRound(circles[i][2]);
+        // circle center
+        circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+        // circle outline
+        circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+    }
+
+    /// Show your results
+    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", src);
+
+    waitKey(0);
 }

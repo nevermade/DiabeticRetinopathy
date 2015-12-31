@@ -28,6 +28,7 @@ void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet);
 void matrixComplexExp(Mat& matrix);
 ComplexNum toComplexNum(Mat& a);
 Mat getRotationMatrix(double theta);
+void opticDiscSegmentation();
 
 #endif /* FEATURE_EXTRACTION_H */
 

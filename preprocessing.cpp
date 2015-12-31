@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include "preprocessing.h"
 using namespace std;
-int w = 8;
+int w = 4;
 int morph_element_size=5;
 
 //Scalar backgroundThreshold(0.734042, 0.982265, 1.42762);
@@ -40,14 +40,17 @@ void backgroundSegmentation(const Mat& src, Mat& dest) {
             //cout<<"Bloque ("<<j+1<<","<<i+1<<") prom:"<<mean(block)<<endl;
         }
     }
-    fineBackGroundSegmentation(dest);
+    //fineBackGroundSegmentation(dest);
+    Mat backgroundImageResult;
+    src.copyTo(backgroundImageResult,dest);
+    imwrite("image/1-background/image1.tiff",backgroundImageResult);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo
 void fineBackGroundSegmentation(Mat& dest){
   Mat element = getStructuringElement( MORPH_RECT,Size( morph_element_size, morph_element_size ));    
   dilate( dest, dest, element );
-  /*namedWindow("Dilation Demo", CV_WINDOW_AUTOSIZE);
-  imshow( "Dilation Demo", dest);*/
+  namedWindow("Dilation Demo", CV_WINDOW_AUTOSIZE);
+  imshow( "Dilation Demo", dest);
 }
 void noiseSegmentation(const Mat& src, Mat& dest){
     CV_Assert(src.depth() != sizeof (uchar));

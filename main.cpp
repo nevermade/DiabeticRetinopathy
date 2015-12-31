@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     initialize();
     Mat image;
     
-    image = imread("img/eye_test.tif", 1);
+    image = imread("image/0-dataset/image1.tif", 1);
     
     mean(image);
     if (!image.data) {
@@ -47,11 +47,12 @@ int main(int argc, char** argv) {
     
     //Preprocessing
     backgroundSegmentation(image, backGroundMask);
-    noiseSegmentation(image,noiseMask);
-    finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
+    opticdiscSegmentation();
+    //noiseSegmentation(image,noiseMask);
+    //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
     
     //Vessel segmentation
-    imageVesselEnhancement(result,finalMask);
+    //imageVesselEnhancement(result,finalMask);
     
     
     waitKey(0);
