@@ -49,6 +49,7 @@ void backgroundSegmentation(const Mat& src, Mat& dest) {
 void fineBackGroundSegmentation(Mat& dest){
   Mat element = getStructuringElement( MORPH_RECT,Size( morph_element_size, morph_element_size ));    
   dilate( dest, dest, element );
+  
   namedWindow("Dilation Demo", CV_WINDOW_AUTOSIZE);
   imshow( "Dilation Demo", dest);
 }

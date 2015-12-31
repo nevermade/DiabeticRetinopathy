@@ -11,8 +11,8 @@
  * Created on 3 de diciembre de 2015, 02:17 PM
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef PREPROCESSING_H
+#define PREPROCESSING_H
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"

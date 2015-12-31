@@ -46,8 +46,8 @@ int main(int argc, char** argv) {
     Mat backGroundMask,noiseMask,finalMask,result;
     
     //Preprocessing
-    backgroundSegmentation(image, backGroundMask);
-    opticdiscSegmentation();
+    //backgroundSegmentation(image, backGroundMask);
+    opticDiscSegmentation();
     //noiseSegmentation(image,noiseMask);
     //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
     

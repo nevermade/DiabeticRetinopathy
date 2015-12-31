@@ -206,15 +206,32 @@ ComplexNum toComplexNum(Mat& a) {
 void opticDiscSegmentation() {
     Mat image,src_gray,roi;
 
-    image = imread("image/1-background/image1.tif", 1);
+    image = imread("image/1-background/image1.tiff", 1);
 
-    cvtColor(image, src_gray, CV_BGR2GRAY);
-
+    vector<Mat> channels;
+    split(image,channels);
+    
+    Mat greenChannel=channels[1];
     /// Reduce the noise so we avoid false circle detection
-    GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
+    //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
     
-    getOpticDiscRoi(src_gray,roi);
+    int y=greenChannel.rows/3;
+    int x=0;
+    int w=greenChannel.cols;
+    int h=y;
+    roi=Mat(greenChannel,Rect(x,y,w,h));
+    //apply median filter
+    medianBlur(roi,roi,11);
+    //opening
+    Mat element = getStructuringElement( MORPH_ELLIPSE,Size( 120, 120 )); 
+    Mat opened;    
+    erode(roi,opened,element);
+    dilate(opened,opened,element);
+    //top hat
+    roi=roi-opened;
+   
     
+    /*
     vector<Vec3f> circles;
 
     /// Apply the Hough Transform to find the circles
@@ -229,10 +246,10 @@ void opticDiscSegmentation() {
         // circle outline
         circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
     }
-
+*/
     /// Show your results
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", src);
+    imshow("Hough Circle Transform Demo", roi);
 
     waitKey(0);
 }
