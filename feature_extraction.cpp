@@ -221,35 +221,75 @@ void opticDiscSegmentation() {
     int h=y;
     roi=Mat(greenChannel,Rect(x,y,w,h));
     //apply median filter
-    medianBlur(roi,roi,11);
+    medianBlur(roi,roi,17);
+    /*
+    /******Top hat process***
     //opening
     Mat element = getStructuringElement( MORPH_ELLIPSE,Size( 120, 120 )); 
     Mat opened;    
     erode(roi,opened,element);
     dilate(opened,opened,element);
-    //top hat
+    //apply top hat
     roi=roi-opened;
-   
     
-    /*
+    //equalizeHist(roi,roi);
+    double maxI;
+    normalize(roi,roi,0,255,CV_MINMAX);    
+    minMaxLoc(roi,NULL,&maxI,NULL,NULL);
+    double threshold= maxI-60;
+    
+    getBinaryMask(threshold,roi);
+    */
+    //GaussianBlur( roi, roi, Size(9, 9), 2, 2 );
+    Point maxPoint;
+    minMaxLoc(roi,NULL,NULL,NULL,&maxPoint);
+    
+    Mat opticD=Mat(roi,Rect(maxPoint.x-(200/2),maxPoint.y-(200/2),200,200));
+    //equalizeHist(opticD,opticD);
     vector<Vec3f> circles;
 
     /// Apply the Hough Transform to find the circles
-    HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, 100, 0, 0);
+    HoughCircles(opticD, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 200);
 
     /// Draw the circles detected
-    for (size_t i = 0; i < circles.size(); i++) {
-        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-        int radius = cvRound(circles[i][2]);
+    Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
+    int radius = cvRound(circles[0][2]);
         // circle center
-        circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+   // circle(opticD, center, 3, Scalar(0, 255, 0), -1, 8, 0);
         // circle outline
-        circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-    }
-*/
+   // circle(opticD, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+    
+
+    
+    Mat opticDMask=Mat(image.rows,image.cols,CV_8UC1,Scalar(255));
+    //fixed center of new optic disk mask
+    center.x=center.x+maxPoint.x-100;
+    center.y=center.y + (image.rows/3)+maxPoint.y-100;
+    
+    circle(opticDMask,center,radius+10,Scalar(0),-1,8,0);
+    
+    Mat result;
+    
+    image.copyTo(result,opticDMask);
     /// Show your results
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", roi);
+    imshow("Hough Circle Transform Demo", result);
+}
 
-    waitKey(0);
+void getBinaryMask(double t, Mat& src){
+    int ncols=src.cols;
+    int nrows=src.rows;
+    uchar* p;
+    
+    for(int i=0;i< nrows;i++){
+        p=src.ptr<uchar>(i);
+        for(int j=0;j<ncols;j++){
+            if(p[j]>=t){
+                p[j]=255;
+            }else{
+                p[j]=0;
+            }
+        }
+    }
+    
 }

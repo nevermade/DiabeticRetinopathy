@@ -29,6 +29,6 @@ void matrixComplexExp(Mat& matrix);
 ComplexNum toComplexNum(Mat& a);
 Mat getRotationMatrix(double theta);
 void opticDiscSegmentation();
-
+void getBinaryMask(double t, Mat& src);
 #endif /* FEATURE_EXTRACTION_H */
 
