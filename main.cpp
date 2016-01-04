@@ -47,7 +47,10 @@ int main(int argc, char** argv) {
     
     //Preprocessing
     //backgroundSegmentation(image, backGroundMask);
-    opticDiscSegmentation();
+    //opticDiscSegmentation();
+    darkLessionSegmentation();
+    
+    
     //noiseSegmentation(image,noiseMask);
     //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
     

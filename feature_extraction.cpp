@@ -266,30 +266,53 @@ void opticDiscSegmentation() {
     center.x=center.x+maxPoint.x-100;
     center.y=center.y + (image.rows/3)+maxPoint.y-100;
     
-    circle(opticDMask,center,radius+10,Scalar(0),-1,8,0);
+    circle(opticDMask,center,radius+20,Scalar(0),-1,8,0);
     
     Mat result;
     
     image.copyTo(result,opticDMask);
     /// Show your results
-    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", result);
+    imwrite("image/2-optic disc/image1.tiff",result);
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", result);*/
 }
+void darkLessionSegmentation(){
+    Mat image,src_gray,roi;
 
-void getBinaryMask(double t, Mat& src){
-    int ncols=src.cols;
-    int nrows=src.rows;
-    uchar* p;
+    image = imread("image/2-optic disc/image1.tiff", 1);
     
-    for(int i=0;i< nrows;i++){
-        p=src.ptr<uchar>(i);
-        for(int j=0;j<ncols;j++){
-            if(p[j]>=t){
-                p[j]=255;
-            }else{
-                p[j]=0;
-            }
-        }
-    }
+    vector<Mat> channels;
+    split(image,channels);
     
+    Mat greenChannel=channels[1];
+    
+    Mat topHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), bottomHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), contrastE;
+    greenChannel.copyTo(topHat);
+    greenChannel.copyTo(bottomHat);
+    /****TOP HAT**/
+    //opening
+    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
+    Mat opened;    
+    erode(greenChannel,opened,element);
+    dilate(opened,opened,element);
+    //apply top hat
+    topHat=topHat-opened;
+    /****BOTTOM HAT**/
+    //opening
+//    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
+    Mat closed;  
+    dilate(greenChannel,closed,element);
+    erode(closed,closed,element);    
+    //apply bottom hat
+    bottomHat=closed-bottomHat;
+    
+    contrastE=greenChannel+topHat-bottomHat;
+    
+    /*Mat medianFilter;
+    
+    medianBlur(contrastE,medianFilter,25);
+    contrastE=medianFilter-contrastE;*/
+    
+    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", contrastE);
 }
