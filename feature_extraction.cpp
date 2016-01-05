@@ -308,11 +308,14 @@ void darkLessionSegmentation(){
     
     contrastE=greenChannel+topHat-bottomHat;
     
-    /*Mat medianFilter;
+    Mat medianFilter;
     
     medianBlur(contrastE,medianFilter,25);
-    contrastE=medianFilter-contrastE;*/
+    contrastE=medianFilter-contrastE;
     
+    
+    normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
+    medianBlur(contrastE,contrastE,5);
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", contrastE);
 }
