@@ -285,7 +285,7 @@ void darkLessionSegmentation(){
     split(image,channels);
     
     Mat greenChannel=channels[1];
-    
+    //cvtColor( image, greenChannel, CV_BGR2GRAY );
     Mat topHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), bottomHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), contrastE;
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
@@ -312,10 +312,69 @@ void darkLessionSegmentation(){
     
     medianBlur(contrastE,medianFilter,25);
     contrastE=medianFilter-contrastE;
-    
-    
+       
     normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
     medianBlur(contrastE,contrastE,5);
-    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", contrastE);
+    
+    double h=calculateHThreshold(contrastE);
+    cout<<h<<endl;
+    threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
+    
+    element = getStructuringElement( MORPH_RECT,Size( 3, 3 ));
+    dilate(contrastE,contrastE,element);
+    imwrite("image/3-dark lession/image2.tiff",contrastE);
+    threshold(contrastE,contrastE,0,255,CV_THRESH_BINARY | CV_THRESH_OTSU);
+    //medianBlur(contrastE,contrastE,5);
+    imwrite("image/3-dark lession/image1.tiff",contrastE);
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", contrastE);*/
+}
+
+
+double calculateHThreshold(Mat &image){
+    
+    double mean=calculateMean(image);
+    int nrows=image.rows;
+    int ncols=image.cols;   
+    int sum=0;
+    double tmp;
+    uchar *p;
+    cout<<mean<<endl;  
+    int counter=0;
+    for(int i=0;i<nrows;i++){
+        
+        p=image.ptr<uchar>(i);
+        
+        for(int j=0;j<ncols;j++){
+            if(p[j]==0) continue;
+            tmp=p[j]-mean;
+            tmp=tmp*tmp;
+            sum+=tmp;
+            counter++;
+        }
+    }
+    cout<<sum<<endl;
+    cout<<counter<<endl;
+    return 2*(1/(counter))*sqrt(sum);
+}
+
+double calculateMean(Mat& image){
+    int nrows=image.rows;
+    int ncols=image.cols;
+    int sum=0;
+    int counter=0;
+    uchar *p;
+    for(int i=0;i<nrows;i++){
+        
+        p=image.ptr<uchar>(i);
+        
+        for(int j=0;j<ncols;j++){
+            if(p[j]==0) continue;
+            sum+=p[j];
+            counter++;
+        }
+    }
+    cout<<sum<<endl;
+    cout<<counter<<endl;
+    return sum/counter;
 }
