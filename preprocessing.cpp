@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include "preprocessing.h"
 using namespace std;
-int w = 4;
+int w = 8;
 int morph_element_size=5;
 
 //Scalar backgroundThreshold(0.734042, 0.982265, 1.42762);
@@ -42,7 +42,8 @@ void backgroundSegmentation(const Mat& src, Mat& dest) {
     }
     //fineBackGroundSegmentation(dest);
     Mat backgroundImageResult;
-    src.copyTo(backgroundImageResult,dest);
+    medianBlur(dest,dest,5);
+    src.copyTo(backgroundImageResult,dest);    
     imwrite("image/1-background/image1.tiff",backgroundImageResult);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo

@@ -32,5 +32,7 @@ void opticDiscSegmentation();
 void darkLessionSegmentation();
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
+int calculateMedian(Mat& image);
+
 #endif /* FEATURE_EXTRACTION_H */
 

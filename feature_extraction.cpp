@@ -204,24 +204,25 @@ ComplexNum toComplexNum(Mat& a) {
 }
 
 void opticDiscSegmentation() {
-    Mat image,src_gray,roi;
-
+    Mat image,roi;
+    
     image = imread("image/1-background/image1.tiff", 1);
 
     vector<Mat> channels;
-    split(image,channels);
+    split(image, channels);
     
-    Mat greenChannel=channels[1];
+    
+    Mat greenChannel = channels[1];
     /// Reduce the noise so we avoid false circle detection
     //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
-    
-    int y=greenChannel.rows/3;
-    int x=0;
-    int w=greenChannel.cols;
-    int h=y;
-    roi=Mat(greenChannel,Rect(x,y,w,h));
+
+    int y = greenChannel.rows / 3;
+    int x = 0;
+    int w = greenChannel.cols;
+    int h = y;
+    roi = Mat(greenChannel, Rect(x, y, w, h));
     //apply median filter
-    medianBlur(roi,roi,17);
+    medianBlur(roi, roi, 17);
     /*
     /******Top hat process***
     //opening
@@ -239,12 +240,12 @@ void opticDiscSegmentation() {
     double threshold= maxI-60;
     
     getBinaryMask(threshold,roi);
-    */
+     */
     //GaussianBlur( roi, roi, Size(9, 9), 2, 2 );
     Point maxPoint;
-    minMaxLoc(roi,NULL,NULL,NULL,&maxPoint);
-    
-    Mat opticD=Mat(roi,Rect(maxPoint.x-(200/2),maxPoint.y-(200/2),200,200));
+    minMaxLoc(roi, NULL, NULL, NULL, &maxPoint);
+
+    Mat opticD = Mat(roi, Rect(maxPoint.x - (200 / 2), maxPoint.y - (200 / 2), 200, 200));
     //equalizeHist(opticD,opticD);
     vector<Vec3f> circles;
 
@@ -254,127 +255,155 @@ void opticDiscSegmentation() {
     /// Draw the circles detected
     Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
     int radius = cvRound(circles[0][2]);
-        // circle center
-   // circle(opticD, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-        // circle outline
-   // circle(opticD, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-    
+    // circle center
+    // circle(opticD, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+    // circle outline
+    // circle(opticD, center, radius, Scalar(0, 0, 255), 3, 8, 0);
 
-    
-    Mat opticDMask=Mat(image.rows,image.cols,CV_8UC1,Scalar(255));
+
+
+    Mat opticDMask = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
     //fixed center of new optic disk mask
-    center.x=center.x+maxPoint.x-100;
-    center.y=center.y + (image.rows/3)+maxPoint.y-100;
-    
-    circle(opticDMask,center,radius+20,Scalar(0),-1,8,0);
-    
-    Mat result;
-    
-    image.copyTo(result,opticDMask);
+    center.x = center.x + maxPoint.x - 100;
+    center.y = center.y + (image.rows / 3) + maxPoint.y - 100;
+
+    circle(opticDMask, center, radius + 20, Scalar(0), -1, 8, 0);
+
+    Mat result,agg_mask;
+
+    image.copyTo(result, opticDMask);   
     /// Show your results
-    imwrite("image/2-optic disc/image1.tiff",result);
+    imwrite("image/2-optic disc/image1.tiff", result);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
 }
-void darkLessionSegmentation(){
-    Mat image,src_gray,roi;
 
+void darkLessionSegmentation() {
+    Mat image;
     image = imread("image/2-optic disc/image1.tiff", 1);
     
     vector<Mat> channels;
-    split(image,channels);
+       
+    split(image, channels);
     
-    Mat greenChannel=channels[1];
+    Mat greenChannel = channels[1];
     //cvtColor( image, greenChannel, CV_BGR2GRAY );
-    Mat topHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), bottomHat(greenChannel.rows,greenChannel.cols,greenChannel.type()), contrastE;
+    Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
     /****TOP HAT**/
     //opening
-    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
-    Mat opened;    
-    erode(greenChannel,opened,element);
-    dilate(opened,opened,element);
+    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+    Mat opened;
+    erode(greenChannel, opened, element);
+    dilate(opened, opened, element);
     //apply top hat
-    topHat=topHat-opened;
+    topHat = topHat - opened;
     /****BOTTOM HAT**/
     //opening
-//    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
-    Mat closed;  
-    dilate(greenChannel,closed,element);
-    erode(closed,closed,element);    
+    //    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
+    Mat closed;
+    dilate(greenChannel, closed, element);
+    erode(closed, closed, element);
     //apply bottom hat
-    bottomHat=closed-bottomHat;
-    
-    contrastE=greenChannel+topHat-bottomHat;
-    
+    bottomHat = closed - bottomHat;
+
+    contrastE = greenChannel + topHat - bottomHat;
+
     Mat medianFilter;
-    
-    medianBlur(contrastE,medianFilter,25);
-    contrastE=medianFilter-contrastE;
-       
+
+    medianBlur(contrastE, medianFilter, 25);
+    contrastE = medianFilter - contrastE;
     normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
-    medianBlur(contrastE,contrastE,5);
-    
-    double h=calculateHThreshold(contrastE);
-    cout<<h<<endl;
-    threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
-    
-    element = getStructuringElement( MORPH_RECT,Size( 3, 3 ));
-    dilate(contrastE,contrastE,element);
-    imwrite("image/3-dark lession/image2.tiff",contrastE);
-    threshold(contrastE,contrastE,0,255,CV_THRESH_BINARY | CV_THRESH_OTSU);
+    //equalizeHist(contrastE,contrastE);    
     //medianBlur(contrastE,contrastE,5);
-    imwrite("image/3-dark lession/image1.tiff",contrastE);
+    //double h = calculateHThreshold(contrastE);
+    double h = calculateMedian(contrastE);
+    cout << h << endl;
+    //threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
+    contrastE = contrastE - h;
+    /*element = getStructuringElement( MORPH_RECT,Size( 3,3 ));
+    dilate(contrastE,contrastE,element);*/
+    //equalizeHist(contrastE,contrastE);
+    medianBlur(contrastE, contrastE, 3);
+    imwrite("image/3-dark lession/image2.tiff", contrastE);
+    threshold(contrastE, contrastE, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    //medianBlur(contrastE,contrastE,5);
+    imwrite("image/3-dark lession/image1.tiff", contrastE);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", contrastE);*/
 }
 
+double calculateHThreshold(Mat &image) {
 
-double calculateHThreshold(Mat &image){
-    
-    double mean=calculateMean(image);
-    int nrows=image.rows;
-    int ncols=image.cols;   
-    int sum=0;
+    double mean = calculateMean(image);
+    int nrows = image.rows;
+    int ncols = image.cols;
+    int sum = 0;
     double tmp;
     uchar *p;
-    cout<<mean<<endl;  
-    int counter=0;
-    for(int i=0;i<nrows;i++){
-        
-        p=image.ptr<uchar>(i);
-        
-        for(int j=0;j<ncols;j++){
-            if(p[j]==0) continue;
-            tmp=p[j]-mean;
-            tmp=tmp*tmp;
-            sum+=tmp;
+
+    int counter = 0;
+    for (int i = 0; i < nrows; i++) {
+
+        p = image.ptr<uchar>(i);
+
+        for (int j = 0; j < ncols; j++) {
+            if (p[j] == 0) continue;
+            tmp = p[j] - mean;
+            tmp = tmp*tmp;
+            sum += tmp;
             counter++;
         }
     }
-    cout<<sum<<endl;
-    cout<<counter<<endl;
-    return 2*(1/(counter))*sqrt(sum);
+
+    return mean - sqrt(sum / counter);
 }
 
-double calculateMean(Mat& image){
-    int nrows=image.rows;
-    int ncols=image.cols;
-    int sum=0;
-    int counter=0;
+double calculateMean(Mat& image) {
+    int nrows = image.rows;
+    int ncols = image.cols;
+    int sum = 0;
+    int counter = 0;
     uchar *p;
-    for(int i=0;i<nrows;i++){
-        
-        p=image.ptr<uchar>(i);
-        
-        for(int j=0;j<ncols;j++){
-            if(p[j]==0) continue;
-            sum+=p[j];
+    for (int i = 0; i < nrows; i++) {
+
+        p = image.ptr<uchar>(i);
+
+        for (int j = 0; j < ncols; j++) {
+            if (p[j] == 0) continue;
+            sum += p[j];
             counter++;
         }
     }
+
+    return sum / counter;
+}
+
+int calculateMedian(Mat& image) {
+    float range[] = {0, 256};
+    const float* histRange = {range};
+
+    bool uniform = true;
+    bool accumulate = false;
+
+    Mat g_hist;
+    int histSize = 256;    
+    
+    unsigned int sum=0;
+    /// Compute the histograms:
+    calcHist(&image, 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate);
+    int n = (image.cols * image.rows - g_hist.at<float>(0))*3/4;
+    for (int i = 1; i < histSize; i++) {
+        sum+=g_hist.at<float>(i);
+        //cout<<g_hist.at<float>(i)<<endl;
+        if(sum>=n){
+            cout<<sum<<endl;
+            cout<<n<<endl;
+            return i;
+        }
+    }
     cout<<sum<<endl;
-    cout<<counter<<endl;
-    return sum/counter;
+    cout<<n<<endl;
+    return 255;
 }
