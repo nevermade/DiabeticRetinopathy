@@ -17,6 +17,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "ComplexNum.h"
+#include "Math.h"
 using namespace cv;
 void imageVesselEnhancement(Mat& result,Mat& finalMask);
 void fourierTransform(const Mat& invGC, Mat& complexI);
@@ -33,6 +34,7 @@ void darkLessionSegmentation();
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
 int calculateMedian(Mat& image);
-
+void vesselSegmentation();
+void getLinePoints(Point &start, Point &end, double theta);
 #endif /* FEATURE_EXTRACTION_H */
 

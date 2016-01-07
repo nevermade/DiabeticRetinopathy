@@ -319,7 +319,7 @@ void darkLessionSegmentation() {
     //medianBlur(contrastE,contrastE,5);
     //double h = calculateHThreshold(contrastE);
     double h = calculateMedian(contrastE);
-    cout << h << endl;
+    
     //threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
     contrastE = contrastE - h;
     /*element = getStructuringElement( MORPH_RECT,Size( 3,3 ));
@@ -397,13 +397,39 @@ int calculateMedian(Mat& image) {
     for (int i = 1; i < histSize; i++) {
         sum+=g_hist.at<float>(i);
         //cout<<g_hist.at<float>(i)<<endl;
-        if(sum>=n){
-            cout<<sum<<endl;
-            cout<<n<<endl;
+        if(sum>=n){            
             return i;
         }
-    }
-    cout<<sum<<endl;
-    cout<<n<<endl;
+    }    
     return 255;
+}
+void vesselSegmentation(){
+    Mat image,invG;
+    image = imread("image/2-optic disc/image1.tiff", 1);
+    vector<Mat> channels;    
+    split(image, channels);
+    Mat mask;
+    
+    invG=channels[1];
+    invG.copyTo(mask);
+    Mat element = getStructuringElement( MORPH_RECT,Size( 3,3 ));   
+    medianBlur(mask,mask,5);
+    erode(mask,mask,element);
+    threshold(mask,mask,5,255,CV_THRESH_BINARY);
+    bitwise_not(invG, invG,mask);
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", mask);*/
+    Point a(5,5),b(0,0);
+    LineIterator it(mask, a,b,8,true);
+    for(int i = 0; i < it.count; i++){
+        cout<<it.pos()<<endl;
+        it++;
+    }
+    Point start, end, theta;
+    Mat window;
+    getLinePoints(&start,&end,theta);
+    
+}
+void getLinePoints(Point &start, Point &end, double theta){
+    
 }
