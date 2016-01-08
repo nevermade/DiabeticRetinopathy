@@ -204,14 +204,14 @@ ComplexNum toComplexNum(Mat& a) {
 }
 
 void opticDiscSegmentation() {
-    Mat image,roi;
-    
+    Mat image, roi;
+
     image = imread("image/1-background/image1.tiff", 1);
 
     vector<Mat> channels;
     split(image, channels);
-    
-    
+
+
     Mat greenChannel = channels[1];
     /// Reduce the noise so we avoid false circle detection
     //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
@@ -269,9 +269,9 @@ void opticDiscSegmentation() {
 
     circle(opticDMask, center, radius + 20, Scalar(0), -1, 8, 0);
 
-    Mat result,agg_mask;
+    Mat result, agg_mask;
 
-    image.copyTo(result, opticDMask);   
+    image.copyTo(result, opticDMask);
     /// Show your results
     imwrite("image/2-optic disc/image1.tiff", result);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
@@ -281,11 +281,11 @@ void opticDiscSegmentation() {
 void darkLessionSegmentation() {
     Mat image;
     image = imread("image/2-optic disc/image1.tiff", 1);
-    
+
     vector<Mat> channels;
-       
+
     split(image, channels);
-    
+
     Mat greenChannel = channels[1];
     //cvtColor( image, greenChannel, CV_BGR2GRAY );
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
@@ -319,7 +319,7 @@ void darkLessionSegmentation() {
     //medianBlur(contrastE,contrastE,5);
     //double h = calculateHThreshold(contrastE);
     double h = calculateMedian(contrastE);
-    
+
     //threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
     contrastE = contrastE - h;
     /*element = getStructuringElement( MORPH_RECT,Size( 3,3 ));
@@ -388,48 +388,86 @@ int calculateMedian(Mat& image) {
     bool accumulate = false;
 
     Mat g_hist;
-    int histSize = 256;    
-    
-    unsigned int sum=0;
+    int histSize = 256;
+
+    unsigned int sum = 0;
     /// Compute the histograms:
     calcHist(&image, 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate);
-    int n = (image.cols * image.rows - g_hist.at<float>(0))*3/4;
+    int n = (image.cols * image.rows - g_hist.at<float>(0))*3 / 4;
     for (int i = 1; i < histSize; i++) {
-        sum+=g_hist.at<float>(i);
+        sum += g_hist.at<float>(i);
         //cout<<g_hist.at<float>(i)<<endl;
-        if(sum>=n){            
+        if (sum >= n) {
             return i;
         }
-    }    
+    }
     return 255;
 }
-void vesselSegmentation(){
-    Mat image,invG;
+
+void vesselSegmentation() {
+    Mat image, invG;
     image = imread("image/2-optic disc/image1.tiff", 1);
-    vector<Mat> channels;    
+    vector<Mat> channels;
     split(image, channels);
     Mat mask;
-    
-    invG=channels[1];
+
+    invG = channels[1];
     invG.copyTo(mask);
-    Mat element = getStructuringElement( MORPH_RECT,Size( 3,3 ));   
-    medianBlur(mask,mask,5);
-    erode(mask,mask,element);
-    threshold(mask,mask,5,255,CV_THRESH_BINARY);
-    bitwise_not(invG, invG,mask);
+    Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
+    medianBlur(mask, mask, 5);
+    erode(mask, mask, element);
+    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
+    bitwise_not(invG, invG, mask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", mask);*/
-    Point a(5,5),b(0,0);
-    LineIterator it(mask, a,b,8,true);
-    for(int i = 0; i < it.count; i++){
-        cout<<it.pos()<<endl;
+    Point a(5, 5), b(0, 0);
+    LineIterator it(mask, a, b, 8, true);
+    for (int i = 0; i < it.count; i++) {
+        cout << it.pos() << endl;
         it++;
     }
-    Point start, end, theta;
+    Point start, end, theta, center;
     Mat window;
-    getLinePoints(&start,&end,theta);
-    
+    getLinePoints(center, 15, &start, &end, theta);
+
 }
-void getLinePoints(Point &start, Point &end, double theta){
-    
+
+void getLinePoints(int l, Point &start, Point &end, double theta) {
+
+    Point center(l/2,l/2);
+    //convert to radians
+    if (theta != 0 && theta != 90) {
+        theta = M_PI / 180 * theta;
+        int m = tan(theta);
+        
+
+        if (m <= 1) {
+            end.x =l/2;
+            end.y = (int) m * end.x;
+            start.x=-l/2;
+            start.y=(int) m* start.x;
+        } else {
+            end.y = l/2;
+            end.x = (int) end.y / m;
+            start.y = -l/2;
+            start.x = (int) start.y / m;
+        }
+        
+        end.x+=center.x;
+        end.y+=center.y;
+        start.x+=center.x;
+        start.y+=center.y;
+    }else{
+        if(theta=0){
+            end.x=center.x+l/2;
+            end.y=center.y;
+            start.x=center.x-l/2;
+            start.y=center.y;
+        }else{
+            end.y=center.y+l/2;
+            end.x=center.x;
+            start.y=center.y-l/2;
+            start.x=center.x;
+        }
+    }
 }
