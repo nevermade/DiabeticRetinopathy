@@ -36,5 +36,7 @@ double calculateMean(Mat& image);
 int calculateMedian(Mat& image);
 void vesselSegmentation();
 void getLinePoints(int l,Point &start, Point &end, double theta);
+void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta);
+double calculateLineStrength(Mat &img, LineIterator &it);
 #endif /* FEATURE_EXTRACTION_H */
 

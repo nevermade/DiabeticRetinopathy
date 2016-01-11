@@ -405,6 +405,7 @@ int calculateMedian(Mat& image) {
 }
 
 void vesselSegmentation() {
+    int lineOperator=15;
     Mat image, invG;
     image = imread("image/2-optic disc/image1.tiff", 1);
     vector<Mat> channels;
@@ -420,15 +421,29 @@ void vesselSegmentation() {
     bitwise_not(invG, invG, mask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", mask);*/
-    Point a(5, 5), b(0, 0);
-    LineIterator it(mask, a, b, 8, true);
-    for (int i = 0; i < it.count; i++) {
-        cout << it.pos() << endl;
-        it++;
+    int nrows=invG.rows-lineOperator;
+    int ncols=invG.cols-lineOperator;
+    uchar *p,*q;
+    
+    for(int i=0;i<nrows;i++){
+        p=invG.ptr<uchar>(i);
+        q=mask.ptr<uchar>(i);
+        for(int j=0;j<ncols;j++){
+            if(q[j]==0) continue;
+            Mat square(invG,Rect(i,j,lineOperator,lineOperator));
+            for(int t=0;t<=180;t=t+15){//t means theta (angle)
+                Point start(0,0), end(0,0), startO(0,0),endO(0,0);    
+                getLinePoints(lineOperator, start, end, t);
+                //calculate line strength
+                getOrtogonalLinePoints(lineOperator, startO,endO,t);
+                LineIterator mainLine(invG,start,end,8,true);
+                LineIterator ortogonalLine(invG,startO,endO,8,true);
+                double mainStr = calculateLineStrength(square,mainLine);
+                //double ortStr=calculateLineStrength(square,ortogonalLine);
+                cout<<mainStr<<endl;
+            }
+        }
     }
-    Point start, end, theta, center;
-    Mat window;
-    getLinePoints(center, 15, &start, &end, theta);
 
 }
 
@@ -457,7 +472,7 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
         end.y+=center.y;
         start.x+=center.x;
         start.y+=center.y;
-    }else{
+    }else{//tan theta inderterminated
         if(theta=0){
             end.x=center.x+l/2;
             end.y=center.y;
@@ -470,4 +485,39 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
             start.x=center.x;
         }
     }
+}
+
+void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta){
+    Point center(l/2,l/2);
+    if(theta==0 || theta==180){
+        start.x=center.x;
+        start.y=center.y-1;
+        end.x=center.x;
+        end.y=center.y+1;        
+    }else if(theta>0 && theta <90){
+        start.x=center.x-1;
+        start.y=center.y-1;
+        end.x=center.x+1;
+        end.y=center.y+1;
+    }else if(theta > 90 && theta <180){
+        start.x=center.x+1;
+        start.y=center.y-1;
+        end.x=center.x-1;
+        end.y=center.y+1;
+    }
+    
+    
+}
+
+double calculateLineStrength(Mat &img, LineIterator &it){
+    double mean= calculateMean(img);
+    double lineMean=0;
+    Point a(0,0);
+    for (int i = 0; i < it.count; i++){
+        a=it.pos();
+        lineMean+=img.at<uchar>(a.x,a.y);
+        it++;
+    }
+    lineMean=lineMean/it.count;
+    return lineMean - mean;
 }
