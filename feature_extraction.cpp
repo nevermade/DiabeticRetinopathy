@@ -405,7 +405,8 @@ int calculateMedian(Mat& image) {
 }
 
 void vesselSegmentation() {
-    int lineOperator=15;
+    int lineOperator = 15;
+    int step = 15;
     Mat image, invG;
     image = imread("image/2-optic disc/image1.tiff", 1);
     vector<Mat> channels;
@@ -418,106 +419,156 @@ void vesselSegmentation() {
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    bitwise_not(invG, invG, mask);
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", mask);*/
-    int nrows=invG.rows-lineOperator;
-    int ncols=invG.cols-lineOperator;
-    uchar *p,*q;
-    
-    for(int i=0;i<nrows;i++){
-        p=invG.ptr<uchar>(i);
-        q=mask.ptr<uchar>(i);
-        for(int j=0;j<ncols;j++){
-            if(q[j]==0) continue;
-            Mat square(invG,Rect(i,j,lineOperator,lineOperator));
-            for(int t=0;t<=180;t=t+15){//t means theta (angle)
-                Point start(0,0), end(0,0), startO(0,0),endO(0,0);    
-                getLinePoints(lineOperator, start, end, t);
-                //calculate line strength
-                getOrtogonalLinePoints(lineOperator, startO,endO,t);
-                LineIterator mainLine(invG,start,end,8,true);
-                LineIterator ortogonalLine(invG,startO,endO,8,true);
-                double mainStr = calculateLineStrength(square,mainLine);
-                //double ortStr=calculateLineStrength(square,ortogonalLine);
-                cout<<mainStr<<endl;
+    bitwise_not(invG, invG, mask);    
+    int nrows = invG.rows - lineOperator;
+    int ncols = invG.cols - lineOperator;
+    uchar *p, *q, *r;
+    Mat tmp(lineOperator,lineOperator,CV_8UC1);
+    vector<LineIterator> lineIt = calculateLineIterators(lineOperator, step,tmp); //[180 / step - 1];
+    vector<LineIterator> ortIt= calculateOrtLineIterators(lineOperator, step,tmp);
+    tmp=Mat::zeros(invG.rows,invG.cols,invG.type());
+    for (int i = 0; i < nrows; i++) {
+        p = invG.ptr<uchar>(i);
+        q = mask.ptr<uchar>(i);
+        r = tmp.ptr<uchar>(i);
+        for (int j = 0; j < ncols; j++) {
+            if (q[j] == 0) continue;
+            Mat square(invG, Rect(j, i, lineOperator, lineOperator));
+            int size=lineIt.size();
+            double max=-100000;            
+            double ortStr=0;
+            for(int it=0;it<size;it++){
+                LineIterator line=lineIt.at(it);
+                LineIterator ort=ortIt.at(it);
+                double mainStr = calculateLineStrength(square, line);
+                
+                //calculate max line operator response
+                if(mainStr>max){
+                    max=mainStr;
+                    ortStr = calculateLineStrength(square,ort);                    
+                }
             }
+            double weighted= 0.2*ortStr + 0.8 * max;
+            if(weighted<20 && weighted > 4){
+                r[j]=255;
+            }
+            //cout<<ortStr<<endl;            
         }
     }
-
+    Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));    
+    dilate(tmp,tmp,e);
+    //medianBlur(tmp,tmp,3);
+    erode(tmp,tmp,e);
+    
+    imwrite("image/4-vessel/image1.tiff",tmp);
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", tmp);*/
 }
 
 void getLinePoints(int l, Point &start, Point &end, double theta) {
 
-    Point center(l/2,l/2);
+    Point center(l / 2, l / 2);
+    int flag = 0;
     //convert to radians
     if (theta != 0 && theta != 90) {
+        if (theta > 90)flag = 1;
         theta = M_PI / 180 * theta;
-        int m = tan(theta);
-        
+        double m = abs(tan(theta));
+
 
         if (m <= 1) {
-            end.x =l/2;
-            end.y = (int) m * end.x;
-            start.x=-l/2;
-            start.y=(int) m* start.x;
+            end.x = l / 2;
+            end.y = m * end.x;
+            start.x = -l / 2;
+            start.y = m * start.x;
         } else {
-            end.y = l/2;
-            end.x = (int) end.y / m;
-            start.y = -l/2;
-            start.x = (int) start.y / m;
+            end.y = l / 2;
+            end.x = end.y / m;
+            start.y = -l / 2;
+            start.x = start.y / m;
         }
-        
-        end.x+=center.x;
-        end.y+=center.y;
-        start.x+=center.x;
-        start.y+=center.y;
-    }else{//tan theta inderterminated
-        if(theta=0){
-            end.x=center.x+l/2;
-            end.y=center.y;
-            start.x=center.x-l/2;
-            start.y=center.y;
-        }else{
-            end.y=center.y+l/2;
-            end.x=center.x;
-            start.y=center.y-l/2;
-            start.x=center.x;
+        if (flag) {
+            end.x *= -1;
+            start.x *= -1;
+        }
+        end.x += center.x;
+        end.y += center.y;
+        start.x += center.x;
+        start.y += center.y;
+    } else {//tan theta inderterminated
+        if (theta == 0) {
+            end.x = center.x + l / 2;
+            end.y = center.y;
+            start.x = center.x - l / 2;
+            start.y = center.y;
+        } else {
+            end.y = center.y + l / 2;
+            end.x = center.x;
+            start.y = center.y - l / 2;
+            start.x = center.x;
         }
     }
 }
 
-void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta){
-    Point center(l/2,l/2);
-    if(theta==0 || theta==180){
-        start.x=center.x;
-        start.y=center.y-1;
-        end.x=center.x;
-        end.y=center.y+1;        
-    }else if(theta>0 && theta <90){
-        start.x=center.x-1;
-        start.y=center.y-1;
-        end.x=center.x+1;
-        end.y=center.y+1;
-    }else if(theta > 90 && theta <180){
-        start.x=center.x+1;
-        start.y=center.y-1;
-        end.x=center.x-1;
-        end.y=center.y+1;
+void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
+    int ortP=3;
+    int pix=ortP/2;
+    Point center(l / 2, l / 2);
+    if (theta == 0 || theta == 180) {
+        start.x = center.x;
+        start.y = center.y - pix;
+        end.x = center.x;
+        end.y = center.y + pix;
+    } else if (theta > 0 && theta < 90) {
+        start.x = center.x - pix;
+        start.y = center.y - pix;
+        end.x = center.x + pix;
+        end.y = center.y + pix;
+    } else if (theta > 90 && theta < 180) {
+        start.x = center.x + pix;
+        start.y = center.y - pix;
+        end.x = center.x - pix;
+        end.y = center.y + pix;
     }
-    
-    
+
+
 }
 
-double calculateLineStrength(Mat &img, LineIterator &it){
-    double mean= calculateMean(img);
-    double lineMean=0;
-    Point a(0,0);
-    for (int i = 0; i < it.count; i++){
-        a=it.pos();
-        lineMean+=img.at<uchar>(a.x,a.y);
+double calculateLineStrength(Mat &img, LineIterator &it) {
+    Scalar m = mean(img);
+    double mean = m.val[0];
+    double lineMean = 0;
+    Point a(0, 0);
+    uchar *p;
+    for (int i = 0; i < it.count; i++) {
+        a = it.pos();
+        p = img.ptr<uchar>(a.y);
+        lineMean += p[a.x];
+        //img.at<uchar>(a.x,a.y);
         it++;
     }
-    lineMean=lineMean/it.count;
+    lineMean = lineMean / it.count;
     return lineMean - mean;
+}
+
+vector<LineIterator> calculateLineIterators(int l, int step, Mat& m) {
+    vector<LineIterator> iterators;
+    Point start(0, 0), end(0, 0);    
+    for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
+        getLinePoints(l, start, end, t);        
+        LineIterator mainLine(m, start, end, 8, true);        
+        iterators.push_back(mainLine);
+    }
+    return iterators;
+}
+
+vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m) {
+    vector<LineIterator> iterators;
+    Point startO(0, 0), endO(0, 0);    
+    for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
+        getOrtogonalLinePoints(l, startO, endO, t);        
+        LineIterator ortogonalLine(m, startO, endO, 8, true);
+        iterators.push_back(ortogonalLine);
+    }
+    return iterators;
 }

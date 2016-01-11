@@ -38,5 +38,7 @@ void vesselSegmentation();
 void getLinePoints(int l,Point &start, Point &end, double theta);
 void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta);
 double calculateLineStrength(Mat &img, LineIterator &it);
+vector<LineIterator> calculateLineIterators(int l, int step, Mat& m);
+vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m);
 #endif /* FEATURE_EXTRACTION_H */
 
