@@ -282,18 +282,20 @@ void darkLessionSegmentation() {
     Mat image;
     image = imread("image/2-optic disc/image1.tiff", 1);
 
-    vector<Mat> channels;
+    /*vector<Mat> channels;
 
-    split(image, channels);
+    split(image, channels);*/
 
-    Mat greenChannel = channels[1];
-    //cvtColor( image, greenChannel, CV_BGR2GRAY );
+    Mat greenChannel; // = channels[1];
+    cvtColor(image, greenChannel, CV_BGR2GRAY);
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
     /****TOP HAT**/
     //opening
-    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+    /*Ptr<CLAHE> ptr=createCLAHE();
+    ptr->apply(greenChannel,greenChannel);*/
+    Mat element = getStructuringElement(MORPH_RECT, Size(11, 11));
     Mat opened;
     erode(greenChannel, opened, element);
     dilate(opened, opened, element);
@@ -312,7 +314,7 @@ void darkLessionSegmentation() {
 
     Mat medianFilter;
 
-    medianBlur(contrastE, medianFilter, 25);
+    medianBlur(contrastE, medianFilter, 37);
     contrastE = medianFilter - contrastE;
     normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
     //equalizeHist(contrastE,contrastE);    
@@ -325,6 +327,8 @@ void darkLessionSegmentation() {
     /*element = getStructuringElement( MORPH_RECT,Size( 3,3 ));
     dilate(contrastE,contrastE,element);*/
     //equalizeHist(contrastE,contrastE);
+    Ptr<CLAHE> ptr = createCLAHE();
+    ptr->apply(contrastE, contrastE);
     medianBlur(contrastE, contrastE, 3);
     imwrite("image/3-dark lession/image2.tiff", contrastE);
     threshold(contrastE, contrastE, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
@@ -332,6 +336,68 @@ void darkLessionSegmentation() {
     imwrite("image/3-dark lession/image1.tiff", contrastE);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", contrastE);*/
+    /* vector<vector<Point> > contours;
+     vector<Vec4i> hierarchy;
+     findContours( contrastE, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+     RNG rng(12345);
+     Mat drawing = Mat::zeros( contrastE.size(), CV_8UC1 );
+     for( int i = 0; i< contours.size(); i++ )
+      {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+      }
+
+     /// Show in a window
+     namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+     imshow( "Contours", drawing );
+     vector<Point> c1=contours.at(0);
+     for(int i=0;i<c1.size();i++){
+         cout<<c1.at(i)<<endl;
+     }
+     cout<<contourArea(c1,false)<<endl;
+     cout<<arcLength(c1,true)<<endl;*/
+
+
+    SimpleBlobDetector::Params params;
+
+    // Change thresholds
+    //params.minThreshold = 10;
+    //params.maxThreshold = 200;
+
+    // Filter by Area.
+    params.filterByArea = true;
+    params.minArea = 10;
+    params.maxArea = 20;
+
+    // Filter by Circularity
+    params.filterByCircularity = true;
+    params.minCircularity = 0.7;
+
+    // Filter by Convexity
+    params.filterByConvexity = false;
+    params.minConvexity = 0.2;
+
+    // Filter by Inertia
+    params.filterByInertia = false;
+    params.minInertiaRatio =0.3;
+    Ptr<SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params); 
+      
+    // Storage for blobs
+    std::vector<KeyPoint> keypoints;
+    bitwise_not(contrastE,contrastE);
+    // Detect blobs
+    detector->detect( contrastE, keypoints ); 
+    //detector.detect(contrastE, keypoints);
+
+    // Draw detected blobs as red circles.
+    // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
+    // the size of the circle corresponds to the size of blob
+
+    Mat im_with_keypoints;
+    drawKeypoints(contrastE, keypoints, im_with_keypoints, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", im_with_keypoints);
+
 }
 
 double calculateHThreshold(Mat &image) {
@@ -419,14 +485,33 @@ void vesselSegmentation() {
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    bitwise_not(invG, invG, mask);    
+    bitwise_not(invG, invG, mask);
+    medianBlur(invG, invG, 3);
+    Ptr<CLAHE> ptr = createCLAHE();
+    ptr->apply(invG, invG);
+
+    Mat median;
+    medianBlur(invG, median, 105);
+    invG = invG - median;
+    //equalizeHist(invG,invG);
+    //Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));    
+    Mat opened, topHat;
+    erode(invG, opened, element);
+    dilate(opened, opened, element);
+    //apply top hat    
+    topHat = invG - opened;
+    invG = invG - topHat;
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", invG);*/
+    //imwrite("image/4-vessel/image2.tiff",invG);
+
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
     uchar *p, *q, *r;
-    Mat tmp(lineOperator,lineOperator,CV_8UC1);
-    vector<LineIterator> lineIt = calculateLineIterators(lineOperator, step,tmp); //[180 / step - 1];
-    vector<LineIterator> ortIt= calculateOrtLineIterators(lineOperator, step,tmp);
-    tmp=Mat::zeros(invG.rows,invG.cols,invG.type());
+    Mat tmp(lineOperator, lineOperator, CV_8UC1);
+    vector<LineIterator> lineIt = calculateLineIterators(lineOperator, step, tmp); //[180 / step - 1];
+    vector<LineIterator> ortIt = calculateOrtLineIterators(lineOperator, step, tmp);
+    tmp = Mat::zeros(invG.rows, invG.cols, invG.type());
     for (int i = 0; i < nrows; i++) {
         p = invG.ptr<uchar>(i);
         q = mask.ptr<uchar>(i);
@@ -434,33 +519,32 @@ void vesselSegmentation() {
         for (int j = 0; j < ncols; j++) {
             if (q[j] == 0) continue;
             Mat square(invG, Rect(j, i, lineOperator, lineOperator));
-            int size=lineIt.size();
-            double max=-100000;            
-            double ortStr=0;
-            for(int it=0;it<size;it++){
-                LineIterator line=lineIt.at(it);
-                LineIterator ort=ortIt.at(it);
+            int size = lineIt.size();
+            double max = -100000;
+            double ortStr = 0;
+            for (int it = 0; it < size; it++) {
+                LineIterator line = lineIt.at(it);
+                LineIterator ort = ortIt.at(it);
                 double mainStr = calculateLineStrength(square, line);
-                
+
                 //calculate max line operator response
-                if(mainStr>max){
-                    max=mainStr;
-                    ortStr = calculateLineStrength(square,ort);                    
+                if (mainStr > max) {
+                    max = mainStr;
+                    ortStr = calculateLineStrength(square, ort);
                 }
             }
-            double weighted= 0.2*ortStr + 0.8 * max;
-            if(weighted<20 && weighted > 4){
-                r[j]=255;
+            double weighted = 0.2 * ortStr + 0.8 * max;
+            if (weighted > 4) {
+                r[j] = 255;
             }
             //cout<<ortStr<<endl;            
         }
     }
-    Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));    
-    dilate(tmp,tmp,e);
-    //medianBlur(tmp,tmp,3);
-    erode(tmp,tmp,e);
-    
-    imwrite("image/4-vessel/image1.tiff",tmp);
+    //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
+
+
+
+    imwrite("image/4-vessel/image1.tiff", tmp);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", tmp);*/
 }
@@ -511,8 +595,8 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
 }
 
 void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
-    int ortP=3;
-    int pix=ortP/2;
+    int ortP = 3;
+    int pix = ortP / 2;
     Point center(l / 2, l / 2);
     if (theta == 0 || theta == 180) {
         start.x = center.x;
@@ -553,10 +637,10 @@ double calculateLineStrength(Mat &img, LineIterator &it) {
 
 vector<LineIterator> calculateLineIterators(int l, int step, Mat& m) {
     vector<LineIterator> iterators;
-    Point start(0, 0), end(0, 0);    
+    Point start(0, 0), end(0, 0);
     for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
-        getLinePoints(l, start, end, t);        
-        LineIterator mainLine(m, start, end, 8, true);        
+        getLinePoints(l, start, end, t);
+        LineIterator mainLine(m, start, end, 8, true);
         iterators.push_back(mainLine);
     }
     return iterators;
@@ -564,9 +648,9 @@ vector<LineIterator> calculateLineIterators(int l, int step, Mat& m) {
 
 vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m) {
     vector<LineIterator> iterators;
-    Point startO(0, 0), endO(0, 0);    
+    Point startO(0, 0), endO(0, 0);
     for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
-        getOrtogonalLinePoints(l, startO, endO, t);        
+        getOrtogonalLinePoints(l, startO, endO, t);
         LineIterator ortogonalLine(m, startO, endO, 8, true);
         iterators.push_back(ortogonalLine);
     }

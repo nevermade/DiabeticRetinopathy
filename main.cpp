@@ -43,13 +43,13 @@ int main(int argc, char** argv) {
         printf(" No image data \n ");
         return -1;
     }
-    Mat backGroundMask,noiseMask,finalMask,result;
+    //Mat backGroundMask,noiseMask,finalMask,result;
     
     //Preprocessing
     //backgroundSegmentation(image, backGroundMask);
     //opticDiscSegmentation();
-    //darkLessionSegmentation();
-    vesselSegmentation();
+    darkLessionSegmentation();
+    //vesselSegmentation();
     
     //noiseSegmentation(image,noiseMask);
     //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
