@@ -282,12 +282,13 @@ void darkLessionSegmentation() {
     Mat image;
     image = imread("image/2-optic disc/image1.tiff", 1);
 
-    /*vector<Mat> channels;
+    vector<Mat> channels;
 
-    split(image, channels);*/
-
-    Mat greenChannel; // = channels[1];
-    cvtColor(image, greenChannel, CV_BGR2GRAY);
+    split(image, channels);
+    
+    Mat greenChannel = channels[1];    
+    //cvtColor(image, greenChannel, CV_BGR2GRAY);
+    
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
@@ -295,7 +296,7 @@ void darkLessionSegmentation() {
     //opening
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(greenChannel,greenChannel);*/
-    Mat element = getStructuringElement(MORPH_RECT, Size(11, 11));
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
     Mat opened;
     erode(greenChannel, opened, element);
     dilate(opened, opened, element);
@@ -308,31 +309,17 @@ void darkLessionSegmentation() {
     dilate(greenChannel, closed, element);
     erode(closed, closed, element);
     //apply bottom hat
-    bottomHat = closed - bottomHat;
-
+    bottomHat = closed - bottomHat;    
     contrastE = greenChannel + topHat - bottomHat;
-
     Mat medianFilter;
-
-    medianBlur(contrastE, medianFilter, 37);
+    medianBlur(contrastE, medianFilter, 43);
     contrastE = medianFilter - contrastE;
-    normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
-    //equalizeHist(contrastE,contrastE);    
-    //medianBlur(contrastE,contrastE,5);
-    //double h = calculateHThreshold(contrastE);
-    double h = calculateMedian(contrastE);
-
-    //threshold(contrastE,contrastE,h,255,CV_THRESH_TOZERO);
-    contrastE = contrastE - h;
-    /*element = getStructuringElement( MORPH_RECT,Size( 3,3 ));
-    dilate(contrastE,contrastE,element);*/
-    //equalizeHist(contrastE,contrastE);
-    Ptr<CLAHE> ptr = createCLAHE();
-    ptr->apply(contrastE, contrastE);
-    medianBlur(contrastE, contrastE, 3);
+    normalize(contrastE, contrastE, 0, 255, CV_MINMAX);    
+    double h = calculateMedian(contrastE);    
+    contrastE = contrastE - h;    
+    medianBlur(contrastE,contrastE,3);
     imwrite("image/3-dark lession/image2.tiff", contrastE);
-    threshold(contrastE, contrastE, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-    //medianBlur(contrastE,contrastE,5);
+    threshold(contrastE, contrastE, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);    
     imwrite("image/3-dark lession/image1.tiff", contrastE);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", contrastE);*/
@@ -357,7 +344,7 @@ void darkLessionSegmentation() {
      cout<<contourArea(c1,false)<<endl;
      cout<<arcLength(c1,true)<<endl;*/
 
-
+/*
     SimpleBlobDetector::Params params;
 
     // Change thresholds
@@ -397,7 +384,7 @@ void darkLessionSegmentation() {
     drawKeypoints(contrastE, keypoints, im_with_keypoints, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", im_with_keypoints);
-
+*/
 }
 
 double calculateHThreshold(Mat &image) {
@@ -478,33 +465,37 @@ void vesselSegmentation() {
     vector<Mat> channels;
     split(image, channels);
     Mat mask;
-
+    Mat tmp2;
     invG = channels[1];
     invG.copyTo(mask);
+    
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 5);
+    medianBlur(mask, mask, 3);    
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    bitwise_not(invG, invG, mask);
+    bitwise_not(invG, invG, mask); 
+    invG.copyTo(tmp2);
     medianBlur(invG, invG, 3);
-    Ptr<CLAHE> ptr = createCLAHE();
-    ptr->apply(invG, invG);
-
-    Mat median;
-    medianBlur(invG, median, 105);
-    invG = invG - median;
+    /*Ptr<CLAHE> ptr=createCLAHE();
+    ptr->apply(invG,invG);*/
     //equalizeHist(invG,invG);
-    //Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));    
-    Mat opened, topHat;
-    erode(invG, opened, element);
+    normalize(invG,invG,0,255,CV_MINMAX);
+    Mat median,topHat,opened;
+    medianBlur(invG, median, 105);    
+    //equalizeHist(invG,invG);
+    //Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));   
+    erode(tmp2, opened, element);
     dilate(opened, opened, element);
     //apply top hat    
-    topHat = invG - opened;
-    invG = invG - topHat;
+    topHat = tmp2 - opened;
+    invG=invG-topHat;
+    
+    //bitwise_not(invG, invG, mask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", invG);*/
-    //imwrite("image/4-vessel/image2.tiff",invG);
-
+    
+    imwrite("image/4-vessel/image2.tiff",invG);
+    
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
     uchar *p, *q, *r;
@@ -533,8 +524,8 @@ void vesselSegmentation() {
                     ortStr = calculateLineStrength(square, ort);
                 }
             }
-            double weighted = 0.2 * ortStr + 0.8 * max;
-            if (weighted > 4) {
+            double weighted = 0.2* ortStr + 0.8 * max;
+            if (weighted > 3) {
                 r[j] = 255;
             }
             //cout<<ortStr<<endl;            
@@ -604,15 +595,15 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
         end.x = center.x;
         end.y = center.y + pix;
     } else if (theta > 0 && theta < 90) {
-        start.x = center.x - pix;
-        start.y = center.y - pix;
-        end.x = center.x + pix;
-        end.y = center.y + pix;
-    } else if (theta > 90 && theta < 180) {
         start.x = center.x + pix;
         start.y = center.y - pix;
         end.x = center.x - pix;
         end.y = center.y + pix;
+    } else if (theta > 90 && theta < 180) {
+        start.x = center.x + pix;
+        start.y = center.y + pix;
+        end.x = center.x - pix;
+        end.y = center.y - pix;
     }
 
 
@@ -655,4 +646,24 @@ vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m) {
         iterators.push_back(ortogonalLine);
     }
     return iterators;
+}
+
+void brightLessionSegmentation(){
+    Mat image;
+    image = imread("image/2-optic disc/image1.tiff", 1);
+    vector<Mat> channels;
+    split(image, channels);
+    Mat greenChannel = channels[1];
+    Mat closed;
+    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+    dilate(greenChannel, closed, element);
+    erode(closed, closed, element);
+    
+    
+    double sig = 1, th = 3.1415*45/180, lm = 1.0, gm = 0.02, ps = 0;
+    Mat kernel = cv::getGaborKernel(cv::Size(3,3), sig, th, lm, gm, ps);   
+    filter2D(greenChannel, greenChannel, CV_8UC1, kernel);
+    threshold(greenChannel, greenChannel, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", greenChannel);
 }

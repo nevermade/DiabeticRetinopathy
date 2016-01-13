@@ -31,6 +31,7 @@ ComplexNum toComplexNum(Mat& a);
 Mat getRotationMatrix(double theta);
 void opticDiscSegmentation();
 void darkLessionSegmentation();
+void brightLessionSegmentation();
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
 int calculateMedian(Mat& image);
