@@ -462,28 +462,28 @@ void vesselSegmentation() {
     int step = 15;
     Mat image, invG;
     image = imread("image/2-optic disc/image1.tiff", 1);
+    
     vector<Mat> channels;
     split(image, channels);
     Mat mask;
-    Mat tmp2;
+    Mat tmp2;   
     invG = channels[1];
     invG.copyTo(mask);
-    
+    /*Ptr<CLAHE> ptr=createCLAHE();
+    ptr->apply(invG,invG);*/    
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 3);    
+    medianBlur(mask, mask, 5);    
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    bitwise_not(invG, invG, mask); 
-    invG.copyTo(tmp2);
-    medianBlur(invG, invG, 3);
-    /*Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(invG,invG);*/
-    //equalizeHist(invG,invG);
-    normalize(invG,invG,0,255,CV_MINMAX);
+    bitwise_not(invG, invG, mask);
+    
+    //Pre- processing
+    invG.copyTo(tmp2);    
     Mat median,topHat,opened;
-    medianBlur(invG, median, 105);    
+    medianBlur(invG, invG, 3);
     //equalizeHist(invG,invG);
-    //Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));   
+    medianBlur(invG, median, 105);
+    invG=invG-median;
     erode(tmp2, opened, element);
     dilate(opened, opened, element);
     //apply top hat    
@@ -492,8 +492,7 @@ void vesselSegmentation() {
     
     //bitwise_not(invG, invG, mask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", invG);*/
-    
+    imshow("Hough Circle Transform Demo", invG);*/    
     imwrite("image/4-vessel/image2.tiff",invG);
     
     int nrows = invG.rows - lineOperator;
@@ -506,7 +505,7 @@ void vesselSegmentation() {
     for (int i = 0; i < nrows; i++) {
         p = invG.ptr<uchar>(i);
         q = mask.ptr<uchar>(i);
-        r = tmp.ptr<uchar>(i);
+        r = tmp.ptr<uchar>(i);        
         for (int j = 0; j < ncols; j++) {
             if (q[j] == 0) continue;
             Mat square(invG, Rect(j, i, lineOperator, lineOperator));
@@ -524,8 +523,8 @@ void vesselSegmentation() {
                     ortStr = calculateLineStrength(square, ort);
                 }
             }
-            double weighted = 0.2* ortStr + 0.8 * max;
-            if (weighted > 3) {
+            double weighted = 0.4* ortStr + 0.6 * max;
+            if (weighted > 1) {
                 r[j] = 255;
             }
             //cout<<ortStr<<endl;            
@@ -610,19 +609,21 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
 }
 
 double calculateLineStrength(Mat &img, LineIterator &it) {
-    Scalar m = mean(img);
-    double mean = m.val[0];
+    Scalar m = sum(img);
+    //double mean = m.val[0]/(img.rows*img.cols-it.count);
     double lineMean = 0;
     Point a(0, 0);
     uchar *p;
-    for (int i = 0; i < it.count; i++) {
+    int size=it.count;
+    for (int i = 0; i < size; i++) {
         a = it.pos();
         p = img.ptr<uchar>(a.y);
         lineMean += p[a.x];
         //img.at<uchar>(a.x,a.y);
         it++;
     }
-    lineMean = lineMean / it.count;
+    double mean = (m.val[0]-lineMean) / (img.rows*img.cols-it.count);
+    lineMean = lineMean / it.count;    
     return lineMean - mean;
 }
 
