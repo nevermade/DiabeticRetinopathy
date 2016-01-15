@@ -38,8 +38,10 @@ int calculateMedian(Mat& image);
 void vesselSegmentation();
 void getLinePoints(int l,Point &start, Point &end, double theta);
 void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta);
-double calculateLineStrength(Mat &img, LineIterator &it);
-vector<LineIterator> calculateLineIterators(int l, int step, Mat& m);
-vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m);
+double calculateLineStrength(Mat &img, vector<Point> &it);
+vector<vector<Point> > calculateLineIterators(int l, int step, Mat& m);
+vector<vector<Point> > calculateOrtLineIterators(int l, int step, Mat& m);
+//vector<vector<Point> > 
+vector<Point> getBSHLine(Point &start, Point &end);
 #endif /* FEATURE_EXTRACTION_H */
 

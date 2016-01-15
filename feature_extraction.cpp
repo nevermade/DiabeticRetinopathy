@@ -498,33 +498,34 @@ void vesselSegmentation() {
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
     uchar *p, *q, *r;
-    Mat tmp(lineOperator, lineOperator, CV_8UC1);
-    vector<LineIterator> lineIt = calculateLineIterators(lineOperator, step, tmp); //[180 / step - 1];
-    vector<LineIterator> ortIt = calculateOrtLineIterators(lineOperator, step, tmp);
+    Mat tmp(lineOperator, lineOperator, CV_8UC1), square;
+    vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step, tmp); //[180 / step - 1];
+    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step, tmp);
     tmp = Mat::zeros(invG.rows, invG.cols, invG.type());
+    vector<Point> *line, *ort;
+    double mainStr,weighted,ortStr;
     for (int i = 0; i < nrows; i++) {
         p = invG.ptr<uchar>(i);
         q = mask.ptr<uchar>(i);
         r = tmp.ptr<uchar>(i);        
         for (int j = 0; j < ncols; j++) {
             if (q[j] == 0) continue;
-            Mat square(invG, Rect(j, i, lineOperator, lineOperator));
+            square= Mat(invG, Rect(j, i, lineOperator, lineOperator));
             int size = lineIt.size();
-            double max = -100000;
-            double ortStr = 0;
+            double max = -100000;            
             for (int it = 0; it < size; it++) {
-                LineIterator line = lineIt.at(it);
-                LineIterator ort = ortIt.at(it);
-                double mainStr = calculateLineStrength(square, line);
+                line = &lineIt[it];
+                ort = &ortIt[it];
+                mainStr = calculateLineStrength(square, *line);
 
                 //calculate max line operator response
                 if (mainStr > max) {
                     max = mainStr;
-                    ortStr = calculateLineStrength(square, ort);
+                    ortStr = calculateLineStrength(square, *ort);
                 }
             }
-            double weighted = 0.4* ortStr + 0.6 * max;
-            if (weighted > 1) {
+            weighted = 0.4* ortStr + 0.6 * max;
+            if (weighted > 2) {
                 r[j] = 255;
             }
             //cout<<ortStr<<endl;            
@@ -608,43 +609,43 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
 
 }
 
-double calculateLineStrength(Mat &img, LineIterator &it) {
+double calculateLineStrength(Mat &img, vector<Point> &it) {
     Scalar m = sum(img);
     //double mean = m.val[0]/(img.rows*img.cols-it.count);
     double lineMean = 0;
     Point a(0, 0);
     uchar *p;
-    int size=it.count;
+    int size=it.size();
     for (int i = 0; i < size; i++) {
-        a = it.pos();
+        a = it[i];
         p = img.ptr<uchar>(a.y);
         lineMean += p[a.x];
         //img.at<uchar>(a.x,a.y);
-        it++;
+        //it++;
     }
-    double mean = (m.val[0]-lineMean) / (img.rows*img.cols-it.count);
-    lineMean = lineMean / it.count;    
+    double mean = (m.val[0]-lineMean) / (img.rows*img.cols-size);
+    lineMean = lineMean / size;    
     return lineMean - mean;
 }
 
-vector<LineIterator> calculateLineIterators(int l, int step, Mat& m) {
-    vector<LineIterator> iterators;
+vector<vector<Point> > calculateLineIterators(int l, int step, Mat& m) {
+    vector<vector<Point> > iterators;
     Point start(0, 0), end(0, 0);
     for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
         getLinePoints(l, start, end, t);
-        LineIterator mainLine(m, start, end, 8, true);
-        iterators.push_back(mainLine);
+        //LineIterator mainLine(m, start, end, 8, true);        
+        iterators.push_back(getBSHLine(start, end));
     }
     return iterators;
 }
 
-vector<LineIterator> calculateOrtLineIterators(int l, int step, Mat& m) {
-    vector<LineIterator> iterators;
+vector<vector<Point> > calculateOrtLineIterators(int l, int step, Mat& m) {
+    vector<vector<Point> > iterators;
     Point startO(0, 0), endO(0, 0);
     for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
         getOrtogonalLinePoints(l, startO, endO, t);
-        LineIterator ortogonalLine(m, startO, endO, 8, true);
-        iterators.push_back(ortogonalLine);
+        //LineIterator ortogonalLine(m, startO, endO, 8, true);        
+        iterators.push_back(getBSHLine(startO, endO));
     }
     return iterators;
 }
@@ -667,4 +668,39 @@ void brightLessionSegmentation(){
     threshold(greenChannel, greenChannel, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", greenChannel);
+}
+
+vector<Point> getBSHLine(Point &start, Point &end){
+    vector<Point> line;
+    float dx = end.x - start.x;
+    float dy = end.y - start.y;
+    float error=0;
+    float deltaerr = abs(dy/dx);
+    int y = start.y;
+    int x= start.x;
+    int ysign= dy>=0?1:-1;
+    int xsign= dx>=0?1:-1;
+    if(dx==0){
+        for(int i=start.y;i<=end.y;i++){
+            line.push_back(Point(x,i));
+        }
+        return line;
+    }
+    
+    while(true){
+        line.push_back(Point(x,y));
+        //cout<<Point(x,y)<<endl;
+        if(x==end.x){                        
+            break;
+        }
+        error+=deltaerr;
+        while(error>=0.5){
+            y+=ysign;
+            error--;
+            //cout<<Point(x,y)<<endl;
+            line.push_back(Point(x,y));
+        }        
+        x+=xsign;
+    };   
+    return line;
 }
