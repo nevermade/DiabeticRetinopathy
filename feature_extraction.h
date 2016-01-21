@@ -44,5 +44,6 @@ vector<vector<Point> > calculateOrtLineIterators(int l, int step);
 //vector<vector<Point> > 
 vector<Point> getBSHLine(Point &start, Point &end);
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt);
+void iluminationEqualization(Mat& input, Mat& output, Mat& mask);
 #endif /* FEATURE_EXTRACTION_H */
 
