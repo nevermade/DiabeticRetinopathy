@@ -471,7 +471,7 @@ void vesselSegmentation() {
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 5);
+    medianBlur(mask, mask, 7);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
     bitwise_not(invG, invG, mask);
@@ -479,7 +479,7 @@ void vesselSegmentation() {
     //Pre- processing
     invG.copyTo(tmp2);
     Mat median, topHat, opened;
-    medianBlur(invG, invG, 3);
+    medianBlur(invG, invG, 5);
     //equalizeHist(invG,invG);
     medianBlur(invG, median, 105);
     invG = invG - median;
@@ -510,7 +510,7 @@ void vesselSegmentation() {
         for (int j = 0; j < ncols; j++) {
             if (q[j] == 0) continue;
             square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
-            if (getLineResponse(square, lineIt, ortIt) > 2) {
+            if (getLineResponse(square, lineIt, ortIt) > 2.5) {
                 r[j] = 255;
             }
             //cout<<ortStr<<endl;            
@@ -518,7 +518,7 @@ void vesselSegmentation() {
     }
     //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
 
-
+    //dilate(tmp,tmp,element);
 
     imwrite("image/4-vessel/image1.tiff", tmp);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
@@ -699,7 +699,7 @@ void brightLessionSegmentation() {
     
     vector<Mat> channels;
     split(image, channels);
-    Mat greenChannel = channels[1];
+    Mat greenChannel = channels[1],lab;
     
     greenChannel.copyTo(mask);
     /*Ptr<CLAHE> ptr=createCLAHE();
@@ -709,25 +709,33 @@ void brightLessionSegmentation() {
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
     
+    Mat l_chann;
+    cvtColor(image,lab,CV_BGR2Lab);
+    split(lab, channels);
+    l_chann=channels[0]; //assign L channel
     
-    Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(greenChannel,greenChannel);
-    
-    Mat median;
-    medianBlur(greenChannel,median,105);
-    greenChannel= greenChannel - median ;
-    
-    
-    iluminationEqualization(greenChannel,greenChannel,mask);
-    /*
-    
+    element = getStructuringElement(MORPH_RECT, Size(13, 13));
+    Mat topHat, bottomHat;
+    l_chann.copyTo(topHat);
+    l_chann.copyTo(bottomHat);
+    //opening      
+    Mat opened;
+    erode(l_chann, opened, element);
+    dilate(opened, opened, element);
+    //apply top hat
+    topHat = topHat - opened;
+    /****BOTTOM HAT**/
+    //opening
+    //    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
     Mat closed;
-    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
-    dilate(greenChannel, closed, element);
-    erode(closed, closed, element);*/
+    dilate(l_chann, closed, element);
+    erode(closed, closed, element);
+    //apply bottom hat
+    bottomHat = closed - bottomHat;
+    l_chann = l_chann + topHat - bottomHat;
     
     namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", greenChannel);
+    imshow("Hough Circle Transform Demo", l_chann);
 }
 
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask){
