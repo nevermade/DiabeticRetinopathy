@@ -50,9 +50,9 @@ int main(int argc, char** argv) {
     //opticDiscSegmentation();
     //darkLessionSegmentation();
     
-    vesselSegmentation();
+    //vesselSegmentation();
     
-    //brightLessionSegmentation();
+    brightLessionSegmentation();
     //noiseSegmentation(image,noiseMask);
     //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
     

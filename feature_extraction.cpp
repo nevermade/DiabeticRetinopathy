@@ -732,10 +732,44 @@ void brightLessionSegmentation() {
     erode(closed, closed, element);
     //apply bottom hat
     bottomHat = closed - bottomHat;
-    l_chann = l_chann + topHat - bottomHat;
+    l_chann = l_chann + topHat - bottomHat;    
     
-    namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", l_chann);
+    Ptr<CLAHE> ptr=createCLAHE();
+    ptr->setClipLimit(11);
+    ptr->apply(l_chann,l_chann);
+    
+    double min, max;
+    minMaxLoc(l_chann, &min, &max);    
+    
+    
+    double t= max - 0.1*max;
+    threshold(l_chann,l_chann,t,255,CV_THRESH_TOZERO);
+    
+    int nrows=l_chann.rows;
+    int ncols=l_chann.cols;
+    int y;
+    uchar *p;//image
+    Vec3b *q;// 
+    
+    int th=180;
+    for(int i=0;i<nrows;i++){
+        p=l_chann.ptr<uchar>(i);
+        q=image.ptr<Vec3b>(i);
+        for(int j=0;j<ncols;j++){
+            if(p[j]==0)continue;
+            y=abs(q[j].val[2]-q[j].val[1]);
+            if(q[j].val[2]>q[j].val[1] && y>=110)
+                p[j]=0;
+            
+        }
+    }
+    
+    
+    
+    imwrite("image/5-bright lession/image.1.tiff",l_chann);
+    
+    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Hough Circle Transform Demo", l_chann);*/
 }
 
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask){
