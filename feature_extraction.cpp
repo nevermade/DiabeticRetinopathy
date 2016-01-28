@@ -250,7 +250,7 @@ void opticDiscSegmentation() {
     vector<Vec3f> circles;
 
     /// Apply the Hough Transform to find the circles
-    HoughCircles(opticD, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 200);
+    HoughCircles(opticD, circles, CV_HOUGH_GRADIENT, 1, 300, 9, 3, 50, 300);
 
     /// Draw the circles detected
     Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
@@ -267,7 +267,7 @@ void opticDiscSegmentation() {
     center.x = center.x + maxPoint.x - 100;
     center.y = center.y + (image.rows / 3) + maxPoint.y - 100;
 
-    circle(opticDMask, center, radius + 20, Scalar(0), -1, 8, 0);
+    circle(opticDMask, center, radius, Scalar(0), -1, 8, 0);
 
     Mat result;
 
@@ -735,39 +735,25 @@ void brightLessionSegmentation() {
     l_chann = l_chann + topHat - bottomHat;    
     
     Ptr<CLAHE> ptr=createCLAHE();
-    ptr->setClipLimit(11);
+    //ptr->setClipLimit(11);
     ptr->apply(l_chann,l_chann);
     
     double min, max;
     minMaxLoc(l_chann, &min, &max);    
     
     
-    double t= max - 0.1*max;
-    threshold(l_chann,l_chann,t,255,CV_THRESH_TOZERO);
+    double t= max - 0.01*max;
+    threshold(l_chann,l_chann,t,255,CV_THRESH_TOZERO);    
+    Mat i1,i2;
+    element=getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
+    dilate(greenChannel,i1,element);
+    element=getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
+    dilate(greenChannel,i2,element);
     
-    int nrows=l_chann.rows;
-    int ncols=l_chann.cols;
-    int y;
-    uchar *p;//image
-    Vec3b *q;// 
-    
-    int th=180;
-    for(int i=0;i<nrows;i++){
-        p=l_chann.ptr<uchar>(i);
-        q=image.ptr<Vec3b>(i);
-        for(int j=0;j<ncols;j++){
-            if(p[j]==0)continue;
-            y=abs(q[j].val[2]-q[j].val[1]);
-            if(q[j].val[2]>q[j].val[1] && y>=110)
-                p[j]=0;
-            
-        }
-    }
-    
-    
-    
-    imwrite("image/5-bright lession/image.1.tiff",l_chann);
-    
+    greenChannel=i1-i2;
+    threshold(greenChannel,greenChannel,0.04*255,255,CV_THRESH_BINARY);
+    imwrite("image/5-bright lession/image1.tiff",l_chann);
+    imwrite("image/5-bright lession/image2.tiff",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
 }
