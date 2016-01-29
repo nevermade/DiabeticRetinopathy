@@ -18,7 +18,7 @@ void imageVesselEnhancement(Mat& result, Mat& finalMask) {
     split(finalMask, maskChannels);
     split(result, channels);
     bitwise_not(channels[1], channels[1], maskChannels[1]);
-    imwrite("img/green_inverted_image.tiff", channels[1]);
+    imwrite("img/green_inverted_image.tif", channels[1]);
     Mat complexI, invGC = channels[1];
     //Fourier transform
     //Mat planes[2];
@@ -74,7 +74,7 @@ void fourierTransform(const Mat& invGC, Mat& complexI) {
 
     // imshow("Input Image"       , invGC   );    // Show the result
     //imshow("spectrum magnitude", magI);
-    //imwrite("img/fourier_transform.tiff",magI);
+    //imwrite("img/fourier_transform.tif",magI);
     //waitKey();
 
     //return 0;
@@ -206,52 +206,62 @@ ComplexNum toComplexNum(Mat& a) {
 void opticDiscSegmentation() {
     Mat image, roi;
 
-    image = imread("image/1-background/image1.tiff", 1);
+    image = imread("image/1-background/image1.tif", 1);
 
     vector<Mat> channels;
     split(image, channels);
 
 
-    Mat greenChannel = channels[1];
+    Mat greenChannel = channels[2];
     /// Reduce the noise so we avoid false circle detection
-    //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
-
+    //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);    
     int y = greenChannel.rows / 3;
     int x = 0;
     int w = greenChannel.cols;
     int h = y;
     roi = Mat(greenChannel, Rect(x, y, w, h));
-    //apply median filter
-    medianBlur(roi, roi, 17);
-    /*
-    /******Top hat process***
-    //opening
-    Mat element = getStructuringElement( MORPH_ELLIPSE,Size( 120, 120 )); 
-    Mat opened;    
-    erode(roi,opened,element);
-    dilate(opened,opened,element);
-    //apply top hat
-    roi=roi-opened;
-    
-    //equalizeHist(roi,roi);
-    double maxI;
-    normalize(roi,roi,0,255,CV_MINMAX);    
-    minMaxLoc(roi,NULL,&maxI,NULL,NULL);
-    double threshold= maxI-60;
-    
-    getBinaryMask(threshold,roi);
-     */
-    //GaussianBlur( roi, roi, Size(9, 9), 2, 2 );
-    Point maxPoint;
-    minMaxLoc(roi, NULL, NULL, NULL, &maxPoint);
 
-    Mat opticD = Mat(roi, Rect(maxPoint.x - (200 / 2), maxPoint.y - (200 / 2), 200, 200));
-    //equalizeHist(opticD,opticD);
+
+
+
+    Scalar mean, stddev;
+    meanStdDev(roi, mean, stddev);
+    double _mean, _stddev;
+    _mean = mean.val[0];
+    _stddev = stddev.val[0];
+    roi = roi - _stddev - _mean;
+    int size = image.cols / 10;
+    size = (size % 2 == 0) ? size + 1 : size;
+    GaussianBlur(roi, roi, Size(size, size), 0, 0);
+    imwrite("image/2-optic disc/image2.tif", roi);
+    double max;
+    minMaxLoc(roi, NULL, &max, NULL, NULL);
+    threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
+    //imwrite("image/2-optic disc/image2.tif", roi);
+
     vector<Vec3f> circles;
 
-    /// Apply the Hough Transform to find the circles
-    HoughCircles(opticD, circles, CV_HOUGH_GRADIENT, 1, 300, 9, 3, 50, 300);
+    HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 300);
 
+    if (circles.size() == 0) {
+        greenChannel = channels[1];
+        /// Reduce the noise so we avoid false circle detection
+        //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);    
+        y = greenChannel.rows / 3;
+        x = 0;
+        w = greenChannel.cols;
+        h = y;
+        roi = Mat(greenChannel, Rect(x, y, w, h));
+        
+        meanStdDev(roi, mean, stddev);        
+        _mean = mean.val[0];
+        _stddev = stddev.val[0];
+        roi = roi - _stddev - _mean;       
+        GaussianBlur(roi, roi, Size(size, size), 0, 0);        
+        minMaxLoc(roi, NULL, &max, NULL, NULL);
+        threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
+        HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 300);
+    }
     /// Draw the circles detected
     Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
     int radius = cvRound(circles[0][2]);
@@ -264,23 +274,25 @@ void opticDiscSegmentation() {
 
     Mat opticDMask = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
     //fixed center of new optic disk mask
-    center.x = center.x + maxPoint.x - 100;
-    center.y = center.y + (image.rows / 3) + maxPoint.y - 100;
+    center.x = center.x;
+    center.y = center.y + (image.rows / 3);
 
     circle(opticDMask, center, radius, Scalar(0), -1, 8, 0);
 
-    Mat result;
 
+    Mat result;
     image.copyTo(result, opticDMask);
     /// Show your results
-    imwrite("image/2-optic disc/image1.tiff", result);
+    imwrite("image/2-optic disc/image1.tif", result);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
+
+
 }
 
 void darkLessionSegmentation() {
     Mat image;
-    image = imread("image/2-optic disc/image1.tiff", 1);
+    image = imread("image/2-optic disc/image1.tif", 1);
 
     vector<Mat> channels;
 
@@ -292,7 +304,7 @@ void darkLessionSegmentation() {
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
-    
+
     /****TOP HAT**/
     //opening    
     Mat element = getStructuringElement(MORPH_RECT, Size(9, 9));
@@ -315,11 +327,11 @@ void darkLessionSegmentation() {
     contrastE = medianFilter - contrastE;
     normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
     double h = calculateMedian(contrastE);
-    contrastE=contrastE - h;
-    imwrite("image/3-dark lession/image2.tiff", contrastE);
+    contrastE = contrastE - h;
+    imwrite("image/3-dark lession/image2.tif", contrastE);
     threshold(contrastE, contrastE, 0, 255, CV_THRESH_OTSU);
     threshold(contrastE, contrastE, 100, 255, CV_THRESH_BINARY);
-    imwrite("image/3-dark lession/image1.tiff", contrastE);
+    imwrite("image/3-dark lession/image1.tif", contrastE);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", contrastE);*/
     /* vector<vector<Point> > contours;
@@ -460,7 +472,7 @@ void vesselSegmentation() {
     int lineOperator = 15;
     int step = 15;
     Mat image, invG;
-    image = imread("image/2-optic disc/image1.tiff", 1);
+    image = imread("image/2-optic disc/image1.tif", 1);
 
     vector<Mat> channels;
     split(image, channels);
@@ -492,7 +504,7 @@ void vesselSegmentation() {
     //bitwise_not(invG, invG, mask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", invG);*/
-    imwrite("image/4-vessel/image2.tiff", invG);
+    imwrite("image/4-vessel/image2.tif", invG);
 
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
@@ -520,7 +532,7 @@ void vesselSegmentation() {
 
     //dilate(tmp,tmp,element);
 
-    imwrite("image/4-vessel/image1.tiff", tmp);
+    imwrite("image/4-vessel/image1.tif", tmp);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", tmp);*/
 }
@@ -552,7 +564,7 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
     //convert to radians
     if (theta != 0 && theta != 90) {
         if (theta > 90)flag = 1;
-        theta = M_PI / 180 * theta;
+        theta = 3.1416 / 180 * theta;
         double m = abs(tan(theta));
 
 
@@ -654,6 +666,7 @@ vector<vector<Point> > calculateOrtLineIterators(int l, int step) {
     }
     return iterators;
 }
+
 vector<Point> getBSHLine(Point &start, Point &end) {
     vector<Point> line;
     float dx = end.x - start.x;
@@ -689,18 +702,17 @@ vector<Point> getBSHLine(Point &start, Point &end) {
     return line;
 }
 
-
 void brightLessionSegmentation() {
-    Mat image,mask;
-    image = imread("image/2-optic disc/image1.tiff", 1);
-    
-    
+    Mat image, mask;
+    image = imread("image/2-optic disc/image1.tif", 1);
+
+
     //bitwise_not(image, image, mask);
-    
+
     vector<Mat> channels;
     split(image, channels);
-    Mat greenChannel = channels[1],lab;
-    
+    Mat greenChannel = channels[1], lab;
+
     greenChannel.copyTo(mask);
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
@@ -708,12 +720,14 @@ void brightLessionSegmentation() {
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    
+
     Mat l_chann;
-    cvtColor(image,lab,CV_BGR2Lab);
+    cvtColor(image, lab, CV_BGR2Lab);
     split(lab, channels);
-    l_chann=channels[0]; //assign L channel
-    
+    l_chann = channels[0]; //assign L channel
+
+
+    //Thresholding method
     element = getStructuringElement(MORPH_RECT, Size(13, 13));
     Mat topHat, bottomHat;
     l_chann.copyTo(topHat);
@@ -732,51 +746,81 @@ void brightLessionSegmentation() {
     erode(closed, closed, element);
     //apply bottom hat
     bottomHat = closed - bottomHat;
-    l_chann = l_chann + topHat - bottomHat;    
-    
-    Ptr<CLAHE> ptr=createCLAHE();
+    l_chann = l_chann + topHat - bottomHat;
+
+    Ptr<CLAHE> ptr = createCLAHE();
     //ptr->setClipLimit(11);
-    ptr->apply(l_chann,l_chann);
-    
+    ptr->apply(l_chann, l_chann);
+
     double min, max;
-    minMaxLoc(l_chann, &min, &max);    
-    
-    
-    double t= max - 0.01*max;
-    threshold(l_chann,l_chann,t,255,CV_THRESH_TOZERO);    
-    Mat i1,i2;
-    element=getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
-    dilate(greenChannel,i1,element);
-    element=getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
-    dilate(greenChannel,i2,element);
-    
-    greenChannel=i1-i2;
-    threshold(greenChannel,greenChannel,0.04*255,255,CV_THRESH_BINARY);
-    imwrite("image/5-bright lession/image1.tiff",l_chann);
-    imwrite("image/5-bright lession/image2.tiff",greenChannel);
+    minMaxLoc(l_chann, &min, &max);
+
+
+    double t = max - 0.01 * max;
+    threshold(l_chann, l_chann, t, 255, CV_THRESH_TOZERO);
+
+    //Morphological method
+    Mat i1, i2;
+    element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
+    dilate(greenChannel, i1, element);
+    element = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
+    dilate(greenChannel, i2, element);
+
+    greenChannel = i1 - i2;
+    threshold(greenChannel, greenChannel, 0.04 * 255, 255, CV_THRESH_BINARY);
+
+
+
+    //3rd step
+    Mat c1, c2;
+    element = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
+    dilate(greenChannel, c1, element);
+    erode(c1, c1, element);
+
+    element = getStructuringElement(MORPH_ELLIPSE, Size(23, 23));
+    dilate(greenChannel, c2, element);
+    erode(c2, c2, element);
+
+    bitwise_and(c1, l_chann, c1, mask);
+    bitwise_and(c2, l_chann, c2, mask);
+
+
+    Mat i5, i6;
+    bitwise_xor(c1, c2, i5, mask);
+    bitwise_and(c1, c2, i6, mask);
+
+    Mat finalOutput;
+
+    finalOutput = i5 + i6;
+
+    imwrite("image/5-bright lession/image1.tif", finalOutput);
+    // imwrite("image/5-bright lession/image2.tif",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
+
+
+
 }
 
-void iluminationEqualization(Mat& input, Mat& output, Mat& mask){
-    Mat out(input.rows,input.cols,input.type());
-    int kernel_size=3;
-    int intensity=20;
-    int nrows=input.rows-kernel_size;
-    int ncols=input.cols-kernel_size;
-    uchar *p,*q,*r;
+void iluminationEqualization(Mat& input, Mat& output, Mat& mask) {
+    Mat out(input.rows, input.cols, input.type());
+    int kernel_size = 3;
+    int intensity = 20;
+    int nrows = input.rows - kernel_size;
+    int ncols = input.cols - kernel_size;
+    uchar *p, *q, *r;
     Mat kernel;
-    for(int i=0;i<nrows; i++){
-        p=input.ptr<uchar>(i);
-        q=out.ptr<uchar>(i);
-        r=mask.ptr<uchar>(i);
-        for(int j=0;j<ncols;j++){
-            if(r[j]==0) continue;
-            kernel=Mat(input,Rect(j,i,kernel_size,kernel_size));
-            Scalar _mean=mean(kernel);
-            double m=_mean.val[0];
-            q[j]=p[j]+intensity-m;
+    for (int i = 0; i < nrows; i++) {
+        p = input.ptr<uchar>(i);
+        q = out.ptr<uchar>(i);
+        r = mask.ptr<uchar>(i);
+        for (int j = 0; j < ncols; j++) {
+            if (r[j] == 0) continue;
+            kernel = Mat(input, Rect(j, i, kernel_size, kernel_size));
+            Scalar _mean = mean(kernel);
+            double m = _mean.val[0];
+            q[j] = p[j] + intensity - m;
         }
-    }    
-    output=out;
+    }
+    output = out;
 }

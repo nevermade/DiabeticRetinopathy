@@ -193,27 +193,27 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: ${OBJECTFILE
 ${OBJECTDIR}/ComplexNum.o: ComplexNum.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComplexNum.o ComplexNum.cpp
+	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComplexNum.o ComplexNum.cpp
 
 ${OBJECTDIR}/feature_extraction.o: feature_extraction.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/feature_extraction.o feature_extraction.cpp
+	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/feature_extraction.o feature_extraction.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/preprocessing.o: preprocessing.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/preprocessing.o preprocessing.cpp
+	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/preprocessing.o preprocessing.cpp
 
 ${OBJECTDIR}/util.o: util.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/util.o util.cpp
+	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/util.o util.cpp
 
 # Subprojects
 .build-subprojects:

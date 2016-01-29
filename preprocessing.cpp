@@ -44,7 +44,7 @@ void backgroundSegmentation(const Mat& src, Mat& dest) {
     Mat backgroundImageResult;
     medianBlur(dest,dest,5);
     src.copyTo(backgroundImageResult,dest);    
-    imwrite("image/1-background/image1.tiff",backgroundImageResult);
+    imwrite("image/1-background/image1.tif",backgroundImageResult);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo
 void fineBackGroundSegmentation(Mat& dest){
@@ -242,7 +242,7 @@ void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask
    
     bitwise_and(bgMask,noiseMask,finalMask);
     src.copyTo(result,finalMask);
-    imwrite("img/final_result.tiff",result);
+    imwrite("img/final_result.tif",result);
     
 }
 
