@@ -277,7 +277,7 @@ void opticDiscSegmentation() {
     center.x = center.x;
     center.y = center.y + (image.rows / 3);
 
-    circle(opticDMask, center, radius, Scalar(0), -1, 8, 0);
+    circle(opticDMask, center, radius+image.rows/40, Scalar(0), -1, 8, 0);
 
 
     Mat result;
@@ -286,8 +286,7 @@ void opticDiscSegmentation() {
     imwrite("image/2-optic disc/image1.tif", result);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
-
-
+    
 }
 
 void darkLessionSegmentation() {
@@ -711,8 +710,9 @@ void brightLessionSegmentation() {
 
     vector<Mat> channels;
     split(image, channels);
-    Mat greenChannel = channels[1], lab;
-
+    Mat gc = channels[1], lab;
+    Mat greenChannel;
+    gc.copyTo(greenChannel);    
     greenChannel.copyTo(mask);
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
@@ -728,7 +728,7 @@ void brightLessionSegmentation() {
 
 
     //Thresholding method
-    element = getStructuringElement(MORPH_RECT, Size(13, 13));
+    element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
     Mat topHat, bottomHat;
     l_chann.copyTo(topHat);
     l_chann.copyTo(bottomHat);
@@ -748,19 +748,19 @@ void brightLessionSegmentation() {
     bottomHat = closed - bottomHat;
     l_chann = l_chann + topHat - bottomHat;
 
-    Ptr<CLAHE> ptr = createCLAHE();
-    //ptr->setClipLimit(11);
-    ptr->apply(l_chann, l_chann);
-
+    //normalize(l_chann, l_chann, 0, 255, CV_MINMAX);
+    
+    /*Ptr<CLAHE> ptr = createCLAHE();    
+    ptr->apply(l_chann, l_chann);*/
+    equalizeHist(l_chann,l_chann);
     double min, max;
     minMaxLoc(l_chann, &min, &max);
-
-
-    double t = max - 0.01 * max;
-    threshold(l_chann, l_chann, t, 255, CV_THRESH_TOZERO);
-
+    
+    double t = max - 0.01* max;
+    threshold(l_chann, l_chann, t, 255, CV_THRESH_BINARY);
+    imwrite("image/5-bright lession/image1.tif", l_chann);
     //Morphological method
-    Mat i1, i2;
+    Mat i1, i2;    
     element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
     dilate(greenChannel, i1, element);
     element = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
@@ -768,10 +768,10 @@ void brightLessionSegmentation() {
 
     greenChannel = i1 - i2;
     threshold(greenChannel, greenChannel, 0.04 * 255, 255, CV_THRESH_BINARY);
+    imwrite("image/5-bright lession/image2.tif", greenChannel);
 
 
-
-    //3rd step
+    //Complementation of previous techniques
     Mat c1, c2;
     element = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
     dilate(greenChannel, c1, element);
@@ -793,12 +793,12 @@ void brightLessionSegmentation() {
 
     finalOutput = i5 + i6;
 
-    imwrite("image/5-bright lession/image1.tif", finalOutput);
+    imwrite("image/5-bright lession/image3.tif", finalOutput);
     // imwrite("image/5-bright lession/image2.tif",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
 
-
+    
 
 }
 
