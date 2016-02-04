@@ -46,8 +46,8 @@ int main(int argc, char** argv) {
     Mat backGroundMask;
     
     //Preprocessing
-    //backgroundSegmentation(image, backGroundMask);
-    //opticDiscSegmentation();
+    backgroundSegmentation(image, backGroundMask);
+    opticDiscSegmentation();
     //darkLessionSegmentation();
     
     //vesselSegmentation();

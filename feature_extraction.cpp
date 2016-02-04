@@ -297,7 +297,7 @@ void darkLessionSegmentation() {
 
     split(image, channels);
 
-    Mat greenChannel = channels[1];
+    Mat greenChannel = channels[1];   
     //cvtColor(image, greenChannel, CV_BGR2GRAY);
     //medianBlur(greenChannel,greenChannel,3);
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
@@ -331,70 +331,7 @@ void darkLessionSegmentation() {
     threshold(contrastE, contrastE, 0, 255, CV_THRESH_OTSU);
     threshold(contrastE, contrastE, 100, 255, CV_THRESH_BINARY);
     imwrite("image/3-dark lession/image1.tif", contrastE);
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", contrastE);*/
-    /* vector<vector<Point> > contours;
-     vector<Vec4i> hierarchy;
-     findContours( contrastE, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-     RNG rng(12345);
-     Mat drawing = Mat::zeros( contrastE.size(), CV_8UC1 );
-     for( int i = 0; i< contours.size(); i++ )
-      {
-        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-      }
-
-     /// Show in a window
-     namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-     imshow( "Contours", drawing );
-     vector<Point> c1=contours.at(0);
-     for(int i=0;i<c1.size();i++){
-         cout<<c1.at(i)<<endl;
-     }
-     cout<<contourArea(c1,false)<<endl;
-     cout<<arcLength(c1,true)<<endl;*/
-
-    /*
-        SimpleBlobDetector::Params params;
-
-        // Change thresholds
-        //params.minThreshold = 10;
-        //params.maxThreshold = 200;
-
-        // Filter by Area.
-        params.filterByArea = true;
-        params.minArea = 10;
-        params.maxArea = 20;
-
-        // Filter by Circularity
-        params.filterByCircularity = true;
-        params.minCircularity = 0.7;
-
-        // Filter by Convexity
-        params.filterByConvexity = false;
-        params.minConvexity = 0.2;
-
-        // Filter by Inertia
-        params.filterByInertia = false;
-        params.minInertiaRatio =0.3;
-        Ptr<SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params); 
       
-        // Storage for blobs
-        std::vector<KeyPoint> keypoints;
-        bitwise_not(contrastE,contrastE);
-        // Detect blobs
-        detector->detect( contrastE, keypoints ); 
-        //detector.detect(contrastE, keypoints);
-
-        // Draw detected blobs as red circles.
-        // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
-        // the size of the circle corresponds to the size of blob
-
-        Mat im_with_keypoints;
-        drawKeypoints(contrastE, keypoints, im_with_keypoints, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-        namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-        imshow("Hough Circle Transform Demo", im_with_keypoints);
-     */
 }
 
 double calculateHThreshold(Mat &image) {
