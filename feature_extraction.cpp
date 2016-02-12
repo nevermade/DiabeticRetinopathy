@@ -252,12 +252,12 @@ void opticDiscSegmentation() {
         w = greenChannel.cols;
         h = y;
         roi = Mat(greenChannel, Rect(x, y, w, h));
-        
-        meanStdDev(roi, mean, stddev);        
+
+        meanStdDev(roi, mean, stddev);
         _mean = mean.val[0];
         _stddev = stddev.val[0];
-        roi = roi - _stddev - _mean;       
-        GaussianBlur(roi, roi, Size(size, size), 0, 0);        
+        roi = roi - _stddev - _mean;
+        GaussianBlur(roi, roi, Size(size, size), 0, 0);
         minMaxLoc(roi, NULL, &max, NULL, NULL);
         threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
         HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 300);
@@ -277,7 +277,7 @@ void opticDiscSegmentation() {
     center.x = center.x;
     center.y = center.y + (image.rows / 3);
 
-    circle(opticDMask, center, radius+image.rows/40, Scalar(0), -1, 8, 0);
+    circle(opticDMask, center, radius + image.rows / 40, Scalar(0), -1, 8, 0);
 
 
     Mat result;
@@ -286,11 +286,11 @@ void opticDiscSegmentation() {
     imwrite("image/2-optic disc/image1.tif", result);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
-    
+
 }
 
 void darkLessionSegmentation() {
-    Mat image;
+    /*Mat image;
     image = imread("image/2-optic disc/image1.tif", 1);
 
     vector<Mat> channels;
@@ -301,11 +301,12 @@ void darkLessionSegmentation() {
     //cvtColor(image, greenChannel, CV_BGR2GRAY);
     //medianBlur(greenChannel,greenChannel,3);
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
+    
     greenChannel.copyTo(topHat);
     greenChannel.copyTo(bottomHat);
 
     /****TOP HAT**/
-    //opening    
+    /*//opening    
     Mat element = getStructuringElement(MORPH_RECT, Size(9, 9));
     Mat opened;
     erode(greenChannel, opened, element);
@@ -315,7 +316,7 @@ void darkLessionSegmentation() {
     /****BOTTOM HAT**/
     //opening
     //    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
-    Mat closed;
+    /*Mat closed;
     dilate(greenChannel, closed, element);
     erode(closed, closed, element);
     //apply bottom hat
@@ -330,8 +331,42 @@ void darkLessionSegmentation() {
     imwrite("image/3-dark lession/image2.tif", contrastE);
     threshold(contrastE, contrastE, 0, 255, CV_THRESH_OTSU);
     threshold(contrastE, contrastE, 100, 255, CV_THRESH_BINARY);
-    imwrite("image/3-dark lession/image1.tif", contrastE);
-      
+    imwrite("image/3-dark lession/image1.tif", contrastE);*/
+
+    Mat image, lowPass, mask;
+    image = imread("image/2-optic disc/image1.tif", 1);
+
+    vector<Mat> channels;
+
+    split(image, channels);
+
+    Mat greenChannel = channels[1];
+    Mat redChannel = channels[2];
+    greenChannel.copyTo(mask);
+    /*Ptr<CLAHE> ptr=createCLAHE();
+    ptr->apply(invG,invG);*/
+    Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
+    medianBlur(mask, mask, 5);
+    erode(mask, mask, element);
+    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
+
+
+    medianBlur(greenChannel, lowPass, 35);
+    medianBlur(greenChannel, greenChannel, 3);
+
+    Ptr<CLAHE> ptr = createCLAHE();
+    ptr->apply(greenChannel, greenChannel);
+
+    greenChannel = greenChannel - lowPass;
+
+    uchar *p = greenChannel.ptr<uchar>(0);
+
+    bitwise_and(greenChannel, mask, greenChannel);
+
+    //greenChannel=greenChannel/redChannel*255;
+
+    imwrite("image/3-dark lession/image1.tif", greenChannel);
+
 }
 
 double calculateHThreshold(Mat &image) {
@@ -407,40 +442,63 @@ int calculateMedian(Mat& image) {
 void vesselSegmentation() {
     int lineOperator = 15;
     int step = 15;
-    Mat image, invG;
+    Mat image, invG, brightL;
     image = imread("image/2-optic disc/image1.tif", 1);
+    //brightL = imread("image/5-bright lesion/image1.tif", 1);
 
-    vector<Mat> channels;
+    vector<Mat> channels, channels2;
     split(image, channels);
     Mat mask;
     Mat tmp2;
     invG = channels[1];
     invG.copyTo(mask);
+    //split(brightL, channels2);
+    //brightL = channels2[1];
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
     medianBlur(mask, mask, 7);
     erode(mask, mask, element);
-    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
+    
+         
+    //bitwise_not(brightL, mask, mask);    
     bitwise_not(invG, invG, mask);
 
+    //element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     //Pre- processing
+
+    Mat median,topHat, opened;
+    /*medianBlur(invG, invG, 3);
     invG.copyTo(tmp2);
-    Mat median, topHat, opened;
-    medianBlur(invG, invG, 5);
-    //equalizeHist(invG,invG);
-    medianBlur(invG, median, 105);
+    medianBlur(invG, median, 75);
     invG = invG - median;
     erode(tmp2, opened, element);
     dilate(opened, opened, element);
     //apply top hat    
-    topHat = tmp2 - opened;
+    topHat = tmp2 - opened;   
+    //threshold(topHat,topHat,0.01*255,255,CV_THRESH_BINARY);
     invG = invG - topHat;
-
-    //bitwise_not(invG, invG, mask);
+    //threshold(invG,invG,0.02*255,255,CV_THRESH_TOZERO);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", invG);*/
+    
+    //equalizeHist(invG,invG);
+    invG.copyTo(tmp2);   
+    erode(tmp2, opened, element);
+    dilate(opened, opened, element);
+    topHat = tmp2 - opened;
+    invG = invG - topHat;  
+    
+    medianBlur(invG,invG,3);
+    medianBlur(invG, median, 105);
+    invG = invG - median;
+    //double max;
+    //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
+    //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
+    
     imwrite("image/4-vessel/image2.tif", invG);
+    
+    
 
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
@@ -458,7 +516,8 @@ void vesselSegmentation() {
         for (int j = 0; j < ncols; j++) {
             if (q[j] == 0) continue;
             square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
-            if (getLineResponse(square, lineIt, ortIt) > 2.5) {
+            //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
+            if (getLineResponse(square, lineIt, ortIt)) {
                 r[j] = 255;
             }
             //cout<<ortStr<<endl;            
@@ -467,7 +526,9 @@ void vesselSegmentation() {
     //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
 
     //dilate(tmp,tmp,element);
-
+    //connectedComponents(tmp,tmp);    
+    
+    
     imwrite("image/4-vessel/image1.tif", tmp);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", tmp);*/
@@ -475,21 +536,35 @@ void vesselSegmentation() {
 
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {
     vector<Point> *line, *ort;
-    double max = -100000, mainStr, ortStr;
+    double max = -100000, mainStr, ortStr, min = 999999;
     int size = lineIt.size();
-
+    int f;
     for (int it = 0; it < size; it++) {
         line = &lineIt[it];
         ort = &ortIt[it];
         mainStr = calculateLineStrength(square, *line);
-
-        //calculate max line operator response
-        if (mainStr > max) {
-            max = mainStr;
+        
+        if(mainStr >5){            
             ortStr = calculateLineStrength(square, *ort);
+            f=mainStr+ortStr;
+        }else{
+            f=mainStr;
+        }
+        
+        //calculate max line operator response
+        if (f > max) {
+            max = f;            
+        }
+        if (f < min) {
+            min = f;
         }
     }
-    return 0.4 * ortStr + 0.6 * max;
+    //return 0.4 * ortStr + 0.6 * max;
+    int t = 0.25 * (12 - min);
+    if (max>t)
+        return max;
+    else
+        return 0;
 
 }
 
@@ -578,7 +653,8 @@ double calculateLineStrength(Mat &img, vector<Point> &it) {
     }
     double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
     lineMean = lineMean / size;
-    return lineMean - mean;
+    
+    return lineMean - mean;    
 }
 
 vector<vector<Point> > calculateLineIterators(int l, int step) {
@@ -649,7 +725,7 @@ void brightLessionSegmentation() {
     split(image, channels);
     Mat gc = channels[1], lab;
     Mat greenChannel;
-    gc.copyTo(greenChannel);    
+    gc.copyTo(greenChannel);
     greenChannel.copyTo(mask);
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
@@ -686,18 +762,18 @@ void brightLessionSegmentation() {
     l_chann = l_chann + topHat - bottomHat;
 
     //normalize(l_chann, l_chann, 0, 255, CV_MINMAX);
-    
+
     /*Ptr<CLAHE> ptr = createCLAHE();    
     ptr->apply(l_chann, l_chann);*/
-    equalizeHist(l_chann,l_chann);
+    equalizeHist(l_chann, l_chann);
     double min, max;
     minMaxLoc(l_chann, &min, &max);
-    
-    double t = max - 0.01* max;
+
+    double t = max - 0.01 * max;
     threshold(l_chann, l_chann, t, 255, CV_THRESH_BINARY);
-    imwrite("image/5-bright lession/image1.tif", l_chann);
+    imwrite("image/5-bright lesion/image3.tif", l_chann);
     //Morphological method
-    Mat i1, i2;    
+    Mat i1, i2;
     element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
     dilate(greenChannel, i1, element);
     element = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
@@ -705,7 +781,7 @@ void brightLessionSegmentation() {
 
     greenChannel = i1 - i2;
     threshold(greenChannel, greenChannel, 0.04 * 255, 255, CV_THRESH_BINARY);
-    imwrite("image/5-bright lession/image2.tif", greenChannel);
+    imwrite("image/5-bright lesion/image2.tif", greenChannel);
 
 
     //Complementation of previous techniques
@@ -730,12 +806,12 @@ void brightLessionSegmentation() {
 
     finalOutput = i5 + i6;
 
-    imwrite("image/5-bright lession/image3.tif", finalOutput);
+    imwrite("image/5-bright lesion/image1.tif", finalOutput);
     // imwrite("image/5-bright lession/image2.tif",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
 
-    
+
 
 }
 
