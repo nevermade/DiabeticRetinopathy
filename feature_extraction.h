@@ -35,7 +35,7 @@ void darkLessionSegmentation();
 void brightLessionSegmentation();
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
-int calculateMedian(Mat& image);
+int calculateMedian(Mat& image, Mat& mask);
 void vesselSegmentation();
 void getLinePoints(int l,Point &start, Point &end, double theta);
 void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta);

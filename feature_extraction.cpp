@@ -290,7 +290,7 @@ void opticDiscSegmentation() {
 }
 
 void darkLessionSegmentation() {
-    /*Mat image;
+    Mat image,mask;
     image = imread("image/2-optic disc/image1.tif", 1);
 
     vector<Mat> channels;
@@ -301,14 +301,25 @@ void darkLessionSegmentation() {
     //cvtColor(image, greenChannel, CV_BGR2GRAY);
     //medianBlur(greenChannel,greenChannel,3);
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
+    //Mask retrieval
+    greenChannel.copyTo(mask);
+    //split(brightL, channels2);
+    //brightL = channels2[1];
+    /*Ptr<CLAHE> ptr=createCLAHE();
+    ptr->apply(invG,invG);*/
+    Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
+    medianBlur(mask, mask, 7);
+    erode(mask, mask, element);
+    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
+    //imwrite("image/3-dark lession/image4.tif", mask);
     
-    greenChannel.copyTo(topHat);
-    greenChannel.copyTo(bottomHat);
-
+    //greenChannel.copyTo(topHat);
+    //greenChannel.copyTo(bottomHat);
+    imwrite("image/3-dark lession/image4.tif", greenChannel); 
     /****TOP HAT**/
-    /*//opening    
-    Mat element = getStructuringElement(MORPH_RECT, Size(9, 9));
-    Mat opened;
+    //opening    
+    element = getStructuringElement(MORPH_RECT, Size(5,5));
+    /*Mat opened;
     erode(greenChannel, opened, element);
     dilate(opened, opened, element);
     //apply top hat
@@ -320,53 +331,34 @@ void darkLessionSegmentation() {
     dilate(greenChannel, closed, element);
     erode(closed, closed, element);
     //apply bottom hat
-    bottomHat = closed - bottomHat;
-    contrastE = greenChannel + topHat - bottomHat;
-    Mat medianFilter;
-    medianBlur(greenChannel, medianFilter, 35);
-    contrastE = medianFilter - contrastE;
-    normalize(contrastE, contrastE, 0, 255, CV_MINMAX);
-    double h = calculateMedian(contrastE);
+    bottomHat = closed - bottomHat;*/    
+    morphologyEx(greenChannel,topHat,CV_MOP_TOPHAT,element);    
+    morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
+    contrastE = (greenChannel + topHat) - bottomHat;    
+    
+    Mat medianFilter;    
+    medianBlur(contrastE, medianFilter, 51);
+    contrastE = medianFilter - contrastE;    
+    medianBlur(contrastE,contrastE,5);    
+    double h = calculateMedian(contrastE,mask);
+    cout<<h<<endl;
     contrastE = contrastE - h;
-    imwrite("image/3-dark lession/image2.tif", contrastE);
+    Mat rec, temp;
+    contrastE.copyTo(rec);
+    imwrite("image/3-dark lession/image3.tif", contrastE);
+    
+    //do{
+        rec.copyTo(temp);
+        dilate(rec,rec,element);    
+        bitwise_and(contrastE,rec,rec,mask); 
+    //}while(); 
+    
+    imwrite("image/3-dark lession/image3.tif", rec);
+    
+    
     threshold(contrastE, contrastE, 0, 255, CV_THRESH_OTSU);
     threshold(contrastE, contrastE, 100, 255, CV_THRESH_BINARY);
-    imwrite("image/3-dark lession/image1.tif", contrastE);*/
-
-    Mat image, lowPass, mask;
-    image = imread("image/2-optic disc/image1.tif", 1);
-
-    vector<Mat> channels;
-
-    split(image, channels);
-
-    Mat greenChannel = channels[1];
-    Mat redChannel = channels[2];
-    greenChannel.copyTo(mask);
-    /*Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(invG,invG);*/
-    Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 5);
-    erode(mask, mask, element);
-    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-
-
-    medianBlur(greenChannel, lowPass, 35);
-    medianBlur(greenChannel, greenChannel, 3);
-
-    Ptr<CLAHE> ptr = createCLAHE();
-    ptr->apply(greenChannel, greenChannel);
-
-    greenChannel = greenChannel - lowPass;
-
-    uchar *p = greenChannel.ptr<uchar>(0);
-
-    bitwise_and(greenChannel, mask, greenChannel);
-
-    //greenChannel=greenChannel/redChannel*255;
-
-    imwrite("image/3-dark lession/image1.tif", greenChannel);
-
+    imwrite("image/3-dark lession/image1.tif", contrastE);    
 }
 
 double calculateHThreshold(Mat &image) {
@@ -415,8 +407,8 @@ double calculateMean(Mat& image) {
     return sum / counter;
 }
 
-int calculateMedian(Mat& image) {
-    float range[] = {0, 256};
+int calculateMedian(Mat& image,Mat& mask) {
+    /*float range[] = {0, 256};
     const float* histRange = {range};
 
     bool uniform = true;
@@ -436,7 +428,33 @@ int calculateMedian(Mat& image) {
             return i;
         }
     }
-    return 255;
+    return 255;*/
+    
+    Scalar s=mean(image,mask);
+    double m=s.val[0];
+    cout<<m<<endl;
+    int nrows=image.rows;
+    int ncols=image.cols;
+    uchar *p,*q;
+    double totalAcc=0;
+    double total;
+    int maskAcc=0;
+    for(int i=0;i<nrows;i++){
+        p=image.ptr<uchar>(i);
+        q=mask.ptr<uchar>(i); 
+        for(int j=0;j<ncols;j++){
+            if(q[j]==0) {
+                maskAcc++;
+                continue;
+            }
+            total=p[j]-m;
+            total = total*total;
+            totalAcc+=total;           
+        }
+    }
+    cout<<maskAcc<<" "<<nrows*ncols<<endl;
+    return (int)(sqrt(totalAcc))*(2/((nrows*ncols)-maskAcc));
+    
 }
 
 void vesselSegmentation() {
@@ -446,7 +464,7 @@ void vesselSegmentation() {
     image = imread("image/2-optic disc/image1.tif", 1);
     //brightL = imread("image/5-bright lesion/image1.tif", 1);
 
-    vector<Mat> channels, channels2;
+    vector<Mat> channels;
     split(image, channels);
     Mat mask;
     Mat tmp2;
