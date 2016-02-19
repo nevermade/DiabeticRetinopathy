@@ -296,10 +296,11 @@ void darkLessionSegmentation() {
     vector<Mat> channels;
 
     split(image, channels);
-
+    
+    //dilate(orig,orig,e);
+    //medianBlur(orig,orig,3);
     Mat greenChannel = channels[1];
-    //cvtColor(image, greenChannel, CV_BGR2GRAY);
-    //medianBlur(greenChannel,greenChannel,3);
+    cvtColor(image, greenChannel, CV_BGR2GRAY);    
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     //Mask retrieval
     greenChannel.copyTo(mask);
@@ -309,6 +310,7 @@ void darkLessionSegmentation() {
     ptr->apply(invG,invG);*/
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
     medianBlur(mask, mask, 7);
+    dilate(mask, mask, element);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
     //imwrite("image/3-dark lession/image4.tif", mask);
@@ -316,63 +318,102 @@ void darkLessionSegmentation() {
     //greenChannel.copyTo(topHat);
     //greenChannel.copyTo(bottomHat);
     //imwrite("image/3-dark lession/image4.tif", greenChannel); 
-    greenChannel = greenChannel * 2.5;
-    medianBlur(contrastE, contrastE, 3);
+    //greenChannel = greenChannel * 2.5;
+    //medianBlur(contrastE, contrastE, 3);
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(greenChannel,greenChannel);*/
-    equalizeHist(greenChannel, greenChannel);
-    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element);
-
-
+    /*equalizeHist(greenChannel, greenChannel);
+    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element);*/   
+    
+    //Pre-processing
+    
+    //element = getStructuringElement(MORPH_ELLIPSE, Size (5, 5));        
+    morphologyEx(greenChannel,topHat,CV_MOP_TOPHAT,element);    
+    morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
+    contrastE = greenChannel + topHat - bottomHat;    
+    
+    Mat medianFilter;    
+    medianBlur(contrastE, medianFilter, 35);
+    greenChannel = medianFilter - contrastE;   
+    imwrite("image/3-dark lession/image3.tif", greenChannel);    
+    
+    Mat orig;
+    greenChannel.copyTo(orig);
+    double min;
+    minMaxLoc(orig,&min,NULL,NULL,NULL);
+    //Feature extraction
     Mat dst, detected_edges;
     greenChannel.copyTo(detected_edges);
-    dst.create(greenChannel.size(), greenChannel.type());
-    int const max_lowThreshold = 100;
+    dst.create(greenChannel.size(), greenChannel.type());    
     int ratio = 2;
     int kernel_size = 3;
     int lowThreshold = 35;
     Canny(detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
     dst = Scalar::all(0);
     greenChannel.copyTo(dst, detected_edges);
-    greenChannel = greenChannel + detected_edges;
+    greenChannel = greenChannel + detected_edges*2;
 
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 2);
 
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+    RNG rng(12345);
+    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
+    
     //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
-
-    SimpleBlobDetector::Params params;
-
-    // Change thresholds
-    params.minThreshold = 0;
-    params.maxThreshold = 100;
-
-    // Filter by Area.
-    params.filterByArea = true;
-    params.minArea = 200;
-
-    // Filter by Circularity
-    params.filterByCircularity = false;
-    params.minCircularity = 0.6;
-
-    // Filter by Convexity
-    params.filterByConvexity = false;
-    params.minConvexity = 0.1;
-
-    // Filter by Inertia
-    params.filterByInertia = false;
-    params.minInertiaRatio = 0.01;
-
-
-    // Storage for blobs
-    vector<KeyPoint> keypoints;
-    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
-
-    // Detect blobs
-    detector->detect(greenChannel, keypoints);
-    Mat im_with_keypoints;
-    drawKeypoints(greenChannel, keypoints, im_with_keypoints, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    imwrite("image/3-dark lession/image4.tif", im_with_keypoints);
+    double area;
+    vector<vector<Point> > filteredContours;
+    for(int i=0; i< contours.size();i++){
+        area=contourArea(contours.at(i));
+        if(area>=500) filteredContours.push_back(contours.at(i));
+    }
+    
+    for (int i = 0; i < filteredContours.size(); i++) {        
+        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
+    }
+    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
+    
+    
+    //second phase
+    contours.clear();
+    hierarchy.clear();
+    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+    filteredContours.clear();
+    for(int i=0; i< contours.size();i++){
+        area=contourArea(contours.at(i));
+        if(area<=10) filteredContours.push_back(contours.at(i));
+    }
+    
+    for (int i = 0; i < filteredContours.size(); i++) {        
+        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy,0, Point());
+    }
+    //morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
+    //third phase
+    contours.clear();
+    hierarchy.clear();
+    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+    filteredContours.clear();
+    Rect r;    
+    min=min>=60?min:60;
+    for(int i=0; i< contours.size();i++){
+        area=contourArea(contours.at(i));
+        r=boundingRect(contours.at(i));
+        Scalar m = mean(orig(r));       
+        
+        if(r.height/r.width>=0.7 && area>=15 && area<=600 && m.val[0] <=min  && area>=0.55*r.height*r.width ) filteredContours.push_back(contours.at(i));
+    }
+    Mat drawing=Mat::zeros(greenChannel.rows, greenChannel.cols,greenChannel.type());
+    for (int i = 0; i < filteredContours.size(); i++) {        
+        drawContours(drawing, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
+    }
+    
+    imwrite("image/3-dark lession/image4.tif", drawing);
     /****TOP HAT**/
     //opening    
     //element = getStructuringElement(MORPH_RECT, Size(5,5));
@@ -595,6 +636,8 @@ void vesselSegmentation() {
 
 
     imwrite("image/4-vessel/image1.tif", tmp);
+    
+    
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", tmp);*/
 }
@@ -836,7 +879,7 @@ void brightLessionSegmentation() {
 
     double t = max - 0.01 * max;
     threshold(l_chann, l_chann, t, 255, CV_THRESH_BINARY);
-    imwrite("image/5-bright lesion/image3.tif", l_chann);
+    //imwrite("image/5-bright lesion/image3.tif", l_chann);
     //Morphological method
     Mat i1, i2;
     element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
@@ -846,7 +889,7 @@ void brightLessionSegmentation() {
 
     greenChannel = i1 - i2;
     threshold(greenChannel, greenChannel, 0.04 * 255, 255, CV_THRESH_BINARY);
-    imwrite("image/5-bright lesion/image2.tif", greenChannel);
+    //imwrite("image/5-bright lesion/image2.tif", greenChannel);
 
 
     //Complementation of previous techniques
@@ -867,11 +910,20 @@ void brightLessionSegmentation() {
     bitwise_xor(c1, c2, i5, mask);
     bitwise_and(c1, c2, i6, mask);
 
-    Mat finalOutput;
+    Mat finalOutput, maskedOrigImg;
 
     finalOutput = i5 + i6;
-
+    
+    element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+    dilate(finalOutput,finalOutput,element);
     imwrite("image/5-bright lesion/image1.tif", finalOutput);
+    
+    
+    bitwise_not(finalOutput,finalOutput,mask);
+    image.copyTo(maskedOrigImg,finalOutput);
+    imwrite("image/5-bright lesion/image2.tif", maskedOrigImg);
+    
+    
     // imwrite("image/5-bright lession/image2.tif",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
