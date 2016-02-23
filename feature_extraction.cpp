@@ -327,7 +327,8 @@ void darkLessionSegmentation() {
     
     //Pre-processing
     
-    //element = getStructuringElement(MORPH_ELLIPSE, Size (5, 5));        
+    //element = getStructuringElement(MORPH_ELLIPSE, Size (5, 5));   
+    //equalizeHist(greenChannel,greenChannel);
     morphologyEx(greenChannel,topHat,CV_MOP_TOPHAT,element);    
     morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
     contrastE = greenChannel + topHat - bottomHat;    
@@ -589,15 +590,17 @@ void vesselSegmentation() {
     imshow("Hough Circle Transform Demo", invG);*/
 
     //equalizeHist(invG,invG);
-    invG.copyTo(tmp2);
-    erode(tmp2, opened, element);
-    dilate(opened, opened, element);
-    topHat = tmp2 - opened;
-    invG = invG - topHat;
-
+    invG.copyTo(tmp2);    
+    Mat contrastE,medianFilter;
     medianBlur(invG, invG, 3);
-    medianBlur(invG, median, 105);
-    invG = invG - median;
+    Ptr<CLAHE> ptr=createCLAHE();
+    ptr->setClipLimit(0.01);    
+    ptr->apply(invG,invG);        
+    medianBlur(invG, medianFilter, 105);
+    invG =invG-medianFilter;
+    morphologyEx(invG,topHat,CV_MOP_TOPHAT,element);     
+    invG = invG -topHat;  
+    
     //double max;
     //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
     //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
@@ -644,32 +647,32 @@ void vesselSegmentation() {
 
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {
     vector<Point> *line, *ort;
-    double max = -100000, mainStr, ortStr, min = 999999;
+    double max = -100000, mainStr, ortStr, min=999999;
     int size = lineIt.size();
     int f;
     for (int it = 0; it < size; it++) {
         line = &lineIt[it];
         ort = &ortIt[it];
-        mainStr = calculateLineStrength(square, *line);
-
-        if (mainStr > 5) {
-            ortStr = calculateLineStrength(square, *ort);
-            f = mainStr + ortStr;
-        } else {
-            f = mainStr;
-        }
-
+        
+        mainStr = calculateLineStrength(square, *line);        
         //calculate max line operator response
+        
+        if(mainStr>4){
+            f=mainStr;
+        }
+        
         if (f > max) {
             max = f;
+            ortStr = calculateLineStrength(square, *ort);
+            if(ortStr)
+            f=mainStr+ortStr;
         }
-        if (f < min) {
-            min = f;
+        if(f<min){
+            min=f;
         }
     }
-    //return 0.4 * ortStr + 0.6 * max;
-    int t = 0.25 * (12 - min);
-    if (max > t)
+    
+    if (max>8)
         return max;
     else
         return 0;
@@ -746,7 +749,7 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
 }
 
 double calculateLineStrength(Mat &img, vector<Point> &it) {
-    Scalar m = sum(img);
+    Scalar m = mean(img);
     //double mean = m.val[0]/(img.rows*img.cols-it.count);
     double lineMean = 0;
     Point a(0, 0);
@@ -759,10 +762,10 @@ double calculateLineStrength(Mat &img, vector<Point> &it) {
         //lineMean+=img.at<uchar>(a);         
         //it++;
     }
-    double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
+    //double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
     lineMean = lineMean / size;
 
-    return lineMean - mean;
+    return lineMean - m.val[0];
 }
 
 vector<vector<Point> > calculateLineIterators(int l, int step) {
