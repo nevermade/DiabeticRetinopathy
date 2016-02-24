@@ -590,7 +590,7 @@ void vesselSegmentation() {
     imshow("Hough Circle Transform Demo", invG);*/
 
     //equalizeHist(invG,invG);
-    invG.copyTo(tmp2);    
+   /* invG.copyTo(tmp2);    
     Mat contrastE,medianFilter;
     medianBlur(invG, invG, 3);
     Ptr<CLAHE> ptr=createCLAHE();
@@ -605,9 +605,9 @@ void vesselSegmentation() {
     //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
     //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
 
-    imwrite("image/4-vessel/image2.tif", invG);
+ //   imwrite("image/4-vessel/image2.tif", invG);
 
-
+/*
 
     int nrows = invG.rows - lineOperator;
     int ncols = invG.cols - lineOperator;
@@ -643,6 +643,51 @@ void vesselSegmentation() {
     
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", tmp);*/
+    
+    image = imread("image/4-vessel/image1.tif", 1);
+    channels.clear();
+    split(image, channels);
+    invG = channels[1];
+    element=getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
+    morphologyEx(invG,topHat,CV_MOP_CLOSE,element,Point(-1,-1),3);
+    medianBlur(topHat,topHat,3);
+    
+    /*element=getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+    morphologyEx(topHat,topHat,CV_MOP_TOPHAT,element);*/
+    
+    
+    Mat detected_edges;
+    int ratio = 2;
+    int kernel_size = 3;
+    int lowThreshold = 35;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    Canny(topHat, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+    RNG rng(12345);
+    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
+    
+    //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
+    double area;
+    Rect r; 
+    vector<vector<Point> > filteredContours;
+    Mat dst=Mat::zeros(topHat.rows,topHat.cols,topHat.type());
+    for(int i=0; i< contours.size();i++){
+        area=contourArea(contours.at(i));
+        r=boundingRect(contours.at(i));
+        if(r.height/r.width>=0.6 && area<=600 &&area>=0.52*r.height*r.width ) filteredContours.push_back(contours.at(i));
+        //if(area>=500) filteredContours.push_back(contours.at(i));
+        
+    }
+    
+    for (int i = 0; i < filteredContours.size(); i++) {        
+        drawContours(dst, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
+    }
+    
+    
+    
+    imwrite("image/4-vessel/image4.tif", dst);
 }
 
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {
@@ -656,23 +701,21 @@ double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vecto
         
         mainStr = calculateLineStrength(square, *line);        
         //calculate max line operator response
-        
-        if(mainStr>4){
-            f=mainStr;
-        }
-        
-        if (f > max) {
-            max = f;
+        f=mainStr;
+        if(mainStr>2.5){
             ortStr = calculateLineStrength(square, *ort);
-            if(ortStr)
             f=mainStr+ortStr;
+        }
+                
+        if (f > max) {
+            max = f;            
         }
         if(f<min){
             min=f;
         }
     }
     
-    if (max>8)
+    if (max>0.4*(12-min))
         return max;
     else
         return 0;

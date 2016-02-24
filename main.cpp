@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     //Preprocessing
     //backgroundSegmentation(image, backGroundMask);
     //opticDiscSegmentation();
-    //darkLessionSegmentation();//microaneurysm
+    darkLessionSegmentation();//microaneurysm
     
     vesselSegmentation();
     
