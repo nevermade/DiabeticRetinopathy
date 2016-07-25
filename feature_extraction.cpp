@@ -292,15 +292,14 @@ void opticDiscSegmentation() {
 void darkLessionSegmentation() {
     Mat image, mask;
     image = imread("image/2-optic disc/image1.tif", 1);
-
     vector<Mat> channels;
 
     split(image, channels);
-    
+
     //dilate(orig,orig,e);
     //medianBlur(orig,orig,3);
     Mat greenChannel = channels[1];
-    cvtColor(image, greenChannel, CV_BGR2GRAY);    
+    cvtColor(image, greenChannel, CV_BGR2GRAY);
     Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
     //Mask retrieval
     greenChannel.copyTo(mask);
@@ -323,36 +322,36 @@ void darkLessionSegmentation() {
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(greenChannel,greenChannel);*/
     /*equalizeHist(greenChannel, greenChannel);
-    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element);*/   
-    
+    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element);*/
+
     //Pre-processing
-    
+
     //element = getStructuringElement(MORPH_ELLIPSE, Size (5, 5));   
     //equalizeHist(greenChannel,greenChannel);
-    morphologyEx(greenChannel,topHat,CV_MOP_TOPHAT,element);    
-    morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
-    contrastE = greenChannel + topHat - bottomHat;    
-    
-    Mat medianFilter;    
+    morphologyEx(greenChannel, topHat, CV_MOP_TOPHAT, element);
+    //morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
+    //contrastE = greenChannel + topHat - bottomHat;    
+    contrastE = topHat;
+    Mat medianFilter;
     medianBlur(contrastE, medianFilter, 35);
-    greenChannel = medianFilter - contrastE;   
-    imwrite("image/3-dark lession/image3.tif", greenChannel);    
-    
+    greenChannel = medianFilter - contrastE;
+    imwrite("image/3-dark lession/image3.tif", greenChannel);
+
     Mat orig;
     greenChannel.copyTo(orig);
     double min;
-    minMaxLoc(orig,&min,NULL,NULL,NULL);
+    minMaxLoc(orig, &min, NULL, NULL, NULL);
     //Feature extraction
     Mat dst, detected_edges;
     greenChannel.copyTo(detected_edges);
-    dst.create(greenChannel.size(), greenChannel.type());    
+    dst.create(greenChannel.size(), greenChannel.type());
     int ratio = 2;
     int kernel_size = 3;
     int lowThreshold = 35;
     Canny(detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
     dst = Scalar::all(0);
     greenChannel.copyTo(dst, detected_edges);
-    greenChannel = greenChannel + detected_edges*2;
+    greenChannel = greenChannel + detected_edges * 2;
 
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 2);
@@ -364,34 +363,34 @@ void darkLessionSegmentation() {
 
     RNG rng(12345);
     //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
-    
+
     //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
     double area;
     vector<vector<Point> > filteredContours;
-    for(int i=0; i< contours.size();i++){
-        area=contourArea(contours.at(i));
-        if(area>=500) filteredContours.push_back(contours.at(i));
+    for (int i = 0; i < contours.size(); i++) {
+        area = contourArea(contours.at(i));
+        if (area >= 500) filteredContours.push_back(contours.at(i));
     }
-    
-    for (int i = 0; i < filteredContours.size(); i++) {        
-        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
+
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
     morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
-    
-    
+
+
     //second phase
     contours.clear();
     hierarchy.clear();
     Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
     findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
     filteredContours.clear();
-    for(int i=0; i< contours.size();i++){
-        area=contourArea(contours.at(i));
-        if(area<=10) filteredContours.push_back(contours.at(i));
+    for (int i = 0; i < contours.size(); i++) {
+        area = contourArea(contours.at(i));
+        if (area <= 10) filteredContours.push_back(contours.at(i));
     }
-    
-    for (int i = 0; i < filteredContours.size(); i++) {        
-        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy,0, Point());
+
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
     //morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
     //third phase
@@ -400,20 +399,20 @@ void darkLessionSegmentation() {
     Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
     findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
     filteredContours.clear();
-    Rect r;    
-    min=min>=60?min:60;
-    for(int i=0; i< contours.size();i++){
-        area=contourArea(contours.at(i));
-        r=boundingRect(contours.at(i));
-        Scalar m = mean(orig(r));       
-        
-        if(r.height/r.width>=0.7 && area>=15 && area<=600 && m.val[0] <=min  && area>=0.55*r.height*r.width ) filteredContours.push_back(contours.at(i));
+    Rect r;
+    min = min >= 60 ? min : 60;
+    for (int i = 0; i < contours.size(); i++) {
+        area = contourArea(contours.at(i));
+        r = boundingRect(contours.at(i));
+        Scalar m = mean(orig(r));
+
+        if (abs(r.height - r.width) <= 0.2 * r.width && area >= 0.6 * r.width * r.height && area <= 600 && m.val[0] <= min) filteredContours.push_back(contours.at(i));
     }
-    Mat drawing=Mat::zeros(greenChannel.rows, greenChannel.cols,greenChannel.type());
-    for (int i = 0; i < filteredContours.size(); i++) {        
-        drawContours(drawing, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
+    Mat drawing = Mat::zeros(greenChannel.rows, greenChannel.cols, greenChannel.type());
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(drawing, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
-    
+
     imwrite("image/3-dark lession/image4.tif", drawing);
     /****TOP HAT**/
     //opening    
@@ -549,8 +548,9 @@ int calculateMedian(Mat& image, Mat& mask) {
 void vesselSegmentation() {
     int lineOperator = 15;
     int step = 15;
-    Mat image, invG, brightL;
+    Mat image, invG, brightL, orig;
     image = imread("image/2-optic disc/image1.tif", 1);
+    orig = image;
     //brightL = imread("image/5-bright lesion/image1.tif", 1);
 
     vector<Mat> channels;
@@ -590,74 +590,69 @@ void vesselSegmentation() {
     imshow("Hough Circle Transform Demo", invG);*/
 
     //equalizeHist(invG,invG);
-   /* invG.copyTo(tmp2);    
-    Mat contrastE,medianFilter;
-    medianBlur(invG, invG, 3);
-    Ptr<CLAHE> ptr=createCLAHE();
-    ptr->setClipLimit(0.01);    
-    ptr->apply(invG,invG);        
-    medianBlur(invG, medianFilter, 105);
-    invG =invG-medianFilter;
-    morphologyEx(invG,topHat,CV_MOP_TOPHAT,element);     
-    invG = invG -topHat;  
+    /* invG.copyTo(tmp2);    
+     Mat contrastE,medianFilter;
+     medianBlur(invG, invG, 3);
+     Ptr<CLAHE> ptr=createCLAHE();
+     ptr->setClipLimit(0.01);    
+     ptr->apply(invG,invG);        
+     medianBlur(invG, medianFilter, 105);
+     invG =invG-medianFilter;
+     morphologyEx(invG,topHat,CV_MOP_TOPHAT,element);     
+     invG = invG -topHat;  
     
-    //double max;
-    //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
-    //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
+     //double max;
+     //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
+     //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
 
- //   imwrite("image/4-vessel/image2.tif", invG);
+  //   imwrite("image/4-vessel/image2.tif", invG);
 
-/*
+ /*
 
-    int nrows = invG.rows - lineOperator;
-    int ncols = invG.cols - lineOperator;
-    uchar *p, *q, *r;
+     int nrows = invG.rows - lineOperator;
+     int ncols = invG.cols - lineOperator;
+     uchar *p, *q, *r;
 
-    vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step); //[180 / step - 1];
-    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step);
-    Mat tmp = Mat(invG.rows, invG.cols, invG.type()), square;
-    //vector<Point> *line, *ort;
-    //double mainStr, weighted, ortStr;
-    for (int i = 0; i < nrows; i++) {
-        //p = invG.ptr<uchar>(i);
-        q = mask.ptr<uchar>(i);
-        r = tmp.ptr<uchar>(i);
-        for (int j = 0; j < ncols; j++) {
-            if (q[j] == 0) continue;
-            square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
-            //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
-            if (getLineResponse(square, lineIt, ortIt)) {
-                r[j] = 255;
-            }
-            //cout<<ortStr<<endl;            
-        }
-    }
-    //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
+     vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step); //[180 / step - 1];
+     vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step);
+     Mat tmp = Mat(invG.rows, invG.cols, invG.type()), square;
+     //vector<Point> *line, *ort;
+     //double mainStr, weighted, ortStr;
+     for (int i = 0; i < nrows; i++) {
+         //p = invG.ptr<uchar>(i);
+         q = mask.ptr<uchar>(i);
+         r = tmp.ptr<uchar>(i);
+         for (int j = 0; j < ncols; j++) {
+             if (q[j] == 0) continue;
+             square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
+             //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
+             if (getLineResponse(square, lineIt, ortIt)) {
+                 r[j] = 255;
+             }
+             //cout<<ortStr<<endl;            
+         }
+     }
+     //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
 
-    //dilate(tmp,tmp,element);
-    //connectedComponents(tmp,tmp);    
+     //dilate(tmp,tmp,element);
+     //connectedComponents(tmp,tmp);    
 
 
-    imwrite("image/4-vessel/image1.tif", tmp);
+     imwrite("image/4-vessel/image1.tif", tmp);
     
     
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", tmp);*/
-    
-    image = imread("image/4-vessel/image1.tif", 1);
+     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+     imshow("Hough Circle Transform Demo", tmp);*/
+    /********************************DARK SEGMENTATION***********************************************************/
+    /*image = imread("image/4-vessel/image3.tif", 1);
     channels.clear();
     split(image, channels);
     invG = channels[1];
     element=getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
     morphologyEx(invG,topHat,CV_MOP_CLOSE,element,Point(-1,-1),3);
-    medianBlur(topHat,topHat,3);
-    
-    /*element=getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-    morphologyEx(topHat,topHat,CV_MOP_TOPHAT,element);*/
-    
     
     Mat detected_edges;
-    int ratio = 2;
+    int ratio = 3;
     int kernel_size = 3;
     int lowThreshold = 35;
     vector<vector<Point> > contours;
@@ -676,7 +671,7 @@ void vesselSegmentation() {
     for(int i=0; i< contours.size();i++){
         area=contourArea(contours.at(i));
         r=boundingRect(contours.at(i));
-        if(r.height/r.width>=0.6 && area<=600 &&area>=0.52*r.height*r.width ) filteredContours.push_back(contours.at(i));
+        if(abs(r.height-r.width)<=0.25*r.width && area<=800 &&area>=0.5*r.height*r.width ) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
         
     }
@@ -688,34 +683,148 @@ void vesselSegmentation() {
     
     
     imwrite("image/4-vessel/image4.tif", dst);
+    
+    Mat darkLRes;
+    readBinaryInBinary("image/3-dark lession/image4.tif", darkLRes);  
+    
+    bitwise_or(darkLRes,dst,dst);
+    
+    imwrite("image/4-vessel/image5.tif", dst);
+    orig.copyTo(dst,dst);
+    imwrite("image/4-vessel/image6.tif", dst);
+    /********************************END**************************************************************/
+    Mat bgr_image = imread("image/2-optic disc/image1.tif", 1);
+    Mat green_image;
+    channels.clear();
+    split(bgr_image, channels);
+    green_image = channels[1];
+    // apply the CLAHE algorithm to the L channel
+    Ptr<CLAHE> clahe = createCLAHE();
+    clahe->setClipLimit(4);
+    clahe->apply(green_image, green_image);
+    medianBlur(green_image, green_image, 3);
+    bitwise_not(green_image, green_image, mask);
+
+    Mat opened_image;
+    erode(green_image, opened_image, element);
+    dilate(opened_image, opened_image, element);
+    green_image = green_image - 0.75 * opened_image;
+
+    double max;
+    minMaxIdx(green_image, NULL, &max, NULL, NULL, mask);
+    threshold(green_image, green_image, 0.2 * max, 255, CV_THRESH_BINARY);
+    erode(green_image, opened_image, element);
+    dilate(opened_image, opened_image, element);
+    medianBlur(green_image, green_image, 3);
+    //imwrite("image/4-vessel/prueba/preimage.tif", green_image);
+
+    Mat detected_edges;
+    int ratio = 3;
+    int kernel_size = 3;
+    int lowThreshold = 35;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    Canny(green_image, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+
+    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
+
+    //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
+    Mat dst = Mat::zeros(green_image.rows, green_image.cols, green_image.type());
+    double area;
+    Rect r; 
+    vector<vector<Point> > filteredContours;    
+    for(int i=0; i< contours.size();i++){
+        area=contourArea(contours.at(i));
+        r=boundingRect(contours.at(i));
+        if(abs(r.height-r.width)<=0.25*r.width && area<=800 &&area>=0.5*r.height*r.width && area>=20 ) filteredContours.push_back(contours.at(i));
+        //if(area>=500) filteredContours.push_back(contours.at(i));
+        
+    }
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(dst, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
+    }
+
+    imwrite("image/4-vessel/prueba/contours.tif",dst);
+/*    // Setup SimpleBlobDetector parameters.
+    SimpleBlobDetector::Params params;
+
+    // Change thresholds
+    params.minThreshold = 10;
+    params.maxThreshold = 255;  
+
+    // Filter by Area.
+    params.filterByArea = true;
+    params.minArea = 1;
+    params.maxArea = 800;
+
+    // Filter by Circularity
+    params.filterByCircularity = true;
+    params.minCircularity = 0.5;
+
+    // Filter by Convexity
+    params.filterByConvexity = false;
+
+    // Filter by Inertia
+    params.filterByInertia = false;
+
+    // Set up detector with params
+    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+
+    // SimpleBlobDetector::create creates a smart pointer. 
+    // So you need to use arrow ( ->) instead of dot ( . )
+    vector<KeyPoint> keypoints;
+    detector->detect(dst, keypoints);
+    cout<<"Numero de puntos: "<<keypoints.size()<<endl;
+    Mat im_with_keypoints;
+    drawKeypoints(dst, keypoints, im_with_keypoints, Scalar(255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);    
+    for (std::vector<cv::KeyPoint>::iterator blobIterator = keypoints.begin(); blobIterator != keypoints.end(); blobIterator++) {
+        std::cout << "size of blob is: " << blobIterator->size << std::endl;
+        std::cout << "point is at: " << blobIterator->pt.x << " " << blobIterator->pt.y << std::endl;
+    }
+    imwrite("image/4-vessel/prueba/microaneurism.tif", im_with_keypoints);
+
+*/
+
+}
+
+void readBinaryInBinary(String path, Mat& binary) {
+    Mat image;
+
+    image = imread(path, 1);
+    vector<Mat> channels;
+    split(image, channels);
+    binary = channels[1];
+
 }
 
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {
     vector<Point> *line, *ort;
-    double max = -100000, mainStr, ortStr, min=999999;
+    double max = -100000, mainStr, ortStr, min = 999999;
     int size = lineIt.size();
     int f;
     for (int it = 0; it < size; it++) {
         line = &lineIt[it];
         ort = &ortIt[it];
-        
-        mainStr = calculateLineStrength(square, *line);        
+
+        mainStr = calculateLineStrength(square, *line);
         //calculate max line operator response
-        f=mainStr;
-        if(mainStr>2.5){
+        f = mainStr;
+        if (mainStr > 2.5) {
             ortStr = calculateLineStrength(square, *ort);
-            f=mainStr+ortStr;
+            f = mainStr + ortStr;
         }
-                
+
         if (f > max) {
-            max = f;            
+            max = f;
         }
-        if(f<min){
-            min=f;
+        if (f < min) {
+            min = f;
         }
     }
-    
-    if (max>0.4*(12-min))
+
+    if (max > 0.4 * (12 - min))
         return max;
     else
         return 0;
@@ -959,17 +1068,17 @@ void brightLessionSegmentation() {
     Mat finalOutput, maskedOrigImg;
 
     finalOutput = i5 + i6;
-    
+
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-    dilate(finalOutput,finalOutput,element);
+    dilate(finalOutput, finalOutput, element);
     imwrite("image/5-bright lesion/image1.tif", finalOutput);
-    
-    
-    bitwise_not(finalOutput,finalOutput,mask);
-    image.copyTo(maskedOrigImg,finalOutput);
+
+
+    bitwise_not(finalOutput, finalOutput, mask);
+    image.copyTo(maskedOrigImg, finalOutput);
     imwrite("image/5-bright lesion/image2.tif", maskedOrigImg);
-    
-    
+
+
     // imwrite("image/5-bright lession/image2.tif",greenChannel);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", l_chann);*/
