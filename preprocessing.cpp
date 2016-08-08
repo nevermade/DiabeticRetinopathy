@@ -14,17 +14,17 @@
 #include "preprocessing.h"
 using namespace std;
 int w = 8;
-int morph_element_size=5;
+int morph_element_size = 5;
 
 //Scalar backgroundThreshold(0.734042, 0.982265, 1.42762);
 Scalar backgroundThreshold(0, 0, 0);
 Mat blankBlock(w, w, CV_8UC3, Scalar(255, 255, 255));
 
-void backgroundSegmentation(const Mat& src, Mat& dest) {
+void backgroundSegmentation(const Mat& src, Mat& bgMask) {
     CV_Assert(src.depth() != sizeof (uchar));
-    dest = Mat::zeros(src.rows, src.cols, src.type());    
+    bgMask = Mat::zeros(src.rows, src.cols, src.type());
     int nRows = src.rows;
-    int nCols = src.cols;  
+    int nCols = src.cols;
     nRows /= w;
     nCols /= w;
     Mat block;
@@ -34,36 +34,63 @@ void backgroundSegmentation(const Mat& src, Mat& dest) {
         //p = src.ptr<uchar>(i*w);
         for (int j = 0; j < nCols; j++) {
             block = Mat(src, Rect(j*w, i*w, w, w));
-            d = Mat(dest, Rect(j*w, i*w, w, w));
+            d = Mat(bgMask, Rect(j*w, i*w, w, w));
             //cout<<"Bloque ("<<j+1<<","<<i+1<<") stddev:"<<calculateStdDev(block)<<endl;          
-            retrieveBackgroundMask(block,d);// mean(block));            
+            retrieveBackgroundMask(block, d); // mean(block));            
             //cout<<"Bloque ("<<j+1<<","<<i+1<<") prom:"<<mean(block)<<endl;
         }
     }
     //fineBackGroundSegmentation(dest);
     Mat backgroundImageResult;
-    medianBlur(dest,dest,5);
-    src.copyTo(backgroundImageResult,dest);    
-    imwrite("image/1-background/image1.tif",backgroundImageResult);
+    medianBlur(bgMask, bgMask, 3);
+    
+    vector<Mat> channels;
+    split(bgMask, channels);
+    bgMask = channels[1];
+
+    
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(bgMask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    vector<vector<Point> > contours_poly(contours.size());
+    vector<Point2f>center(contours.size());
+    vector<float>radius(contours.size());
+    for (int i = 0; i < contours.size(); i++) {
+        approxPolyDP(Mat(contours[i]), contours_poly[i], 3, true);
+        minEnclosingCircle((Mat) contours_poly[i], center[i], radius[i]);
+    }
+     Mat fineMask = Mat::zeros(bgMask.rows, bgMask.cols, CV_8UC1);
+    for( int i = 0; i< contours.size(); i++ )
+     {
+       circle(fineMask, center[i], radius[i]-67, Scalar(255), -1, 8, 0);
+     }
+    
+    
+    bgMask = fineMask;
+    //src.copyTo(backgroundImageResult, bgMask);
+    //imwrite("image/1-background/image1.tif", backgroundImageResult);
+    imwrite("image/1-background/mask1.tif", bgMask);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo
-void fineBackGroundSegmentation(Mat& dest){
-  Mat element = getStructuringElement( MORPH_RECT,Size( morph_element_size, morph_element_size ));    
-  dilate( dest, dest, element );
-  
-  namedWindow("Dilation Demo", CV_WINDOW_AUTOSIZE);
-  imshow( "Dilation Demo", dest);
+
+void fineBackGroundSegmentation(Mat& dest) {
+    Mat element = getStructuringElement(MORPH_RECT, Size(morph_element_size, morph_element_size));
+    dilate(dest, dest, element);
+
+    namedWindow("Dilation Demo", CV_WINDOW_AUTOSIZE);
+    imshow("Dilation Demo", dest);
 }
-void noiseSegmentation(const Mat& src, Mat& dest){
+
+void noiseSegmentation(const Mat& src, Mat& dest) {
     CV_Assert(src.depth() != sizeof (uchar));
-    dest = Mat::zeros(src.rows, src.cols, src.type());    
+    dest = Mat::zeros(src.rows, src.cols, src.type());
     int nRows = src.rows;
-    int nCols = src.cols;    
+    int nCols = src.cols;
     nRows /= w;
     nCols /= w;
     Mat block;
     //Equalization
-    Mat eqH(src.rows, src.cols, src.type()),medianFilter,ycrcb,d,hsi;    
+    Mat eqH(src.rows, src.cols, src.type()), medianFilter, ycrcb, d, hsi;
     cvtColor(src, ycrcb, CV_BGR2YCrCb);
     vector<Mat> channels;
     split(ycrcb, channels);
@@ -71,32 +98,33 @@ void noiseSegmentation(const Mat& src, Mat& dest){
     merge(channels, ycrcb);
     cvtColor(ycrcb, eqH, CV_YCrCb2BGR);
     medianBlur(eqH, medianFilter, 3);
-    bgrToHsi(medianFilter,hsi);
+    bgrToHsi(medianFilter, hsi);
     //imwrite("img/noise_hsi.tif", hsi);    
     //imwrite("img/median_filter.tif", medianFilter);
-    
+
     for (int i = 0; i < nRows; i++) {
         //p = src.ptr<uchar>(i*w);
         for (int j = 0; j < nCols; j++) {
             block = Mat(hsi, Rect(j*w, i*w, w, w));
-            d = Mat(dest, Rect(j*w, i*w, w, w));            
-            retrieveNoiseMask(block,d);            
+            d = Mat(dest, Rect(j*w, i*w, w, w));
+            retrieveNoiseMask(block, d);
             //cout<<"Bloque ("<<j+1<<","<<i+1<<") prom:"<<calculateNoiseFactor(block)<<endl;
         }
     }
     fineNoiseSegmentation(dest);
 }
 
-void fineNoiseSegmentation(Mat& dest){
-    Mat element = getStructuringElement( MORPH_RECT,Size( morph_element_size, morph_element_size ));
-    morphologyEx( dest, dest, MORPH_OPEN, element );
-    erode(dest,dest,element);
+void fineNoiseSegmentation(Mat& dest) {
+    Mat element = getStructuringElement(MORPH_RECT, Size(morph_element_size, morph_element_size));
+    morphologyEx(dest, dest, MORPH_OPEN, element);
+    erode(dest, dest, element);
     /*namedWindow("Fine Segmentation Noise Mask", CV_WINDOW_AUTOSIZE);
     imshow( "Fine Segmentation Noise Mask", dest);*/
 }
-void retrieveNoiseMask(Mat src, Mat dest){
-    if(calculateNoiseFactor(src)<=0.315){
-         blankBlock.copyTo(dest);
+
+void retrieveNoiseMask(Mat src, Mat dest) {
+    if (calculateNoiseFactor(src) <= 0.315) {
+        blankBlock.copyTo(dest);
     }
     //cout<<"Bloque ("<<j+1<<","<<i+1<<") prom:"<<calculateNoiseFactor(dest)<<endl;
 }
@@ -109,7 +137,7 @@ void retrieveBackgroundMask(Mat src, Mat dest) {
             ){
         blankBlock.copyTo(dest);
     }*/
-    
+
     if (calculateDistance(mean(src)) >= 7.3) {//7.3
         blankBlock.copyTo(dest);
     }
@@ -220,30 +248,31 @@ void bgrToHsi(Mat src, Mat& hsi) {
 
 
 //Esta funcion calcula el ruido de la imagen HSI
-double calculateNoiseFactor(Mat& block){
-    double noiseFactorTotal=0,pixelNoise;
+
+double calculateNoiseFactor(Mat& block) {
+    double noiseFactorTotal = 0, pixelNoise;
     int nRows = block.rows;
     int nCols = block.cols;
     Vec3b *ptr;
-    for(int i=0;i<nRows;i++){
+    for (int i = 0; i < nRows; i++) {
         ptr = block.ptr<Vec3b>(i);
-        for(int j=0;j<nCols;j++){
-            if(ptr[j].val[0]==0 || ptr[j].val[2]==0)
-                continue;               
-            pixelNoise=(double)ptr[j].val[0]/ptr[j].val[2];// h/i
-            noiseFactorTotal+=pixelNoise;
+        for (int j = 0; j < nCols; j++) {
+            if (ptr[j].val[0] == 0 || ptr[j].val[2] == 0)
+                continue;
+            pixelNoise = (double) ptr[j].val[0] / ptr[j].val[2]; // h/i
+            noiseFactorTotal += pixelNoise;
         }
     }
-    noiseFactorTotal/=(w*w);
+    noiseFactorTotal /= (w * w);
     return noiseFactorTotal;
 }
 
-void finalSegmentation(const Mat& src,Mat& bgMask, Mat& noiseMask,Mat& finalMask, Mat& result){
-   
-    bitwise_and(bgMask,noiseMask,finalMask);
-    src.copyTo(result,finalMask);
-    imwrite("img/final_result.tif",result);
-    
+void finalSegmentation(const Mat& src, Mat& bgMask, Mat& noiseMask, Mat& finalMask, Mat& result) {
+
+    bitwise_and(bgMask, noiseMask, finalMask);
+    src.copyTo(result, finalMask);
+    imwrite("img/final_result.tif", result);
+
 }
 
 

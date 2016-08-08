@@ -203,11 +203,11 @@ ComplexNum toComplexNum(Mat& a) {
     return ComplexNum(a);
 }
 
-void opticDiscSegmentation() {
+void opticDiscSegmentation(Mat& bgMask, Mat& maImage) {
     Mat image, roi;
 
     image = imread("image/1-background/image1.tif", 1);
-
+    readInGreenChannel("image/1-background/mask1.tif", bgMask);
     vector<Mat> channels;
     split(image, channels);
 
@@ -233,7 +233,7 @@ void opticDiscSegmentation() {
     int size = image.cols / 10;
     size = (size % 2 == 0) ? size + 1 : size;
     GaussianBlur(roi, roi, Size(size, size), 0, 0);
-    imwrite("image/2-optic disc/image2.tif", roi);
+    //imwrite("image/2-optic disc/image2.tif", roi);
     double max;
     minMaxLoc(roi, NULL, &max, NULL, NULL);
     threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
@@ -283,170 +283,82 @@ void opticDiscSegmentation() {
     Mat result;
     image.copyTo(result, opticDMask);
     /// Show your results
+    bitwise_and(bgMask, opticDMask, bgMask);
     imwrite("image/2-optic disc/image1.tif", result);
+    imwrite("image/3-final mask/mask1.tif", bgMask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
 
 }
 
-void darkLessionSegmentation() {
-    Mat image, mask;
-    image = imread("image/2-optic disc/image1.tif", 1);
-    vector<Mat> channels;
+void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
 
-    split(image, channels);
 
-    //dilate(orig,orig,e);
-    //medianBlur(orig,orig,3);
-    Mat greenChannel = channels[1];
-    cvtColor(image, greenChannel, CV_BGR2GRAY);
-    Mat topHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), bottomHat(greenChannel.rows, greenChannel.cols, greenChannel.type()), contrastE;
-    //Mask retrieval
-    greenChannel.copyTo(mask);
-    //split(brightL, channels2);
-    //brightL = channels2[1];
-    /*Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(invG,invG);*/
+
+    Mat invG;
+    readInGreenChannel("image/2-optic disc/image1.tif", invG);
+    readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 7);
-    dilate(mask, mask, element);
-    erode(mask, mask, element);
-    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-    //imwrite("image/3-dark lession/image4.tif", mask);
 
-    //greenChannel.copyTo(topHat);
-    //greenChannel.copyTo(bottomHat);
-    //imwrite("image/3-dark lession/image4.tif", greenChannel); 
-    //greenChannel = greenChannel * 2.5;
-    //medianBlur(contrastE, contrastE, 3);
-    /*Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(greenChannel,greenChannel);*/
-    /*equalizeHist(greenChannel, greenChannel);
-    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element);*/
 
-    //Pre-processing
+    /*green_image.copyTo(bgMask);
+    medianBlur(bgMask, bgMask, 7);
+    erode(bgMask, bgMask, element);*/
+    // apply the CLAHE algorithm to the L channel
 
-    //element = getStructuringElement(MORPH_ELLIPSE, Size (5, 5));   
-    //equalizeHist(greenChannel,greenChannel);
-    morphologyEx(greenChannel, topHat, CV_MOP_TOPHAT, element);
-    //morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
-    //contrastE = greenChannel + topHat - bottomHat;    
-    contrastE = topHat;
-    Mat medianFilter;
-    medianBlur(contrastE, medianFilter, 35);
-    greenChannel = medianFilter - contrastE;
-    imwrite("image/3-dark lession/image3.tif", greenChannel);
 
-    Mat orig;
-    greenChannel.copyTo(orig);
-    double min;
-    minMaxLoc(orig, &min, NULL, NULL, NULL);
-    //Feature extraction
-    Mat dst, detected_edges;
-    greenChannel.copyTo(detected_edges);
-    dst.create(greenChannel.size(), greenChannel.type());
-    int ratio = 2;
+    bitwise_not(invG, invG, bgMask);
+    Mat medianFilter, topHat;
+    medianBlur(invG, invG, 3);
+    Ptr<CLAHE> ptr = createCLAHE();
+    ptr->setClipLimit(4);
+    ptr->apply(invG, invG);
+    medianBlur(invG, medianFilter, 105);
+    invG = invG - medianFilter;
+    morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
+    invG = invG - topHat;
+    GaussianBlur(invG, invG, Size(9, 9), 0, 0);
+    //imwrite("image/5-vessel/image3.tif", invG);
+    //imwrite("image/5-vessel/image4.tif", topHat);
+    double max, min;
+    minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
+    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
+    imwrite("image/4-dark lession/invg.tif", invG);
+
+
+
+
+    Mat detected_edges;
+    int ratio = 3;
     int kernel_size = 3;
     int lowThreshold = 35;
-    Canny(detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    dst = Scalar::all(0);
-    greenChannel.copyTo(dst, detected_edges);
-    greenChannel = greenChannel + detected_edges * 2;
-
-    element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 2);
-
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    Canny(invG, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
     findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
-    RNG rng(12345);
+
     //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
 
-    //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
+
+    maImage = Mat::zeros(invG.rows, invG.cols, invG.type());
     double area;
-    vector<vector<Point> > filteredContours;
-    for (int i = 0; i < contours.size(); i++) {
-        area = contourArea(contours.at(i));
-        if (area >= 500) filteredContours.push_back(contours.at(i));
-    }
-
-    for (int i = 0; i < filteredContours.size(); i++) {
-        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
-    }
-    morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
-
-
-    //second phase
-    contours.clear();
-    hierarchy.clear();
-    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-    filteredContours.clear();
-    for (int i = 0; i < contours.size(); i++) {
-        area = contourArea(contours.at(i));
-        if (area <= 10) filteredContours.push_back(contours.at(i));
-    }
-
-    for (int i = 0; i < filteredContours.size(); i++) {
-        drawContours(greenChannel, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
-    }
-    //morphologyEx(greenChannel, greenChannel, CV_MOP_CLOSE, element, Point(-1, -1), 1);
-    //third phase
-    contours.clear();
-    hierarchy.clear();
-    Canny(greenChannel, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-    filteredContours.clear();
     Rect r;
-    min = min >= 60 ? min : 60;
+    vector<vector<Point> > filteredContours;
+    double k;
     for (int i = 0; i < contours.size(); i++) {
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
-        Scalar m = mean(orig(r));
+        k = r.height / r.width;
+        if ((k >= 0.7 && k <= 1.3) && area <= 800 && area >= 0.5 * r.height * r.width && area >= 20) filteredContours.push_back(contours.at(i));
+        //if(area>=500) filteredContours.push_back(contours.at(i));
 
-        if (abs(r.height - r.width) <= 0.2 * r.width && area >= 0.6 * r.width * r.height && area <= 600 && m.val[0] <= min) filteredContours.push_back(contours.at(i));
     }
-    Mat drawing = Mat::zeros(greenChannel.rows, greenChannel.cols, greenChannel.type());
     for (int i = 0; i < filteredContours.size(); i++) {
-        drawContours(drawing, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
+        drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
 
-    imwrite("image/3-dark lession/image4.tif", drawing);
-    /****TOP HAT**/
-    //opening    
-    //element = getStructuringElement(MORPH_RECT, Size(5,5));
-    /*Mat opened;
-    erode(greenChannel, opened, element);
-    dilate(opened, opened, element);
-    //apply top hat
-    topHat = topHat - opened;
-    /****BOTTOM HAT**/
-    //opening
-    //    Mat element = getStructuringElement( MORPH_RECT,Size( 5, 5 )); 
-    /*Mat closed;
-    dilate(greenChannel, closed, element);
-    erode(closed, closed, element);
-    //apply bottom hat
-    bottomHat = closed - bottomHat;*/
-    /*morphologyEx(greenChannel,topHat,CV_MOP_TOPHAT,element);    
-    morphologyEx(greenChannel,bottomHat,CV_MOP_BLACKHAT,element);   
-    contrastE = (greenChannel + topHat) - bottomHat;    
-    
-    Mat medianFilter;    
-    medianBlur(contrastE, medianFilter, 35);
-    contrastE = medianFilter - contrastE;    
-       
-    /*double h = calculateMedian(contrastE,mask);
-    cout<<h<<endl;
-    contrastE = contrastE - h;  */
-
-
-
-    /*threshold(contrastE, contrastE, 0, 255, CV_THRESH_OTSU);
-    threshold(contrastE, contrastE, 100, 255, CV_THRESH_BINARY);*/
-    //imwrite("image/3-dark lession/image1.tif", contrastE);    
+    imwrite("image/4-dark lession/maimage1.tif", maImage);
 }
 
 double calculateHThreshold(Mat &image) {
@@ -545,248 +457,82 @@ int calculateMedian(Mat& image, Mat& mask) {
 
 }
 
-void vesselSegmentation() {
+void vesselSegmentation(Mat& bgMask, Mat& maImage) {
     int lineOperator = 15;
     int step = 15;
-    Mat image, invG, brightL, orig;
-    image = imread("image/2-optic disc/image1.tif", 1);
-    orig = image;
-    //brightL = imread("image/5-bright lesion/image1.tif", 1);
+    Mat invG;
 
-    vector<Mat> channels;
-    split(image, channels);
-    Mat mask;
-    Mat tmp2;
-    invG = channels[1];
-    invG.copyTo(mask);
+    readInGreenChannel("image/2-optic disc/image1.tif", invG);
+    readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
+    readInGreenChannel("image/4-dark lession/maimage1.tif", maImage);
+
+
+    //brightL = imread("image/5-bright lesion/image1.tif", 1);
     //split(brightL, channels2);
     //brightL = channels2[1];
     /*Ptr<CLAHE> ptr=createCLAHE();
     ptr->apply(invG,invG);*/
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-    medianBlur(mask, mask, 7);
-    erode(mask, mask, element);
 
 
     //bitwise_not(brightL, mask, mask);    
-    bitwise_not(invG, invG, mask);
+    bitwise_not(invG, invG, bgMask);
 
     //element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-    //Pre- processing
+    //Pre- processing   
 
-    Mat median, topHat, opened;
-    /*medianBlur(invG, invG, 3);
-    invG.copyTo(tmp2);
-    medianBlur(invG, median, 75);
-    invG = invG - median;
-    erode(tmp2, opened, element);
-    dilate(opened, opened, element);
-    //apply top hat    
-    topHat = tmp2 - opened;   
-    //threshold(topHat,topHat,0.01*255,255,CV_THRESH_BINARY);
+    Mat medianFilter, topHat;
+    medianBlur(invG, invG, 3);
+    Ptr<CLAHE> ptr = createCLAHE();
+    ptr->setClipLimit(4);
+    ptr->apply(invG, invG);
+    medianBlur(invG, medianFilter, 105);
+    invG = invG - medianFilter;
+    morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
     invG = invG - topHat;
-    //threshold(invG,invG,0.02*255,255,CV_THRESH_TOZERO);
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", invG);*/
-
-    //equalizeHist(invG,invG);
-    /* invG.copyTo(tmp2);    
-     Mat contrastE,medianFilter;
-     medianBlur(invG, invG, 3);
-     Ptr<CLAHE> ptr=createCLAHE();
-     ptr->setClipLimit(0.01);    
-     ptr->apply(invG,invG);        
-     medianBlur(invG, medianFilter, 105);
-     invG =invG-medianFilter;
-     morphologyEx(invG,topHat,CV_MOP_TOPHAT,element);     
-     invG = invG -topHat;  
-    
-     //double max;
-     //minMaxLoc(invG,NULL,&max,NULL,NULL,mask);
-     //threshold(invG,invG,0.1*max,255,CV_THRESH_TOZERO);    
-
-  //   imwrite("image/4-vessel/image2.tif", invG);
-
- /*
-
-     int nrows = invG.rows - lineOperator;
-     int ncols = invG.cols - lineOperator;
-     uchar *p, *q, *r;
-
-     vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step); //[180 / step - 1];
-     vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step);
-     Mat tmp = Mat(invG.rows, invG.cols, invG.type()), square;
-     //vector<Point> *line, *ort;
-     //double mainStr, weighted, ortStr;
-     for (int i = 0; i < nrows; i++) {
-         //p = invG.ptr<uchar>(i);
-         q = mask.ptr<uchar>(i);
-         r = tmp.ptr<uchar>(i);
-         for (int j = 0; j < ncols; j++) {
-             if (q[j] == 0) continue;
-             square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
-             //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
-             if (getLineResponse(square, lineIt, ortIt)) {
-                 r[j] = 255;
-             }
-             //cout<<ortStr<<endl;            
-         }
-     }
-     //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
-
-     //dilate(tmp,tmp,element);
-     //connectedComponents(tmp,tmp);    
-
-
-     imwrite("image/4-vessel/image1.tif", tmp);
+    GaussianBlur(invG, invG, Size(9, 9), 0, 0);
+    //imwrite("image/5-vessel/image3.tif", invG);
+    //imwrite("image/5-vessel/image4.tif", topHat);
+    double max, min;
+    minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
+    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
     
     
-     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-     imshow("Hough Circle Transform Demo", tmp);*/
-    /********************************DARK SEGMENTATION***********************************************************/
-    /*image = imread("image/4-vessel/image3.tif", 1);
-    channels.clear();
-    split(image, channels);
-    invG = channels[1];
-    element=getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
-    morphologyEx(invG,topHat,CV_MOP_CLOSE,element,Point(-1,-1),3);
+    invG= invG - maImage;
+    medianBlur(invG, invG, 3);
+    imwrite("image/5-vessel/image3.tif", invG);
     
-    Mat detected_edges;
-    int ratio = 3;
-    int kernel_size = 3;
-    int lowThreshold = 35;
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    Canny(topHat, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+    int nrows = invG.rows - lineOperator;
+    int ncols = invG.cols - lineOperator;
+    uchar *p, *q, *r;
 
-    RNG rng(12345);
-    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
-    
-    //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
-    double area;
-    Rect r; 
-    vector<vector<Point> > filteredContours;
-    Mat dst=Mat::zeros(topHat.rows,topHat.cols,topHat.type());
-    for(int i=0; i< contours.size();i++){
-        area=contourArea(contours.at(i));
-        r=boundingRect(contours.at(i));
-        if(abs(r.height-r.width)<=0.25*r.width && area<=800 &&area>=0.5*r.height*r.width ) filteredContours.push_back(contours.at(i));
-        //if(area>=500) filteredContours.push_back(contours.at(i));
-        
+    vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step); //[180 / step - 1];
+    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step);
+    Mat tmp = Mat(invG.rows, invG.cols, invG.type()), square;
+    //vector<Point> *line, *ort;
+    //double mainStr, weighted, ortStr;
+    for (int i = 0; i < nrows; i++) {
+        //p = invG.ptr<uchar>(i);
+        q = bgMask.ptr<uchar>(i);
+        r = tmp.ptr<uchar>(i);
+        for (int j = 0; j < ncols; j++) {
+            if (q[j] == 0) continue;
+            square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
+            //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
+            if (getLineResponse(square, lineIt, ortIt)) {
+                r[j] = 255;
+            }
+            //cout<<ortStr<<endl;            
+        }
     }
+    //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
+
+    //dilate(tmp,tmp,element);
+    //connectedComponents(tmp,tmp);    
+
+
+    imwrite("image/5-vessel/image1.tif", tmp);
     
-    for (int i = 0; i < filteredContours.size(); i++) {        
-        drawContours(dst, filteredContours, i, Scalar(255), CV_FILLED, 8,hierarchy,0, Point());
-    }
-    
-    
-    
-    imwrite("image/4-vessel/image4.tif", dst);
-    
-    Mat darkLRes;
-    readBinaryInBinary("image/3-dark lession/image4.tif", darkLRes);  
-    
-    bitwise_or(darkLRes,dst,dst);
-    
-    imwrite("image/4-vessel/image5.tif", dst);
-    orig.copyTo(dst,dst);
-    imwrite("image/4-vessel/image6.tif", dst);
-    /********************************END**************************************************************/
-    Mat bgr_image = imread("image/2-optic disc/image1.tif", 1);
-    Mat green_image;
-    channels.clear();
-    split(bgr_image, channels);
-    green_image = channels[1];
-    // apply the CLAHE algorithm to the L channel
-    Ptr<CLAHE> clahe = createCLAHE();
-    clahe->setClipLimit(4);
-    clahe->apply(green_image, green_image);
-    medianBlur(green_image, green_image, 3);
-    bitwise_not(green_image, green_image, mask);
-
-    Mat opened_image;
-    erode(green_image, opened_image, element);
-    dilate(opened_image, opened_image, element);
-    green_image = green_image - 0.75 * opened_image;
-
-    double max;
-    minMaxIdx(green_image, NULL, &max, NULL, NULL, mask);
-    threshold(green_image, green_image, 0.2 * max, 255, CV_THRESH_BINARY);
-    erode(green_image, opened_image, element);
-    dilate(opened_image, opened_image, element);
-    medianBlur(green_image, green_image, 3);
-    //imwrite("image/4-vessel/prueba/preimage.tif", green_image);
-
-    Mat detected_edges;
-    int ratio = 3;
-    int kernel_size = 3;
-    int lowThreshold = 35;
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    Canny(green_image, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-
-
-    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
-
-    //https://github.com/SamViesselman/SeniorDesignComputerVision/blob/master/Image%20Processing.py
-    Mat dst = Mat::zeros(green_image.rows, green_image.cols, green_image.type());
-    double area;
-    Rect r; 
-    vector<vector<Point> > filteredContours;    
-    for(int i=0; i< contours.size();i++){
-        area=contourArea(contours.at(i));
-        r=boundingRect(contours.at(i));
-        if(abs(r.height-r.width)<=0.25*r.width && area<=800 &&area>=0.5*r.height*r.width && area>=20 ) filteredContours.push_back(contours.at(i));
-        //if(area>=500) filteredContours.push_back(contours.at(i));
-        
-    }
-    for (int i = 0; i < filteredContours.size(); i++) {
-        drawContours(dst, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
-    }
-
-    imwrite("image/4-vessel/prueba/contours.tif",dst);
-/*    // Setup SimpleBlobDetector parameters.
-    SimpleBlobDetector::Params params;
-
-    // Change thresholds
-    params.minThreshold = 10;
-    params.maxThreshold = 255;  
-
-    // Filter by Area.
-    params.filterByArea = true;
-    params.minArea = 1;
-    params.maxArea = 800;
-
-    // Filter by Circularity
-    params.filterByCircularity = true;
-    params.minCircularity = 0.5;
-
-    // Filter by Convexity
-    params.filterByConvexity = false;
-
-    // Filter by Inertia
-    params.filterByInertia = false;
-
-    // Set up detector with params
-    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
-
-    // SimpleBlobDetector::create creates a smart pointer. 
-    // So you need to use arrow ( ->) instead of dot ( . )
-    vector<KeyPoint> keypoints;
-    detector->detect(dst, keypoints);
-    cout<<"Numero de puntos: "<<keypoints.size()<<endl;
-    Mat im_with_keypoints;
-    drawKeypoints(dst, keypoints, im_with_keypoints, Scalar(255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);    
-    for (std::vector<cv::KeyPoint>::iterator blobIterator = keypoints.begin(); blobIterator != keypoints.end(); blobIterator++) {
-        std::cout << "size of blob is: " << blobIterator->size << std::endl;
-        std::cout << "point is at: " << blobIterator->pt.x << " " << blobIterator->pt.y << std::endl;
-    }
-    imwrite("image/4-vessel/prueba/microaneurism.tif", im_with_keypoints);
-
-*/
-
 }
 
 void readBinaryInBinary(String path, Mat& binary) {
@@ -797,6 +543,14 @@ void readBinaryInBinary(String path, Mat& binary) {
     split(image, channels);
     binary = channels[1];
 
+}
+
+void readInGreenChannel(const String& path, Mat& image) {
+    Mat im;
+    im = imread(path, 1);
+    vector<Mat> channels;
+    split(im, channels);
+    image = channels[1];
 }
 
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {

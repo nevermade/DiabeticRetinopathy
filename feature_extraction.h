@@ -30,13 +30,13 @@ void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet);
 void matrixComplexExp(Mat& matrix);
 ComplexNum toComplexNum(Mat& a);
 Mat getRotationMatrix(double theta);
-void opticDiscSegmentation();
-void darkLessionSegmentation();
+void opticDiscSegmentation(Mat& bgMask, Mat& maImage);
+void darkLessionSegmentation(Mat& bgMask, Mat& maImage);
 void brightLessionSegmentation();
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
 int calculateMedian(Mat& image, Mat& mask);
-void vesselSegmentation();
+void vesselSegmentation(Mat& bgMask,Mat& maImage);
 void getLinePoints(int l,Point &start, Point &end, double theta);
 void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta);
 double calculateLineStrength(Mat &img, vector<Point> &it);
@@ -51,5 +51,7 @@ void iluminationEqualization(Mat& input, Mat& output, Mat& mask);
 /**util**/
 
 void readBinaryInBinary(String path, Mat& binary);
+void readInGreenChannel(const String& path, Mat& image);
+
 #endif /* FEATURE_EXTRACTION_H */
 

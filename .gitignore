@@ -6,6 +6,7 @@ nbproject/private/
 build/
 nbbuild/
 dist/
+image/
 nbdist/
 nbactions.xml
 .nb-gradle/
