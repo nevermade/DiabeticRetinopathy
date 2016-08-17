@@ -46,7 +46,7 @@ vector<vector<Point> > calculateOrtLineIterators(int l, int step);
 vector<Point> getBSHLine(Point &start, Point &end);
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt);
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask);
-
+void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, int lineStep);
 
 /**util**/
 

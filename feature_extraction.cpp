@@ -457,10 +457,81 @@ int calculateMedian(Mat& image, Mat& mask) {
 
 }
 
+void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, int lineStep) {
+
+    int nrows = input.rows - lineLength;
+    int ncols = input.cols - lineLength;
+    int offset = lineLength / 2;
+    uchar *q, *r;
+
+    vector<vector<Point> > lineIt = calculateLineIterators(lineLength, lineStep); //[180 / lineStep - 1];
+    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineLength, lineStep);
+    output = Mat::zeros(input.rows, input.cols, input.type()); Mat square;
+    //vector<Point> *line, *ort;
+    //double mainStr, weighted, ortStr;
+    for (int i = 0; i < nrows; i++) {
+        //p = input.ptr<uchar>(i);
+        q = mask.ptr<uchar>(i + offset);
+        r = output.ptr<uchar>(i + offset);
+        for (int j = 0; j < ncols; j++) {
+            if (q[j + offset] == 0) continue;
+            square = Mat(input, Rect(j, i, lineLength, lineLength));
+            //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
+            if (getLineResponse(square, lineIt, ortIt)) {
+                r[j + offset] = 255;
+            }
+            //cout<<ortStr<<endl;       
+
+        }
+
+    }
+    
+    /*    
+    Mat detected_edges;
+    int ratio = 3;
+    int kernel_size = 3;
+    int lowThreshold = 35;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    Canny(tmp, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+
+    //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
+
+
+    Mat maImage = Mat::zeros(tmp.rows, tmp.cols, tmp.type());
+    double area;
+    Rect re;
+    vector<vector<Point> > filteredContours;
+    double k;
+    for (int i = 0; i < contours.size(); i++) {
+        area = contourArea(contours.at(i));
+        re = boundingRect(contours.at(i));
+        k = re.height / re.width;
+        if ((k >= 0.7 && k <= 1.3) && area <= 800 && area >= 0.2*re.height*re.width ) filteredContours.push_back(contours.at(i));
+        //if(area>=500) filteredContours.push_back(contours.at(i));
+
+    }
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
+    }
+    
+    output=tmp-maImage; */
+    //Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
+    //morphologyEx(tmp, output, CV_MOP_OPEN, element);
+
+
+
+    //imwrite("image/5-vessel/image2.tif", maImage);
+    //imwrite("image/5-vessel/image1.tif", tmp);
+
+}
+
 void vesselSegmentation(Mat& bgMask, Mat& maImage) {
-    int lineOperator = 15;
-    int step = 15;
+
     Mat invG;
+    int step = 15;
 
     readInGreenChannel("image/2-optic disc/image1.tif", invG);
     readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
@@ -490,49 +561,30 @@ void vesselSegmentation(Mat& bgMask, Mat& maImage) {
     invG = invG - medianFilter;
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
     invG = invG - topHat;
-    GaussianBlur(invG, invG, Size(9, 9), 0, 0);
+    GaussianBlur(invG, invG, Size(9, 9), 3.25, 3.25);
     //imwrite("image/5-vessel/image3.tif", invG);
     //imwrite("image/5-vessel/image4.tif", topHat);
-    double max, min;
+    /*double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
-    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
-    
-    
-    invG= invG - maImage;
-    medianBlur(invG, invG, 3);
+    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);*/
+
+
+    //invG = invG - maImage;
     imwrite("image/5-vessel/image3.tif", invG);
-    
-    int nrows = invG.rows - lineOperator;
-    int ncols = invG.cols - lineOperator;
-    uchar *p, *q, *r;
 
-    vector<vector<Point> > lineIt = calculateLineIterators(lineOperator, step); //[180 / step - 1];
-    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineOperator, step);
-    Mat tmp = Mat(invG.rows, invG.cols, invG.type()), square;
-    //vector<Point> *line, *ort;
-    //double mainStr, weighted, ortStr;
-    for (int i = 0; i < nrows; i++) {
-        //p = invG.ptr<uchar>(i);
-        q = bgMask.ptr<uchar>(i);
-        r = tmp.ptr<uchar>(i);
-        for (int j = 0; j < ncols; j++) {
-            if (q[j] == 0) continue;
-            square = Mat(invG, Rect(j, i, lineOperator, lineOperator));
-            //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
-            if (getLineResponse(square, lineIt, ortIt)) {
-                r[j] = 255;
-            }
-            //cout<<ortStr<<endl;            
-        }
-    }
-    //Mat e = getStructuringElement(MORPH_RECT, Size(3, 3));
+    Mat imR15, imR30, result;
 
-    //dilate(tmp,tmp,element);
-    //connectedComponents(tmp,tmp);    
+    getLineImageResponse(invG, imR15, bgMask, 15, step);
+    getLineImageResponse(invG, imR30, bgMask, 30, step);
+    /*imwrite("image/5-vessel/im15.tif", imR15);
+    imwrite("image/5-vessel/im30.tif", imR30);*/
+    result = imR15 - imR30;
+    morphologyEx(result, result, CV_MOP_OPEN, element);
+    imwrite("image/5-vessel/final.tif", result);
 
 
-    imwrite("image/5-vessel/image1.tif", tmp);
-    
+
+
 }
 
 void readBinaryInBinary(String path, Mat& binary) {
@@ -564,11 +616,12 @@ double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vecto
 
         mainStr = calculateLineStrength(square, *line);
         //calculate max line operator response
-        f = mainStr;
-        if (mainStr > 2.5) {
+
+        if (mainStr > 8) {
             ortStr = calculateLineStrength(square, *ort);
-            f = mainStr + ortStr;
-        }
+            f = 0.5 * mainStr + 0.5 * ortStr;
+        } else
+            f = 0;
 
         if (f > max) {
             max = f;
@@ -578,7 +631,7 @@ double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vecto
         }
     }
 
-    if (max > 0.4 * (12 - min))
+    if (max)
         return max;
     else
         return 0;
