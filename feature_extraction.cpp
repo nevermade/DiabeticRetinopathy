@@ -317,12 +317,13 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
     invG = invG - medianFilter;
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
     invG = invG - topHat;
-    GaussianBlur(invG, invG, Size(9, 9), 0, 0);
+    blur(invG, invG, Size(3, 3));
+    //GaussianBlur(invG, invG, Size(9, 9), 0, 0);
     //imwrite("image/5-vessel/image3.tif", invG);
     //imwrite("image/5-vessel/image4.tif", topHat);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
-    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
+    //threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
     imwrite("image/4-dark lession/invg.tif", invG);
 
 
@@ -331,7 +332,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
     Mat detected_edges;
     int ratio = 3;
     int kernel_size = 3;
-    int lowThreshold = 35;
+    int lowThreshold = 25;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     Canny(invG, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
@@ -350,7 +351,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
         k = r.height / r.width;
-        if ((k >= 0.7 && k <= 1.3) && area <= 800 && area >= 0.5 * r.height * r.width && area >= 20) filteredContours.push_back(contours.at(i));
+        if ((k >= 0.8 && k <= 1.2) && area <= 800 && area >= 0.5 * r.height * r.width) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
@@ -464,17 +465,22 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
     int offset = lineLength / 2;
     uchar *q, *r;
 
+
     vector<vector<Point> > lineIt = calculateLineIterators(lineLength, lineStep); //[180 / lineStep - 1];
-    vector<vector<Point> > ortIt = calculateOrtLineIterators(lineLength, lineStep);
-    output = Mat::zeros(input.rows, input.cols, input.type()); Mat square;
+    Point ortIt[12][3];
+    calculateOrtLineIterators(ortIt, lineLength, lineStep);
+    //vector<vector<Point> > ortIt = calculateOrtLineIterators(ortIt, lineLength, lineStep);
+    output = Mat::zeros(input.rows, input.cols, input.type());
+    Mat square;
+
     //vector<Point> *line, *ort;
     //double mainStr, weighted, ortStr;
     for (int i = 0; i < nrows; i++) {
         //p = input.ptr<uchar>(i);
-        q = mask.ptr<uchar>(i + offset);
+        q = input.ptr<uchar>(i + offset);
         r = output.ptr<uchar>(i + offset);
         for (int j = 0; j < ncols; j++) {
-            if (q[j + offset] == 0) continue;
+            if (q[j + offset] <= 4) continue;
             square = Mat(input, Rect(j, i, lineLength, lineLength));
             //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
             if (getLineResponse(square, lineIt, ortIt)) {
@@ -485,7 +491,7 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
         }
 
     }
-    
+
     /*    
     Mat detected_edges;
     int ratio = 3;
@@ -531,7 +537,7 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
 void vesselSegmentation(Mat& bgMask, Mat& maImage) {
 
     Mat invG;
-    int step = 15;
+    int step = 18;
 
     readInGreenChannel("image/2-optic disc/image1.tif", invG);
     readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
@@ -570,14 +576,14 @@ void vesselSegmentation(Mat& bgMask, Mat& maImage) {
 
 
     //invG = invG - maImage;
-    imwrite("image/5-vessel/image3.tif", invG);
+    //imwrite("image/5-vessel/image3.tif", invG);
 
     Mat imR15, imR30, result;
 
     getLineImageResponse(invG, imR15, bgMask, 15, step);
-    getLineImageResponse(invG, imR30, bgMask, 30, step);
-    /*imwrite("image/5-vessel/im15.tif", imR15);
-    imwrite("image/5-vessel/im30.tif", imR30);*/
+    //imwrite("image/5-vessel/im15.tif", imR15);
+    getLineImageResponse(invG, imR30, bgMask, 30, step);    
+    //imwrite("image/5-vessel/im30.tif", imR30);
     result = imR15 - imR30;
     morphologyEx(result, result, CV_MOP_OPEN, element);
     imwrite("image/5-vessel/final.tif", result);
@@ -605,20 +611,20 @@ void readInGreenChannel(const String& path, Mat& image) {
     image = channels[1];
 }
 
-double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, vector<vector<Point> > &ortIt) {
-    vector<Point> *line, *ort;
+double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, Point ortIt[][3]) {
+    //vector<Point> *line, *ort;
     double max = -100000, mainStr, ortStr, min = 999999;
     int size = lineIt.size();
     int f;
     for (int it = 0; it < size; it++) {
-        line = &lineIt[it];
-        ort = &ortIt[it];
+        //line = &lineIt[it];
+        //ort = &ortIt[it];
 
-        mainStr = calculateLineStrength(square, *line);
+        mainStr = calculateLineStrength(square, lineIt[it]);
         //calculate max line operator response
 
         if (mainStr > 8) {
-            ortStr = calculateLineStrength(square, *ort);
+            ortStr = calculateLineStrength(square, ortIt[it]);
             f = 0.5 * mainStr + 0.5 * ortStr;
         } else
             f = 0;
@@ -687,17 +693,17 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
     int ortP = 3;
     int pix = ortP / 2;
     Point center(l / 2, l / 2);
-    if (theta == 0 || theta == 180) {
+    if (theta == 0) {
         start.x = center.x;
         start.y = center.y - pix;
         end.x = center.x;
         end.y = center.y + pix;
-    } else if (theta > 0 && theta < 90) {
+    } else if (theta == 1) {
         start.x = center.x + pix;
         start.y = center.y - pix;
         end.x = center.x - pix;
         end.y = center.y + pix;
-    } else if (theta > 90 && theta < 180) {
+    } else if (theta == 2) {
         start.x = center.x + pix;
         start.y = center.y + pix;
         end.x = center.x - pix;
@@ -708,12 +714,14 @@ void getOrtogonalLinePoints(int l, Point &start, Point &end, double theta) {
 }
 
 double calculateLineStrength(Mat &img, vector<Point> &it) {
-    Scalar m = mean(img);
+    Scalar m = sum(img);
     //double mean = m.val[0]/(img.rows*img.cols-it.count);
+
     double lineMean = 0;
     Point a(0, 0);
     uchar *p;
     int size = it.size();
+
     for (int i = 0; i < size; i++) {
         a = it[i];
         p = img.ptr<uchar>(a.y);
@@ -721,11 +729,35 @@ double calculateLineStrength(Mat &img, vector<Point> &it) {
         //lineMean+=img.at<uchar>(a);         
         //it++;
     }
+    double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
     //double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
     lineMean = lineMean / size;
 
-    return lineMean - m.val[0];
+    return lineMean - mean;
 }
+double calculateLineStrength(Mat &img, Point it[3]) {
+    Scalar m = sum(img);
+    //double mean = m.val[0]/(img.rows*img.cols-it.count);
+
+    double lineMean = 0;
+    Point a(0, 0);
+    uchar *p;
+    int size = 3;
+
+    for (int i = 0; i < size; i++) {
+        a = it[i];
+        p = img.ptr<uchar>(a.y);
+        lineMean += p[a.x];
+        //lineMean+=img.at<uchar>(a);         
+        //it++;
+    }
+    double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
+    //double mean = (m.val[0] - lineMean) / (img.rows * img.cols - size);
+    lineMean = lineMean / size;
+
+    return lineMean - mean;
+}
+
 
 vector<vector<Point> > calculateLineIterators(int l, int step) {
     vector<vector<Point> > iterators;
@@ -738,15 +770,19 @@ vector<vector<Point> > calculateLineIterators(int l, int step) {
     return iterators;
 }
 
-vector<vector<Point> > calculateOrtLineIterators(int l, int step) {
-    vector<vector<Point> > iterators;
-    Point startO(0, 0), endO(0, 0);
-    for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
+void calculateOrtLineIterators(Point it[12][3], int l, int step) {
+    //vector<vector<Point> > iterators;
+    Point startO(0, 0), endO(0, 0), mid(l/2,l/2);
+    
+    for (int t = 0; t < 12; t++) {
         getOrtogonalLinePoints(l, startO, endO, t);
         //LineIterator ortogonalLine(m, startO, endO, 8, true);        
-        iterators.push_back(getBSHLine(startO, endO));
+        //iterators.push_back(getBSHLine(startO, endO));
+        it[t][0]=startO;
+        it[t][1]=mid;
+        it[t][2]=endO;
     }
-    return iterators;
+    //return iterators;
 }
 
 vector<Point> getBSHLine(Point &start, Point &end) {
