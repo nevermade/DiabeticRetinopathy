@@ -475,15 +475,22 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
 
     //vector<Point> *line, *ort;
     //double mainStr, weighted, ortStr;
+    int threshold;
+    if(lineLength==15)
+        threshold=6;
+    else
+        threshold=12;
+    
+    
     for (int i = 0; i < nrows; i++) {
         //p = input.ptr<uchar>(i);
         q = input.ptr<uchar>(i + offset);
         r = output.ptr<uchar>(i + offset);
         for (int j = 0; j < ncols; j++) {
-            if (q[j + offset] <= 4) continue;
+            if (q[j + offset] <= 5) continue;
             square = Mat(input, Rect(j, i, lineLength, lineLength));
             //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
-            if (getLineResponse(square, lineIt, ortIt)) {
+            if (getLineResponse(square, lineIt, ortIt)>threshold) {
                 r[j + offset] = 255;
             }
             //cout<<ortStr<<endl;       
@@ -537,7 +544,7 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
 void vesselSegmentation(Mat& bgMask, Mat& maImage) {
 
     Mat invG;
-    int step = 18;
+    int step = 15;
 
     readInGreenChannel("image/2-optic disc/image1.tif", invG);
     readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
@@ -580,13 +587,13 @@ void vesselSegmentation(Mat& bgMask, Mat& maImage) {
 
     Mat imR15, imR30, result;
 
-    getLineImageResponse(invG, imR15, bgMask, 15, step);
+    //getLineImageResponse(invG, imR15, bgMask, 15, step);
     //imwrite("image/5-vessel/im15.tif", imR15);
-    getLineImageResponse(invG, imR30, bgMask, 30, step);    
-    //imwrite("image/5-vessel/im30.tif", imR30);
-    result = imR15 - imR30;
-    morphologyEx(result, result, CV_MOP_OPEN, element);
-    imwrite("image/5-vessel/final.tif", result);
+    getLineImageResponse(invG, imR30, bgMask, 30, step);
+    imwrite("image/5-vessel/im30.tif", imR30);
+    //result = imR15 - imR30;
+    //morphologyEx(result, result, CV_MOP_OPEN, element);
+    //imwrite("image/5-vessel/final.tif", result);
 
 
 
@@ -621,11 +628,16 @@ double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, Point ortIt[
         //ort = &ortIt[it];
 
         mainStr = calculateLineStrength(square, lineIt[it]);
+        //ortStr = calculateLineStrength(square, ortIt[it]);
         //calculate max line operator response
-
-        if (mainStr > 8) {
+        
+        if (mainStr > 3) {
             ortStr = calculateLineStrength(square, ortIt[it]);
-            f = 0.5 * mainStr + 0.5 * ortStr;
+            if(ortStr>2){
+                f = mainStr;
+            }else
+                f=0;
+            
         } else
             f = 0;
 
@@ -650,9 +662,12 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
     int flag = 0;
     //convert to radians
     if (theta != 0 && theta != 90) {
-        if (theta > 90)flag = 1;
+        if (theta > 90) {
+            flag = 1;
+            theta = 180 - theta;
+        }
         theta = 3.1416 / 180 * theta;
-        double m = abs(tan(theta));
+        double m = tan(theta);
 
 
         if (m <= 1) {
@@ -674,6 +689,8 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
         end.y += center.y;
         start.x += center.x;
         start.y += center.y;
+        
+
     } else {//tan theta inderterminated
         if (theta == 0) {
             end.x = center.x + l / 2;
@@ -735,6 +752,7 @@ double calculateLineStrength(Mat &img, vector<Point> &it) {
 
     return lineMean - mean;
 }
+
 double calculateLineStrength(Mat &img, Point it[3]) {
     Scalar m = sum(img);
     //double mean = m.val[0]/(img.rows*img.cols-it.count);
@@ -758,42 +776,57 @@ double calculateLineStrength(Mat &img, Point it[3]) {
     return lineMean - mean;
 }
 
-
 vector<vector<Point> > calculateLineIterators(int l, int step) {
     vector<vector<Point> > iterators;
     Point start(0, 0), end(0, 0);
     for (int t = 0; t < 180; t = t + step) {//t means theta (angle)                    
         getLinePoints(l, start, end, t);
         //LineIterator mainLine(m, start, end, 8, true);        
-        iterators.push_back(getBSHLine(start, end));
+        iterators.push_back(getDDALine(start, end));
+
     }
     return iterators;
 }
 
 void calculateOrtLineIterators(Point it[12][3], int l, int step) {
     //vector<vector<Point> > iterators;
-    Point startO(0, 0), endO(0, 0), mid(l/2,l/2);
-    
+    Point startO(0, 0), endO(0, 0), mid(l / 2, l / 2);
+
     for (int t = 0; t < 12; t++) {
         getOrtogonalLinePoints(l, startO, endO, t);
         //LineIterator ortogonalLine(m, startO, endO, 8, true);        
         //iterators.push_back(getBSHLine(startO, endO));
-        it[t][0]=startO;
-        it[t][1]=mid;
-        it[t][2]=endO;
+        it[t][0] = startO;
+        it[t][1] = mid;
+        it[t][2] = endO;
     }
     //return iterators;
 }
 
-vector<Point> getBSHLine(Point &start, Point &end) {
+vector<Point> getDDALine(Point &start, Point &end) {
     vector<Point> line;
-    float dx = end.x - start.x;
-    float dy = end.y - start.y;
+    int length;
+    float dx = abs(end.x - start.x);
+    float dy = abs(end.y - start.y);
     float error = 0;
     float deltaerr = abs(dy / dx);
-    int y = start.y;
-    int x = start.x;
-    int ysign = dy >= 0 ? 1 : -1;
+    if (dx >= dy)
+        length = dx;
+    else
+        length = dy;
+    dx=dx/length;
+    dy=dy/length;
+    dx = (end.x - start.x) >= 0 ? dx : -1*dx;
+    dy = (end.y - start.y) >= 0 ? dy : -1*dy;    
+    float y = start.y;
+    float x = start.x;
+    
+    for(int i=0;i<=length;i++){
+        line.push_back(Point(round(x),round(y)));
+        x+=dx;
+        y+=dy;        
+    }
+    /*int ysign = dy >= 0 ? 1 : -1;
     int xsign = dx >= 0 ? 1 : -1;
     if (dx == 0) {
         for (int i = start.y; i <= end.y; i++) {
@@ -816,7 +849,7 @@ vector<Point> getBSHLine(Point &start, Point &end) {
             line.push_back(Point(x, y));
         }
         x += xsign;
-    };
+    };*/
     return line;
 }
 

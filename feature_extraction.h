@@ -44,7 +44,7 @@ double calculateLineStrength(Mat &img, Point it[]);
 vector<vector<Point> > calculateLineIterators(int l, int step);
 void calculateOrtLineIterators(Point it[][3],int l, int step);
 //vector<vector<Point> > 
-vector<Point> getBSHLine(Point &start, Point &end);
+vector<Point> getDDALine(Point &start, Point &end);
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, Point it[][3]);
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask);
 void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, int lineStep);

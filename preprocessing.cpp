@@ -67,8 +67,8 @@ void backgroundSegmentation(const Mat& src, Mat& bgMask) {
     
     
     bgMask = fineMask;
-    //src.copyTo(backgroundImageResult, bgMask);
-    //imwrite("image/1-background/image1.tif", backgroundImageResult);
+    src.copyTo(backgroundImageResult, bgMask);
+    imwrite("image/1-background/image1.tif", backgroundImageResult);
     imwrite("image/1-background/mask1.tif", bgMask);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo
