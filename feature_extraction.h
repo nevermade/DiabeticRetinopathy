@@ -16,20 +16,9 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "ComplexNum.h"
-#include <math.h>
-#include "util.h"
+
+using namespace std;
 using namespace cv;
-void imageVesselEnhancement(Mat& result,Mat& finalMask);
-void fourierTransform(const Mat& invGC, Mat& complexI);
-void apply2DCWT(Mat& complexI);
-void printMatrix(const Mat& m);
-template<typename _Tp>
-void printMatrix(Mat& m);
-void apply2DMorletWavelet(ComplexNum& K, Mat& inv, Mat& morletWavelet);
-void matrixComplexExp(Mat& matrix);
-ComplexNum toComplexNum(Mat& a);
-Mat getRotationMatrix(double theta);
 void opticDiscSegmentation(Mat& bgMask, Mat& maImage);
 void darkLessionSegmentation(Mat& bgMask, Mat& maImage);
 void brightLessionSegmentation();

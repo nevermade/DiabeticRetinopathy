@@ -4,36 +4,29 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   main.cpp
- * Author: espri
+ * Author: USER
  *
- * Created on 1 de diciembre de 2015, 11:37 PM
+ * Created on 31 de agosto de 2016, 11:56 PM
  */
 
-#include <cstdlib>
+#include <QApplication>
+#include "MainForm.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "preprocessing.h"
 #include "feature_extraction.h"
-#include <fstream>
-#include <iostream>
+#include <cstdlib>
 using namespace std;
 using namespace cv;
+int main(int argc, char *argv[]) {
+    // initialize resources, if needed
+    // Q_INIT_RESOURCE(resfile);
 
-/*
- * 
- */
-ofstream myFile;
-
-void initialize();
-void finish();
-
-
-int main(int argc, char** argv) {
-    
-    
-    initialize();
+    QApplication app(argc, argv);
+    MainForm mainForm;
+    mainForm.show();
     Mat image;
     
     image = imread("image/0-dataset/image1.tif", 1);
@@ -46,11 +39,11 @@ int main(int argc, char** argv) {
     Mat bgMask, odImage, maImage;
     
     //Preprocessing
-    //backgroundSegmentation(image, bgMask);
-    //opticDiscSegmentation(bgMask, maImage);
-    //darkLessionSegmentation(bgMask, maImage);//microaneurysm
+    backgroundSegmentation(image, bgMask);
+    opticDiscSegmentation(bgMask, maImage);
+    darkLessionSegmentation(bgMask, maImage);//microaneurysm
     
-    vesselSegmentation(bgMask,maImage);
+    //vesselSegmentation(bgMask,maImage);
     
     //brightLessionSegmentation();
     //noiseSegmentation(image,noiseMask);
@@ -61,15 +54,8 @@ int main(int argc, char** argv) {
     
     
     waitKey(0);
-    
-    finish();
-    return 0;
-}
+       
+    // create and show your widgets here
 
-void initialize(){
-    myFile.open("output.txt");
-}
-
-void finish(){
-    myFile.close();
+    return app.exec();
 }

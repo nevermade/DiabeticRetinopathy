@@ -19,6 +19,7 @@ CCC=g++
 CXX=g++
 FC=gfortran
 AS=as
+QMAKE=qmake
 
 # Macros
 CND_PLATFORM=MinGW-Windows
@@ -34,12 +35,7 @@ include Makefile
 OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
-OBJECTFILES= \
-	${OBJECTDIR}/ComplexNum.o \
-	${OBJECTDIR}/feature_extraction.o \
-	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/preprocessing.o \
-	${OBJECTDIR}/util.o
+OBJECTFILES=
 
 
 # C Compiler Flags
@@ -56,177 +52,29 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-Lsources/lib sources/lib/libopencv_calib3d300.dll.a sources/lib/libopencv_calib3d_pch_dephelp.a sources/lib/libopencv_core300.dll.a sources/lib/libopencv_core_pch_dephelp.a sources/lib/libopencv_features2d300.dll.a sources/lib/libopencv_features2d_pch_dephelp.a sources/lib/libopencv_flann300.dll.a sources/lib/libopencv_flann_pch_dephelp.a sources/lib/libopencv_hal300.a sources/lib/libopencv_hal_pch_dephelp.a sources/lib/libopencv_highgui300.dll.a sources/lib/libopencv_highgui_pch_dephelp.a sources/lib/libopencv_imgcodecs300.dll.a sources/lib/libopencv_imgcodecs_pch_dephelp.a sources/lib/libopencv_imgproc300.dll.a sources/lib/libopencv_imgproc_pch_dephelp.a sources/lib/libopencv_ml300.dll.a sources/lib/libopencv_ml_pch_dephelp.a sources/lib/libopencv_objdetect300.dll.a sources/lib/libopencv_objdetect_pch_dephelp.a sources/lib/libopencv_perf_calib3d_pch_dephelp.a sources/lib/libopencv_perf_core_pch_dephelp.a sources/lib/libopencv_perf_features2d_pch_dephelp.a sources/lib/libopencv_perf_imgcodecs_pch_dephelp.a sources/lib/libopencv_perf_imgproc_pch_dephelp.a sources/lib/libopencv_perf_objdetect_pch_dephelp.a sources/lib/libopencv_perf_photo_pch_dephelp.a sources/lib/libopencv_perf_stitching_pch_dephelp.a sources/lib/libopencv_perf_superres_pch_dephelp.a sources/lib/libopencv_perf_video_pch_dephelp.a sources/lib/libopencv_perf_videoio_pch_dephelp.a sources/lib/libopencv_photo300.dll.a sources/lib/libopencv_photo_pch_dephelp.a sources/lib/libopencv_shape300.dll.a sources/lib/libopencv_shape_pch_dephelp.a sources/lib/libopencv_stitching300.dll.a sources/lib/libopencv_stitching_pch_dephelp.a sources/lib/libopencv_superres300.dll.a sources/lib/libopencv_superres_pch_dephelp.a sources/lib/libopencv_test_calib3d_pch_dephelp.a sources/lib/libopencv_test_core_pch_dephelp.a sources/lib/libopencv_test_features2d_pch_dephelp.a sources/lib/libopencv_test_flann_pch_dephelp.a sources/lib/libopencv_test_highgui_pch_dephelp.a sources/lib/libopencv_test_imgcodecs_pch_dephelp.a sources/lib/libopencv_test_imgproc_pch_dephelp.a sources/lib/libopencv_test_ml_pch_dephelp.a sources/lib/libopencv_test_objdetect_pch_dephelp.a sources/lib/libopencv_test_photo_pch_dephelp.a sources/lib/libopencv_test_shape_pch_dephelp.a sources/lib/libopencv_test_stitching_pch_dephelp.a sources/lib/libopencv_test_superres_pch_dephelp.a sources/lib/libopencv_test_video_pch_dephelp.a sources/lib/libopencv_test_videoio_pch_dephelp.a sources/lib/libopencv_ts300.a sources/lib/libopencv_ts_pch_dephelp.a sources/lib/libopencv_video300.dll.a sources/lib/libopencv_video_pch_dephelp.a sources/lib/libopencv_videoio300.dll.a sources/lib/libopencv_videoio_pch_dephelp.a sources/lib/libopencv_videostab300.dll.a sources/lib/libopencv_videostab_pch_dephelp.a
+LDLIBSOPTIONS=/C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_calib3d300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_calib3d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_core300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_core_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_features2d300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_features2d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_flann300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_flann_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_hal300.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_hal_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_highgui300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_highgui_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgcodecs300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgcodecs_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgproc300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgproc_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ml300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ml_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_objdetect300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_objdetect_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_calib3d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_core_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_features2d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_imgcodecs_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_imgproc_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_objdetect_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_photo_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_stitching_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_superres_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_video_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_videoio_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_photo300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_photo_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_shape300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_shape_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_stitching300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_stitching_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_superres300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_superres_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_calib3d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_core_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_features2d_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_flann_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_highgui_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_imgcodecs_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_imgproc_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_ml_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_objdetect_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_photo_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_shape_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_stitching_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_superres_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_video_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_videoio_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ts300.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ts_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_video300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_video_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videoio300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videoio_pch_dephelp.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videostab300.dll.a /C/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videostab_pch_dephelp.a
+
+nbproject/qt-${CND_CONF}.mk: nbproject/qt-${CND_CONF}.pro FORCE
+	${QMAKE} VPATH=. -spec win32-g++ -o qttmp-${CND_CONF}.mk nbproject/qt-${CND_CONF}.pro
+	mv -f qttmp-${CND_CONF}.mk nbproject/qt-${CND_CONF}.mk
+	@sed -e 's/\/qt\/bin/\/qt\/bin\//g' nbproject/qt-${CND_CONF}.mk >nbproject/qt-${CND_CONF}.tmp
+	@mv -f nbproject/qt-${CND_CONF}.tmp nbproject/qt-${CND_CONF}.mk
+
+FORCE:
 
 # Build Targets
-.build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_calib3d300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_calib3d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_core300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_core_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_features2d300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_features2d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_flann300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_flann_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_hal300.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_hal_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_highgui300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_highgui_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_imgcodecs300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_imgcodecs_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_imgproc300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_imgproc_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_ml300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_ml_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_objdetect300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_objdetect_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_calib3d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_core_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_features2d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_imgcodecs_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_imgproc_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_objdetect_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_photo_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_stitching_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_superres_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_video_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_perf_videoio_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_photo300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_photo_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_shape300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_shape_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_stitching300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_stitching_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_superres300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_superres_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_calib3d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_core_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_features2d_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_flann_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_highgui_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_imgcodecs_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_imgproc_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_ml_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_objdetect_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_photo_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_shape_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_stitching_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_superres_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_video_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_test_videoio_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_ts300.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_ts_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_video300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_video_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_videoio300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_videoio_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_videostab300.dll.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: sources/lib/libopencv_videostab_pch_dephelp.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe: ${OBJECTFILES}
-	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/ComplexNum.o: ComplexNum.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComplexNum.o ComplexNum.cpp
-
-${OBJECTDIR}/feature_extraction.o: feature_extraction.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/feature_extraction.o feature_extraction.cpp
-
-${OBJECTDIR}/main.o: main.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
-
-${OBJECTDIR}/preprocessing.o: preprocessing.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/preprocessing.o preprocessing.cpp
-
-${OBJECTDIR}/util.o: util.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Isources/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/util.o util.cpp
+.build-conf: ${BUILD_SUBPROJECTS} nbproject/qt-${CND_CONF}.mk
+	"${MAKE}" -f nbproject/qt-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/DiabeticRetinopathy.exe
+
+${CND_BUILDDIR}/Debug/%.o: nbproject/qt-${CND_CONF}.mk
+	${MAKE} -f nbproject/qt-${CND_CONF}.mk "$@"
 
 # Subprojects
 .build-subprojects:
 
 # Clean Targets
-.clean-conf: ${CLEAN_SUBPROJECTS}
-	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/diabeticretinopathy.exe
+.clean-conf: ${CLEAN_SUBPROJECTS} nbproject/qt-${CND_CONF}.mk
+	${MAKE} -f nbproject/qt-${CND_CONF}.mk distclean
 
 # Subprojects
 .clean-subprojects:
-
-# Enable dependency checking
-.dep.inc: .depcheck-impl
-
-include .dep.inc

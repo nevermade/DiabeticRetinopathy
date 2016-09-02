@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=MinGW-Windows
 CND_ARTIFACT_DIR_Debug=dist/Debug/MinGW-Windows
-CND_ARTIFACT_NAME_Debug=diabeticretinopathy
-CND_ARTIFACT_PATH_Debug=dist/Debug/MinGW-Windows/diabeticretinopathy
+CND_ARTIFACT_NAME_Debug=DiabeticRetinopathy
+CND_ARTIFACT_PATH_Debug=dist/Debug/MinGW-Windows/DiabeticRetinopathy
 CND_PACKAGE_DIR_Debug=dist/Debug/MinGW-Windows/package
-CND_PACKAGE_NAME_Debug=diabeticretinopathy.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/diabeticretinopathy.tar
+CND_PACKAGE_NAME_Debug=DiabeticRetinopathy.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/DiabeticRetinopathy.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows
-CND_ARTIFACT_NAME_Release=diabeticretinopathy
-CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/diabeticretinopathy
+CND_ARTIFACT_NAME_Release=DiabeticRetinopathy
+CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/DiabeticRetinopathy
 CND_PACKAGE_DIR_Release=dist/Release/MinGW-Windows/package
-CND_PACKAGE_NAME_Release=diabeticretinopathy.tar
-CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/diabeticretinopathy.tar
+CND_PACKAGE_NAME_Release=DiabeticRetinopathy.tar
+CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/DiabeticRetinopathy.tar
 #
 # include compiler specific variables
 #

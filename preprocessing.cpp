@@ -12,6 +12,7 @@
  */
 #include <cstdlib>
 #include "preprocessing.h"
+using namespace cv;
 using namespace std;
 int w = 8;
 int morph_element_size = 5;
