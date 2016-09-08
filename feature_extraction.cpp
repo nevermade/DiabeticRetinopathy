@@ -12,11 +12,11 @@ using namespace std;
 double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
 
-void opticDiscSegmentation(Mat& bgMask, Mat& maImage) {
-    Mat image, roi;
+void opticDiscSegmentation(Mat& bgMask, Mat& image) {
+    Mat roi;
 
-    image = imread("image/1-background/image1.tif", 1);
-    readInGreenChannel("image/1-background/mask1.tif", bgMask);
+    //image = imread("image/1-background/image1.tif", 1);
+    //readInGreenChannel("image/1-background/mask1.tif", bgMask);
     vector<Mat> channels;
     split(image, channels);
 
@@ -89,24 +89,26 @@ void opticDiscSegmentation(Mat& bgMask, Mat& maImage) {
     circle(opticDMask, center, radius + image.rows / 40, Scalar(0), -1, 8, 0);
 
 
-    Mat result;
-    image.copyTo(result, opticDMask);
+    //Mat result;
+    image.copyTo(image, opticDMask);
     /// Show your results
     bitwise_and(bgMask, opticDMask, bgMask);
-    imwrite("image/2-optic disc/image1.tif", result);
-    imwrite("image/3-final mask/mask1.tif", bgMask);
+    //imwrite("image/2-optic disc/image1.tif", result);
+    //imwrite("image/3-final mask/mask1.tif", bgMask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
     imshow("Hough Circle Transform Demo", result);*/
 
 }
 
-void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
+void darkLessionSegmentation(Mat& bgMask, Mat& image) {
 
 
 
     Mat invG;
-    readInGreenChannel("image/2-optic disc/image1.tif", invG);
-    readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
+    readInGreenChannel(image, invG);
+    //readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
+    
+    
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
 
 
@@ -118,7 +120,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
 
     bitwise_not(invG, invG, bgMask);
     Mat medianFilter, topHat;
-    medianBlur(invG, invG, 3);
+    //medianBlur(invG, invG, 3);
     Ptr<CLAHE> ptr = createCLAHE();
     ptr->setClipLimit(4);
     ptr->apply(invG, invG);
@@ -127,13 +129,13 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
     invG = invG - topHat;
     blur(invG, invG, Size(3, 3));
-    //GaussianBlur(invG, invG, Size(9, 9), 0, 0);
+    //GaussianBlur(invG, invG, Size(5, 5), 0, 0);
     //imwrite("image/5-vessel/image3.tif", invG);
     //imwrite("image/5-vessel/image4.tif", topHat);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
     //threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
-    imwrite("image/4-dark lession/invg.tif", invG);
+    //imwrite("image/4-dark lession/invg.tif", invG);
 
 
 
@@ -151,7 +153,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
     //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
 
 
-    maImage = Mat::zeros(invG.rows, invG.cols, invG.type());
+    Mat maImage = Mat::zeros(invG.rows, invG.cols, invG.type());
     double area;
     Rect r;
     vector<vector<Point> > filteredContours;
@@ -168,7 +170,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& maImage) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
 
-    imwrite("image/4-dark lession/maimage1.tif", maImage);
+    //imwrite("image/4-dark lession/maimage1.tif", maImage);
 }
 
 double calculateHThreshold(Mat &image) {
@@ -427,6 +429,13 @@ void readInGreenChannel(const String& path, Mat& image) {
     image = channels[1];
 }
 
+void readInGreenChannel(Mat& src, Mat& image) {
+    
+    vector<Mat> channels;
+    split(src, channels);
+    image = channels[1];
+}
+
 double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, Point ortIt[][3]) {
     //vector<Point> *line, *ort;
     double max = -100000, mainStr, ortStr, min = 999999;
@@ -662,34 +671,36 @@ vector<Point> getDDALine(Point &start, Point &end) {
     return line;
 }
 
-void brightLessionSegmentation() {
-    Mat image, mask;
-    image = imread("image/2-optic disc/image1.tif", 1);
+void brightLessionSegmentation(Mat& mask, Mat& image) {
+    
+    //image = imread("image/2-optic disc/image1.tif", 1);
 
 
     //bitwise_not(image, image, mask);
 
     vector<Mat> channels;
     split(image, channels);
-    Mat gc = channels[1], lab;
+    Mat gc = channels[1];
     Mat greenChannel;
     gc.copyTo(greenChannel);
-    greenChannel.copyTo(mask);
+    /*greenChannel.copyTo(mask);
     /*Ptr<CLAHE> ptr=createCLAHE();
-    ptr->apply(invG,invG);*/
+    ptr->apply(invG,invG);
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
-    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);
-
+    threshold(mask, mask, 5, 255, CV_THRESH_BINARY);*/
+    
+    Mat lab;
     Mat l_chann;
+    
     cvtColor(image, lab, CV_BGR2Lab);
     split(lab, channels);
     l_chann = channels[0]; //assign L channel
 
 
     //Thresholding method
-    element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
     Mat topHat, bottomHat;
     l_chann.copyTo(topHat);
     l_chann.copyTo(bottomHat);
@@ -756,12 +767,12 @@ void brightLessionSegmentation() {
 
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     dilate(finalOutput, finalOutput, element);
-    imwrite("image/5-bright lesion/image1.tif", finalOutput);
+    //imwrite("image/6-bright lesion/image1.tif", finalOutput);
 
 
-    bitwise_not(finalOutput, finalOutput, mask);
+   /* bitwise_not(finalOutput, finalOutput, mask);
     image.copyTo(maskedOrigImg, finalOutput);
-    imwrite("image/5-bright lesion/image2.tif", maskedOrigImg);
+    imwrite("image/5-bright lesion/image2.tif", maskedOrigImg);*/
 
 
     // imwrite("image/5-bright lession/image2.tif",greenChannel);

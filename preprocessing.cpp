@@ -21,7 +21,7 @@ int morph_element_size = 5;
 Scalar backgroundThreshold(0, 0, 0);
 Mat blankBlock(w, w, CV_8UC3, Scalar(255, 255, 255));
 
-void backgroundSegmentation(const Mat& src, Mat& bgMask) {
+void backgroundSegmentation(Mat& src, Mat& bgMask) {
     CV_Assert(src.depth() != sizeof (uchar));
     bgMask = Mat::zeros(src.rows, src.cols, src.type());
     int nRows = src.rows;
@@ -68,9 +68,9 @@ void backgroundSegmentation(const Mat& src, Mat& bgMask) {
     
     
     bgMask = fineMask;
-    src.copyTo(backgroundImageResult, bgMask);
-    imwrite("image/1-background/image1.tif", backgroundImageResult);
-    imwrite("image/1-background/mask1.tif", bgMask);
+    src.copyTo(src, bgMask);
+    //imwrite("image/1-background/image1.tif", backgroundImageResult);
+    //imwrite("image/1-background/mask1.tif", bgMask);
 }
 //Se aplica la dilatacion de la mascara segmentada del fondo
 

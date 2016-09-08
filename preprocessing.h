@@ -17,7 +17,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 using namespace cv;
-void backgroundSegmentation(const Mat& src, Mat& dest);
+void backgroundSegmentation(Mat& src, Mat& dest);
 Scalar calculateStdDev(Mat& block);
 void retrieveBackgroundMask(Mat src, Mat dest);
 double calculateDistance(Scalar mean);

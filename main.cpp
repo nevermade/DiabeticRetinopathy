@@ -49,29 +49,21 @@ int main(int argc, char *argv[]) {
     Mat bgMask, odImage, maImage;
 
     //clasificar bd
-    classifyBD();
+    //classifyBD();
 
 
 
     //Preprocessing
     backgroundSegmentation(image, bgMask);
-    opticDiscSegmentation(bgMask, maImage);
-    darkLessionSegmentation(bgMask, maImage); //microaneurysm
-
+    opticDiscSegmentation(bgMask, image);
+    darkLessionSegmentation(bgMask, image);
+    brightLessionSegmentation(bgMask, image);
+    
     //vesselSegmentation(bgMask,maImage);
 
-    //brightLessionSegmentation();
-    //noiseSegmentation(image,noiseMask);
-    //finalSegmentation(image,backGroundMask,noiseMask,finalMask,result);
-
-    //Vessel segmentation
-    //imageVesselEnhancement(result,finalMask);
-
+    
 
     waitKey(0);
-
-    // create and show your widgets here
-
     //return app.exec();
     return 0;
 }

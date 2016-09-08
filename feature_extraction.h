@@ -19,9 +19,9 @@
 
 using namespace std;
 using namespace cv;
-void opticDiscSegmentation(Mat& bgMask, Mat& maImage);
-void darkLessionSegmentation(Mat& bgMask, Mat& maImage);
-void brightLessionSegmentation();
+void opticDiscSegmentation(Mat& bgMask, Mat& image);
+void darkLessionSegmentation(Mat& bgMask, Mat& image);
+void brightLessionSegmentation(Mat& bgMask, Mat& image);
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
 int calculateMedian(Mat& image, Mat& mask);
@@ -42,6 +42,7 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
 
 void readBinaryInBinary(String path, Mat& binary);
 void readInGreenChannel(const String& path, Mat& image);
+void readInGreenChannel(Mat& src, Mat& image);
 
 #endif /* FEATURE_EXTRACTION_H */
 
