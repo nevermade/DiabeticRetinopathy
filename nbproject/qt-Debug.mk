@@ -902,9 +902,10 @@ build/Debug/MinGW-Windows/main.o: main.cpp C:/Qt/5.6/mingw49_32/include/QtWidget
 		sources/include/opencv2/imgcodecs/imgcodecs_c.h \
 		sources/include/opencv2/videoio/videoio_c.h \
 		sources/include/opencv2/ml.hpp \
+		sources/include/opencv2/core/core.hpp \
 		sources/include/opencv2/highgui/highgui.hpp \
-		preprocessing.h \
 		sources/include/opencv2/imgproc/imgproc.hpp \
+		preprocessing.h \
 		feature_extraction.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/Debug/MinGW-Windows/main.o main.cpp
 

@@ -16,12 +16,21 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 using namespace std;
 using namespace cv;
+struct CharsImage{
+    int nImage;
+    int numberDarkZone;
+    int areaDarkZone;
+    int numberBrightZones;
+    int areaBrightZone;    
+};
+
 void opticDiscSegmentation(Mat& bgMask, Mat& image);
-void darkLessionSegmentation(Mat& bgMask, Mat& image);
-void brightLessionSegmentation(Mat& bgMask, Mat& image);
+void darkLessionSegmentation(Mat& bgMask, Mat& image,CharsImage& ci);
+void brightLessionSegmentation(Mat& bgMask, Mat& image,CharsImage& ci);
 double calculateHThreshold(Mat &image);
 double calculateMean(Mat& image);
 int calculateMedian(Mat& image, Mat& mask);

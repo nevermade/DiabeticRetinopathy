@@ -13,7 +13,7 @@ double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
 
 void opticDiscSegmentation(Mat& bgMask, Mat& image) {
-    Mat roi;
+    Mat roi, median;
 
     //image = imread("image/1-background/image1.tif", 1);
     //readInGreenChannel("image/1-background/mask1.tif", bgMask);
@@ -21,7 +21,9 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
     split(image, channels);
 
 
-    Mat greenChannel = channels[2];
+    //Mat greenChannel = channels[2];
+    Mat greenChannel;
+    cvtColor( image, greenChannel, CV_BGR2GRAY );
     /// Reduce the noise so we avoid false circle detection
     //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);    
     int y = greenChannel.rows / 3;
@@ -45,12 +47,13 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
     //imwrite("image/2-optic disc/image2.tif", roi);
     double max;
     minMaxLoc(roi, NULL, &max, NULL, NULL);
-    threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
+    threshold(roi, roi, 0.3 * max, 255, CV_THRESH_BINARY);
     //imwrite("image/2-optic disc/image2.tif", roi);
 
     vector<Vec3f> circles;
 
-    HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 300);
+    HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols, 30, 10, 0, 0);
+    //HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols/2, 100, 50, 0, 0);
 
     if (circles.size() == 0) {
         greenChannel = channels[1];
@@ -61,15 +64,17 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
         w = greenChannel.cols;
         h = y;
         roi = Mat(greenChannel, Rect(x, y, w, h));
-
+        
         meanStdDev(roi, mean, stddev);
         _mean = mean.val[0];
         _stddev = stddev.val[0];
         roi = roi - _stddev - _mean;
         GaussianBlur(roi, roi, Size(size, size), 0, 0);
+        
         minMaxLoc(roi, NULL, &max, NULL, NULL);
-        threshold(roi, roi, 0.2 * max, 255, CV_THRESH_BINARY);
-        HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, 300, 15, 5, 50, 300);
+        threshold(roi, roi, 0.3 * max, 255, CV_THRESH_BINARY);
+        HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols, 30, 10, 0, 0);
+        //HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols/2, 100, 50, 0, 0);
     }
     /// Draw the circles detected
     Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
@@ -86,13 +91,16 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
     center.x = center.x;
     center.y = center.y + (image.rows / 3);
 
-    circle(opticDMask, center, radius + image.rows / 40, Scalar(0), -1, 8, 0);
+    circle(opticDMask, center, radius + 50, Scalar(0), -1, 8, 0);
 
-
+    
     //Mat result;
-    image.copyTo(image, opticDMask);
+    
     /// Show your results
+    Mat finalImage;
     bitwise_and(bgMask, opticDMask, bgMask);
+    image.copyTo(finalImage, bgMask);
+    image=finalImage;
     //imwrite("image/2-optic disc/image1.tif", result);
     //imwrite("image/3-final mask/mask1.tif", bgMask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
@@ -100,7 +108,7 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
 
 }
 
-void darkLessionSegmentation(Mat& bgMask, Mat& image) {
+void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
 
 
 
@@ -127,27 +135,20 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image) {
     medianBlur(invG, medianFilter, 105);
     invG = invG - medianFilter;
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
-    invG = invG - topHat;
-    blur(invG, invG, Size(3, 3));
-    //GaussianBlur(invG, invG, Size(5, 5), 0, 0);
+    invG = invG - topHat;    
+    GaussianBlur(invG, invG, Size(7, 7),0,0);
+    //GaussianBlur(invG, invG, Size(9, 9), 0, 0);
     //imwrite("image/5-vessel/image3.tif", invG);
     //imwrite("image/5-vessel/image4.tif", topHat);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
-    //threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
+    threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
     //imwrite("image/4-dark lession/invg.tif", invG);
 
-
-
-
-    Mat detected_edges;
-    int ratio = 3;
-    int kernel_size = 3;
-    int lowThreshold = 25;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    Canny(invG, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-    findContours(detected_edges, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+    //Canny(invG, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+    findContours(invG, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
 
     //Mat drawing = Mat::zeros(detected_edges.size(), CV_8UC1);
@@ -161,16 +162,30 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image) {
     for (int i = 0; i < contours.size(); i++) {
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
-        k = r.height / r.width;
-        if ((k >= 0.8 && k <= 1.2) && area <= 800 && area >= 0.5 * r.height * r.width) filteredContours.push_back(contours.at(i));
+        if(r.height>r.width){
+            max=r.height;
+            min=r.width;
+        }else{
+            max=r.width;
+            min=r.height;
+        }
+        
+        k = min/max;
+        if ((k >= 0.8) && area <= 800 && area >= 0.55 * r.height * r.width && area>=20) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
     for (int i = 0; i < filteredContours.size(); i++) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
+    
+    
+    //dilate(maImage,maImage,element);
+    ci.areaDarkZone=countNonZero(maImage);
+    ci.numberDarkZone=filteredContours.size();
 
-    //imwrite("image/4-dark lession/maimage1.tif", maImage);
+    imwrite("image/4-dark lession/image"+SSTR(ci.nImage)+".tif", maImage);
+    
 }
 
 double calculateHThreshold(Mat &image) {
@@ -671,7 +686,7 @@ vector<Point> getDDALine(Point &start, Point &end) {
     return line;
 }
 
-void brightLessionSegmentation(Mat& mask, Mat& image) {
+void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     
     //image = imread("image/2-optic disc/image1.tif", 1);
 
@@ -761,26 +776,53 @@ void brightLessionSegmentation(Mat& mask, Mat& image) {
     bitwise_xor(c1, c2, i5, mask);
     bitwise_and(c1, c2, i6, mask);
 
-    Mat finalOutput, maskedOrigImg;
+    Mat finalOutput;
 
     finalOutput = i5 + i6;
 
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+    erode(finalOutput,finalOutput,element);
     dilate(finalOutput, finalOutput, element);
+    
     //imwrite("image/6-bright lesion/image1.tif", finalOutput);
+      
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    //Canny(finalOutput, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
+   
+    //findContours(finalOutput, contours, hierarchy, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+    findContours(finalOutput, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
+    vector<vector<Point> > filteredContours;
+    double k,area;
+    
+    Rect r;
+    for (int i = 0; i < contours.size(); i++) {
+        area = contourArea(contours.at(i));
+        r = boundingRect(contours.at(i));
+        if(r.height>r.width){
+            max=r.height;
+            min=r.width;
+        }else{
+            max=r.width;
+            min=r.height;
+        }
+        
+        k = min/max;
+        if ((k >= 0.3) && area >=10 && area >= 0.3 * r.height * r.width) filteredContours.push_back(contours.at(i));
+        //if (area>=10) filteredContours.push_back(contours.at(i));
+        //if(area>=500) filteredContours.push_back(contours.at(i));
 
-   /* bitwise_not(finalOutput, finalOutput, mask);
-    image.copyTo(maskedOrigImg, finalOutput);
-    imwrite("image/5-bright lesion/image2.tif", maskedOrigImg);*/
-
-
-    // imwrite("image/5-bright lession/image2.tif",greenChannel);
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", l_chann);*/
-
-
-
+    }
+    
+    
+    Mat maImage = Mat::zeros(finalOutput.rows, finalOutput.cols, finalOutput.type());
+    for (int i = 0; i < filteredContours.size(); i++) {
+        drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
+    }
+    imwrite("image/6-bright lesion/image"+SSTR(ci.nImage)+".tif", maImage);
+    ci.areaBrightZone=countNonZero(maImage);
+    ci.numberBrightZones=filteredContours.size();
 }
 
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask) {
