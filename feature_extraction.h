@@ -28,7 +28,7 @@ struct CharsImage{
     int areaBrightZone;    
 };
 
-void opticDiscSegmentation(Mat& bgMask, Mat& image);
+void opticDiscSegmentation(Mat& bgMask, Mat& image, CharsImage& ci);
 void darkLessionSegmentation(Mat& bgMask, Mat& image,CharsImage& ci);
 void brightLessionSegmentation(Mat& bgMask, Mat& image,CharsImage& ci);
 double calculateHThreshold(Mat &image);

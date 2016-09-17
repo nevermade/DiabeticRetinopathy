@@ -11,10 +11,10 @@ using namespace std;
 
 double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
-
-void opticDiscSegmentation(Mat& bgMask, Mat& image) {
-    Mat roi, median;
-
+void opticDiscSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
+    //Mat roi;
+    int fixedCircleSize=50;
+    int windowSize=400;
     //image = imread("image/1-background/image1.tif", 1);
     //readInGreenChannel("image/1-background/mask1.tif", bgMask);
     vector<Mat> channels;
@@ -23,39 +23,57 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
 
     //Mat greenChannel = channels[2];
     Mat greenChannel;
-    cvtColor( image, greenChannel, CV_BGR2GRAY );
+    cvtColor(image, greenChannel, CV_BGR2GRAY);
     /// Reduce the noise so we avoid false circle detection
     //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);    
-    int y = greenChannel.rows / 3;
+    /*int y = greenChannel.rows / 3;
     int x = 0;
     int w = greenChannel.cols;
     int h = y;
-    roi = Mat(greenChannel, Rect(x, y, w, h));
+    roi = Mat(greenChannel, Rect(x, y, w, h));*/
 
 
 
 
-    Scalar mean, stddev;
+    /*Scalar mean, stddev;
     meanStdDev(roi, mean, stddev);
     double _mean, _stddev;
     _mean = mean.val[0];
     _stddev = stddev.val[0];
     roi = roi - _stddev - _mean;
     int size = image.cols / 10;
-    size = (size % 2 == 0) ? size + 1 : size;
-    GaussianBlur(roi, roi, Size(size, size), 0, 0);
+    size = (size % 2 == 0) ? size + 1 : size;*/
+    //GaussianBlur(roi, roi, Size(35, 35), 0, 0);
+    
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(11, 11));
+    Mat aux;
+    morphologyEx(greenChannel, aux, MORPH_DILATE, element,Point(-1,-1),3);
+    //erode(aux,aux,element);
+    //GaussianBlur(aux, aux, Size(25, 25), 0, 0);
+    medianBlur(aux, aux, 25);
+    Point maxLoc;
+    minMaxLoc(aux, NULL, NULL, NULL, &maxLoc);
+    int x = maxLoc.x-(windowSize/2);
+    int y = maxLoc.y-(windowSize/2);
+    Mat roi(aux,Rect(x,y,windowSize,windowSize));
+    //imwrite("image/3-final mask/image"+SSTR(ci.nImage)+".tif", roi);
+    //element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+    //morphologyEx(roi, roi, MORPH_CLOSE, element);
+    //morphologyEx( roi, roi, MORPH_CLOSE, element,Point(-1,-1),2);
+    //GaussianBlur(roi, roi, Size(31, 31), 0, 0);
+    //medianBlur(roi,roi,35);
     //imwrite("image/2-optic disc/image2.tif", roi);
-    double max;
-    minMaxLoc(roi, NULL, &max, NULL, NULL);
-    threshold(roi, roi, 0.3 * max, 255, CV_THRESH_BINARY);
+    //double max;
+    //minMaxLoc(roi, NULL, &max, NULL, NULL);
+    //threshold(roi, roi, 0.3 * max, 255, CV_THRESH_BINARY);
     //imwrite("image/2-optic disc/image2.tif", roi);
 
     vector<Vec3f> circles;
 
-    HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols, 30, 10, 0, 0);
+    HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, roi.cols, 20, 10, 50, 250);
     //HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols/2, 100, 50, 0, 0);
 
-    if (circles.size() == 0) {
+    /*if (circles.size() == 0) {
         greenChannel = channels[1];
         /// Reduce the noise so we avoid false circle detection
         //GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);    
@@ -75,32 +93,56 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image) {
         threshold(roi, roi, 0.3 * max, 255, CV_THRESH_BINARY);
         HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols, 30, 10, 0, 0);
         //HoughCircles(roi, circles, CV_HOUGH_GRADIENT, 1, image.cols/2, 100, 50, 0, 0);
-    }
+    }*/
     /// Draw the circles detected
-    Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
-    int radius = cvRound(circles[0][2]);
+    //Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
+    //int radius = cvRound(circles[0][2]);
     // circle center
     // circle(opticD, center, 3, Scalar(0, 255, 0), -1, 8, 0);
     // circle outline
     // circle(opticD, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-
-
-
+    /*double minDist=70,radius,res;
+    Point bestCenter, center, dif;
+    cout<<circles.size()<<endl;
+    for (int i = 0; i < circles.size(); i++) {
+        
+        center.x=circles[i][0];
+        center.y=cvRound(circles[i][1]);
+        //Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        
+        //center.x = center.x;
+        //center.y = center.y + (image.rows / 3);
+        // circle center
+        //cout<<maxLoc<<" "<<center<<endl;        
+        dif=maxLoc-center;
+        res=sqrt(dif.x*dif.x+dif.y*dif.y);
+        //cout<<res<<endl;
+        if(res<=minDist){
+            bestCenter.x=center.x;
+            bestCenter.y=center.y+ (image.rows / 3);
+            radius = cvRound(circles[i][2]);
+            break;
+        }
+    }*/
+    //cout<<circles.size()<<endl;
+    Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
+    int radius = cvRound(circles[0][2]);
     Mat opticDMask = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
     //fixed center of new optic disk mask
-    center.x = center.x;
-    center.y = center.y + (image.rows / 3);
+    //center.x = center.x;
+    center.x=center.x + (maxLoc.x-(windowSize/2));
+    center.y=center.y + (maxLoc.y-(windowSize/2));
 
-    circle(opticDMask, center, radius + 50, Scalar(0), -1, 8, 0);
+    circle(opticDMask, center, radius+fixedCircleSize, Scalar(0), -1, 8, 0);
 
-    
+
     //Mat result;
-    
+
     /// Show your results
     Mat finalImage;
     bitwise_and(bgMask, opticDMask, bgMask);
     image.copyTo(finalImage, bgMask);
-    image=finalImage;
+    image = finalImage;
     //imwrite("image/2-optic disc/image1.tif", result);
     //imwrite("image/3-final mask/mask1.tif", bgMask);
     /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
@@ -115,8 +157,8 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     Mat invG;
     readInGreenChannel(image, invG);
     //readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
-    
-    
+
+
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
 
 
@@ -130,16 +172,16 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     Mat medianFilter, topHat;
     //medianBlur(invG, invG, 3);
     Ptr<CLAHE> ptr = createCLAHE();
-    ptr->setClipLimit(4);
+    ptr->setClipLimit(6);
     ptr->apply(invG, invG);
     medianBlur(invG, medianFilter, 105);
     invG = invG - medianFilter;
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
-    invG = invG - topHat;    
-    GaussianBlur(invG, invG, Size(7, 7),0,0);
+    invG = invG - topHat;
+    GaussianBlur(invG, invG, Size(7, 7), 0, 0);
     //GaussianBlur(invG, invG, Size(9, 9), 0, 0);
     //imwrite("image/5-vessel/image3.tif", invG);
-    //imwrite("image/5-vessel/image4.tif", topHat);
+    //imwrite("image/7-thesis/image1.tif", invG);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
     threshold(invG, invG, 0.25 * max, 255, CV_THRESH_BINARY);
@@ -162,30 +204,30 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     for (int i = 0; i < contours.size(); i++) {
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
-        if(r.height>r.width){
-            max=r.height;
-            min=r.width;
-        }else{
-            max=r.width;
-            min=r.height;
+        if (r.height > r.width) {
+            max = r.height;
+            min = r.width;
+        } else {
+            max = r.width;
+            min = r.height;
         }
-        
-        k = min/max;
-        if ((k >= 0.8) && area <= 800 && area >= 0.55 * r.height * r.width && area>=20) filteredContours.push_back(contours.at(i));
+
+        k = min / max;
+        if ((k >= 0.8) && area <= 800 && area >= 0.50 * r.height * r.width && area >= 20) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
     for (int i = 0; i < filteredContours.size(); i++) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
-    
-    
-    //dilate(maImage,maImage,element);
-    ci.areaDarkZone=countNonZero(maImage);
-    ci.numberDarkZone=filteredContours.size();
 
-    imwrite("image/4-dark lession/image"+SSTR(ci.nImage)+".tif", maImage);
-    
+
+    //dilate(maImage,maImage,element);
+    ci.areaDarkZone = countNonZero(maImage);
+    ci.numberDarkZone = filteredContours.size();
+
+    //imwrite("image/4-dark lession/image"+SSTR(ci.nImage)+".tif", maImage);
+
 }
 
 double calculateHThreshold(Mat &image) {
@@ -302,12 +344,12 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
     //vector<Point> *line, *ort;
     //double mainStr, weighted, ortStr;
     int threshold;
-    if(lineLength==15)
-        threshold=6;
+    if (lineLength == 15)
+        threshold = 6;
     else
-        threshold=12;
-    
-    
+        threshold = 12;
+
+
     for (int i = 0; i < nrows; i++) {
         //p = input.ptr<uchar>(i);
         q = input.ptr<uchar>(i + offset);
@@ -316,7 +358,7 @@ void getLineImageResponse(Mat& input, Mat& output, Mat& mask, int lineLength, in
             if (q[j + offset] <= 5) continue;
             square = Mat(input, Rect(j, i, lineLength, lineLength));
             //if (getLineResponse(square, lineIt, ortIt) > 2.5) {
-            if (getLineResponse(square, lineIt, ortIt)>threshold) {
+            if (getLineResponse(square, lineIt, ortIt) > threshold) {
                 r[j + offset] = 255;
             }
             //cout<<ortStr<<endl;       
@@ -445,7 +487,7 @@ void readInGreenChannel(const String& path, Mat& image) {
 }
 
 void readInGreenChannel(Mat& src, Mat& image) {
-    
+
     vector<Mat> channels;
     split(src, channels);
     image = channels[1];
@@ -463,14 +505,14 @@ double getLineResponse(Mat &square, vector<vector<Point> > &lineIt, Point ortIt[
         mainStr = calculateLineStrength(square, lineIt[it]);
         //ortStr = calculateLineStrength(square, ortIt[it]);
         //calculate max line operator response
-        
+
         if (mainStr > 3) {
             ortStr = calculateLineStrength(square, ortIt[it]);
-            if(ortStr>2){
+            if (ortStr > 2) {
                 f = mainStr;
-            }else
-                f=0;
-            
+            } else
+                f = 0;
+
         } else
             f = 0;
 
@@ -522,7 +564,7 @@ void getLinePoints(int l, Point &start, Point &end, double theta) {
         end.y += center.y;
         start.x += center.x;
         start.y += center.y;
-        
+
 
     } else {//tan theta inderterminated
         if (theta == 0) {
@@ -647,17 +689,17 @@ vector<Point> getDDALine(Point &start, Point &end) {
         length = dx;
     else
         length = dy;
-    dx=dx/length;
-    dy=dy/length;
-    dx = (end.x - start.x) >= 0 ? dx : -1*dx;
-    dy = (end.y - start.y) >= 0 ? dy : -1*dy;    
+    dx = dx / length;
+    dy = dy / length;
+    dx = (end.x - start.x) >= 0 ? dx : -1 * dx;
+    dy = (end.y - start.y) >= 0 ? dy : -1 * dy;
     float y = start.y;
     float x = start.x;
-    
-    for(int i=0;i<=length;i++){
-        line.push_back(Point(round(x),round(y)));
-        x+=dx;
-        y+=dy;        
+
+    for (int i = 0; i <= length; i++) {
+        line.push_back(Point(round(x), round(y)));
+        x += dx;
+        y += dy;
     }
     /*int ysign = dy >= 0 ? 1 : -1;
     int xsign = dx >= 0 ? 1 : -1;
@@ -687,7 +729,7 @@ vector<Point> getDDALine(Point &start, Point &end) {
 }
 
 void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
-    
+
     //image = imread("image/2-optic disc/image1.tif", 1);
 
 
@@ -705,10 +747,10 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);*/
-    
+
     Mat lab;
     Mat l_chann;
-    
+
     cvtColor(image, lab, CV_BGR2Lab);
     split(lab, channels);
     l_chann = channels[0]; //assign L channel
@@ -781,48 +823,48 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     finalOutput = i5 + i6;
 
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
-    erode(finalOutput,finalOutput,element);
+    erode(finalOutput, finalOutput, element);
     dilate(finalOutput, finalOutput, element);
-    
+
     //imwrite("image/6-bright lesion/image1.tif", finalOutput);
-      
+
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     //Canny(finalOutput, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-   
+
     //findContours(finalOutput, contours, hierarchy, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     findContours(finalOutput, contours, hierarchy, CV_RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
     vector<vector<Point> > filteredContours;
-    double k,area;
-    
+    double k, area;
+
     Rect r;
     for (int i = 0; i < contours.size(); i++) {
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
-        if(r.height>r.width){
-            max=r.height;
-            min=r.width;
-        }else{
-            max=r.width;
-            min=r.height;
+        if (r.height > r.width) {
+            max = r.height;
+            min = r.width;
+        } else {
+            max = r.width;
+            min = r.height;
         }
-        
-        k = min/max;
-        if ((k >= 0.3) && area >=10 && area >= 0.3 * r.height * r.width) filteredContours.push_back(contours.at(i));
+
+        k = min / max;
+        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width) filteredContours.push_back(contours.at(i));
         //if (area>=10) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
-    
-    
+
+
     Mat maImage = Mat::zeros(finalOutput.rows, finalOutput.cols, finalOutput.type());
     for (int i = 0; i < filteredContours.size(); i++) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
-    imwrite("image/6-bright lesion/image"+SSTR(ci.nImage)+".tif", maImage);
-    ci.areaBrightZone=countNonZero(maImage);
-    ci.numberBrightZones=filteredContours.size();
+    //imwrite("image/6-bright lesion/image"+SSTR(ci.nImage)+".tif", maImage);
+    ci.areaBrightZone = countNonZero(finalOutput);
+    ci.numberBrightZones = filteredContours.size();
 }
 
 void iluminationEqualization(Mat& input, Mat& output, Mat& mask) {
