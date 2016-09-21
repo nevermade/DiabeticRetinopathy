@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     //clasificar bd
     //classifyBD();
-    int numberOfImages = 20;
+    int numberOfImages = 25;
     int nChars = 3;
     int nCategories = 4;
     string urlBase = "";
@@ -56,83 +56,96 @@ int main(int argc, char *argv[]) {
     int flag = 1;
     int nImage = 0;
     string svmFileName = "svm_training.xml";
-    ifstream ifile(svmFileName);
-    if (!ifile.is_open()) {
-        for (int i = 0; i < nCategories; i++) {
-            switch (i) {
-                case 0:
-                    urlBase = "image/0-dataset/0 - normal/";
-                    image_name = "n_image";
-                    break;
-                case 1:
-                    urlBase = "image/0-dataset/1 - leve/";
-                    image_name = "l_image";
-                    break;
-                case 2:
-                    urlBase = "image/0-dataset/2 - moderado/";
-                    image_name = "m_image";
-                    break;
-                case 3:
-                    urlBase = "image/0-dataset/3 - severo/";
-                    image_name = "s_image";
-                    break;
+    string trainingFileName = "training_data.csv";
+    ifstream svmFile(svmFileName);
+    ifstream trainingFile(trainingFileName);    
+    Ptr<TrainData> td;
+    if (!svmFile.is_open()) {
+        if (!trainingFile.is_open()) {
+            ofstream trainingFileOutput(trainingFileName);
+            for (int i = 0; i < nCategories; i++) {
+                switch (i) {
+                    case 0:
+                        urlBase = "image/0-dataset/0 - normal/";
+                        image_name = "n_image";
+                        break;
+                    case 1:
+                        urlBase = "image/0-dataset/1 - leve/";
+                        image_name = "l_image";
+                        break;
+                    case 2:
+                        urlBase = "image/0-dataset/2 - moderado/";
+                        image_name = "m_image";
+                        break;
+                    case 3:
+                        urlBase = "image/0-dataset/3 - severo/";
+                        image_name = "s_image";
+                        break;
 
-            }
-            for (int n = 1; n <= numberOfImages; n++) {
-                CharsImage ci;
-                ci.nImage = n;
-
-                image = imread(urlBase + image_name + SSTR(n) + ".tif", 1);
-                if (flag) {
-                    backgroundSegmentation(image, bgMask);
-                    flag = 0;
                 }
-                bgMask.copyTo(tmp);
-                opticDiscSegmentation(tmp, image, ci);
-                //cout<<ci.nImage+i*numberOfImages<<endl;
-                imwrite("image/3-final mask/image"+SSTR(ci.nImage)+".tif", tmp);
-                darkLessionSegmentation(tmp, image, ci);
-                brightLessionSegmentation(tmp, image, ci);
+                for (int n = 1; n <= numberOfImages; n++) {
+                    CharsImage ci;
+                    ci.nImage = n;
+
+                    image = imread(urlBase + image_name + SSTR(n) + ".tif", 1);
+                    if (flag) {
+                        backgroundSegmentation(image, bgMask);
+                        flag = 0;
+                    }
+                    bgMask.copyTo(tmp);
+                    opticDiscSegmentation(tmp, image, ci);
+                    //cout<<ci.nImage+i*numberOfImages<<endl;
+                    //imwrite("image/3-final mask/image"+SSTR(ci.nImage)+".tif", tmp);
+                    darkLessionSegmentation(tmp, image, ci);
+                    brightLessionSegmentation(tmp, image, ci);
 
 
-                //cout<<"Imagen "<<nImage<<": "<<"(Tipo - "<<i<<") "<<ci.areaDarkZone<<" "<<ci.numberDarkZone<<" "<<ci.areaBrightZone<<" "<<ci.numberBrightZones<<endl;
-                cout<<"Imagen "<<nImage<<": "<<"(Tipo - "<<i<<") "<<ci.areaDarkZone<<" "<<ci.numberDarkZone<<" "<<ci.areaBrightZone<<endl;
-                //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
-                labels[nImage] = i;
-                trainingData[nImage][0] = ci.areaDarkZone;
-                trainingData[nImage][1] = ci.numberDarkZone;
-                trainingData[nImage][2] = ci.areaBrightZone;
-                //trainingData[nImage][4] = ci.numberBrightZones;
-                nImage++;          
+                    //cout<<"Imagen "<<nImage<<": "<<"(Tipo - "<<i<<") "<<ci.areaDarkZone<<" "<<ci.numberDarkZone<<" "<<ci.areaBrightZone<<" "<<ci.numberBrightZones<<endl;
+                    cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << endl;
+                    trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << ","<<i<<endl;
+                    //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
+                    labels[nImage] = i;
+                    trainingData[nImage][0] = ci.areaDarkZone;
+                    trainingData[nImage][1] = ci.numberDarkZone;
+                    trainingData[nImage][2] = ci.areaBrightZone;
+                    //trainingData[nImage][4] = ci.numberBrightZones;
+                    nImage++;
+                }               
             }
-            
+            trainingFileOutput.close();
+            Mat labelsMat(numberOfImages*nCategories, 1, CV_32SC1, labels);
+            Mat trainingDataMat(numberOfImages*nCategories, nChars, CV_32FC1, trainingData);
+            td = TrainData::create(trainingDataMat, ROW_SAMPLE, labelsMat);
+        } else {
+            td = TrainData::loadFromCSV(trainingFileName, -1);
+            svmFile.close();
         }
-        
-        Mat labelsMat(numberOfImages*nCategories, 1, CV_32SC1, labels);
-        Mat trainingDataMat(numberOfImages*nCategories, nChars, CV_32FC1, trainingData);
+
         Ptr<SVM> svm = SVM::create();
         /*svm->setType(ml::SVM::C_SVC);
         svm->setKernel(ml::SVM::    POLY);
         svm->setGamma(3);
         svm->setDegree(3);*/
-
-        Ptr<TrainData> td = TrainData::create(trainingDataMat, ROW_SAMPLE, labelsMat);
-        svm->trainAuto(td);
+        svm->trainAuto(td, 5);
         svm->save(svmFileName);
+        
+
     } else {
         cout << "File Exists" << endl;
         Ptr<SVM> svm = SVM::create();
         svm = SVM::load<SVM>(svmFileName);
         cout << "Config SVM file opened..." << endl;
-        float test[1][3] = {{407, 2, 912}};
+        float test[1][3] = {
+            {95, 3, 1705}
+        };
         Mat sampleMat(1, nChars, CV_32FC1, test);
-        cout << svm->getVarCount() << endl;
+        //cout << svm->getVarCount() << endl;
         float result = svm->predict(sampleMat);
         cout << "El resultado es: " << result << endl;
     }
 
 
-    ifile.close();
+    svmFile.close();
 
 
     //svm->load("svm_result.xml");
