@@ -43,24 +43,26 @@ void backgroundSegmentation(Mat& src, Mat& bgMask) {
     }
     //fineBackGroundSegmentation(dest);
     Mat backgroundImageResult;
-    medianBlur(bgMask, bgMask, 3);
+    medianBlur(bgMask, bgMask, 11);
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));    
+    morphologyEx(bgMask, bgMask, MORPH_OPEN, element, Point(-1, -1), 2);
     
     vector<Mat> channels;
     split(bgMask, channels);
     bgMask = channels[1];
 
-    
+    //imwrite("image/3-final mask/imageBGMASK.tif", bgMask);
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     findContours(bgMask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
     vector<vector<Point> > contours_poly(contours.size());
     vector<Point2f>center(contours.size());
     vector<float>radius(contours.size());
-    for (int i = 0; i < contours.size(); i++) {
+    for (int i = 0; i < 1; i++) {
         approxPolyDP(Mat(contours[i]), contours_poly[i], 3, true);
         minEnclosingCircle((Mat) contours_poly[i], center[i], radius[i]);
     }
-     Mat fineMask = Mat::zeros(bgMask.rows, bgMask.cols, CV_8UC1);
+    Mat fineMask = Mat::zeros(bgMask.rows, bgMask.cols, CV_8UC1);
     for( int i = 0; i< contours.size(); i++ )
      {
        circle(fineMask, center[i], radius[i]-67, Scalar(255), -1, 8, 0);

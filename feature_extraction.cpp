@@ -13,7 +13,7 @@ double step = 0.2618, max = 2.8798, dilation = 3, elongation = 4, theta = 0;
 
 void opticDiscSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     Mat roi;
-    int fixedCircleSize = 50;
+    int fixedCircleSize = 80;
     int windowSize = 400;
     //image = imread("image/1-background/image1.tif", 1);
     //readInGreenChannel("image/1-background/mask1.tif", bgMask);
@@ -127,36 +127,47 @@ void opticDiscSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
         }
     }*/
     //cout<<circles.size()<<endl;
-    Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
-    int radius = cvRound(circles[0][2]);
     Mat opticDMask = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
-    //fixed center of new optic disk mask
-    //center.x = center.x;
-    center.x = center.x;
-    center.y = center.y + image.rows / 3;
+    if (circles.size() > 0) {
+        Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
+        int radius = cvRound(circles[0][2]);
 
-    circle(opticDMask, center, radius + fixedCircleSize, Scalar(0), -1, 8, 0);
+        //fixed center of new optic disk mask
+        //center.x = center.x;
+        center.x = center.x;
+        center.y = center.y + image.rows / 3;
+
+        circle(opticDMask, center, radius + fixedCircleSize, Scalar(0), -1, 8, 0);
 
 
-    //Mat result;
+        //Mat result;
 
-    /// Show your results
-    Mat finalImage;
+        /// Show your results
+
+        //imwrite("image/2-optic disc/image"+SSTR(ci.nImage)+".tif", image);
+        //imwrite("image/3-final mask/mask1.tif", bgMask);
+        /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+        imshow("Hough Circle Transform Demo", result);*/
+    } else {
+        Point maxLoc;
+        minMaxLoc(roi, NULL, NULL, NULL, &maxLoc);
+        maxLoc.x = maxLoc.x;
+        maxLoc.y = maxLoc.y + image.rows / 3;
+        circle(opticDMask, maxLoc, 100, Scalar(0), -1, 8, 0);
+
+    }
+
+    Mat finalImage, finalMask;
     bitwise_and(bgMask, opticDMask, bgMask);
     image.copyTo(finalImage, bgMask);
     image = finalImage;
-    //imwrite("image/2-optic disc/image"+SSTR(ci.nImage)+".tif", image);
-    //imwrite("image/3-final mask/mask1.tif", bgMask);
-    /*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-    imshow("Hough Circle Transform Demo", result);*/
-
 }
 
 void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
 
 
 
-  Mat invG;
+    Mat invG;
     readInGreenChannel(image, invG);
     //readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
 
@@ -187,7 +198,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     //imwrite("image/7-thesis/image1.tif", invG);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
-    threshold(invG, invG, 30 , 255, CV_THRESH_BINARY);
+    threshold(invG, invG, 30, 255, CV_THRESH_BINARY);
 
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
@@ -202,7 +213,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     double k;
     for (int i = 0; i < contours.size(); i++) {
         drawContours(maImage, contours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
-        area = contourArea(contours.at(i));        
+        area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
         Scalar m = mean(image(r), maImage(r));
         if (r.height > r.width) {
@@ -214,7 +225,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
         }
 
         k = min / max;
-        if ((k >= 0.8) && area <= 800 && area >= 0.50 * r.height * r.width && area >= 20 && m.val[0]<=20) filteredContours.push_back(contours.at(i));
+        if ((k >= 0.8) && area <= 800 && area >= 0.50 * r.height * r.width && area >= 20 && m.val[2] >= 50) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
@@ -755,7 +766,9 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     cvtColor(image, lab, CV_BGR2Lab);
     split(lab, channels);
     l_chann = channels[0]; //assign L channel
-
+    /*Ptr<CLAHE> ptr = createCLAHE();
+    ptr->setClipLimit(4);
+    ptr->apply(l_chann, l_chann);*/
 
     //Thresholding method
     Mat element = getStructuringElement(MORPH_ELLIPSE, Size(15, 15));
@@ -840,7 +853,9 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     double k, area;
 
     Rect r;
+    Mat maImage = Mat::zeros(finalOutput.rows, finalOutput.cols, finalOutput.type());
     for (int i = 0; i < contours.size(); i++) {
+        drawContours(maImage, contours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
         if (r.height > r.width) {
@@ -850,21 +865,21 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
             max = r.width;
             min = r.height;
         }
-
+        Scalar m = mean(image(r), maImage(r));
         k = min / max;
-        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width) filteredContours.push_back(contours.at(i));
+        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width ) filteredContours.push_back(contours.at(i));
         //if (area>=10) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
 
 
-    Mat maImage = Mat::zeros(finalOutput.rows, finalOutput.cols, finalOutput.type());
+    maImage = Mat::zeros(finalOutput.rows, finalOutput.cols, finalOutput.type());
     for (int i = 0; i < filteredContours.size(); i++) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
-    //imwrite("image/6-bright lesion/image"+SSTR(ci.nImage)+".tif", maImage);
-    ci.areaBrightZone = countNonZero(finalOutput);
+    imwrite("image/6-bright lesion/image" + SSTR(ci.nImage) + ".tif", maImage);
+    ci.areaBrightZone = countNonZero(maImage);
     ci.numberBrightZones = filteredContours.size();
 }
 
