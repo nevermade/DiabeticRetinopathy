@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     //generate testset file
     //generateTestFile();
     //return 0;
-    int numberOfImages = 40;
+    int numberOfImages = 30;
     int nChars = 4;
     int nCategories = 4;
     string urlBase = "";
@@ -111,8 +111,9 @@ int main(int argc, char *argv[]) {
                     brightLessionSegmentation(tmp, image, ci);
 
 
-                    //cout<<"Imagen "<<nImage<<": "<<"(Tipo - "<<i<<") "<<ci.areaDarkZone<<" "<<ci.numberDarkZone<<" "<<ci.areaBrightZone<<" "<<ci.numberBrightZones<<endl;
+                    
                     cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<" " << ci.numberBrightZones <<endl;
+                    //cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<endl;
                     trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones <<"," << i << endl;
                     //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
                     labels[nImage] = i;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
         svm->setKernel(ml::SVM::POLY);
         svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1e-6));
         svm->setDegree(3);*/
-        svm->trainAuto(td, 8);
+        svm->trainAuto(td, 12);
         svm->save(svmFileName);
 
 

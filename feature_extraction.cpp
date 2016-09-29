@@ -167,10 +167,10 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
 
 
 
-    Mat invG;
+    Mat invG, tmpGC;
     readInGreenChannel(image, invG);
     //readInGreenChannel("image/3-final mask/mask1.tif", bgMask);
-
+    
 
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
 
@@ -182,6 +182,8 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
 
 
     bitwise_not(invG, invG, bgMask);
+    invG.copyTo(tmpGC);
+    Scalar mImg= mean(tmpGC, bgMask);
     //equalizeHist(invG,invG);
     Mat medianFilter, topHat;
     //medianBlur(invG, invG, 3);
@@ -198,7 +200,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     //imwrite("image/7-thesis/image1.tif", invG);
     double max, min;
     minMaxLoc(invG, &min, &max, NULL, NULL, bgMask);
-    threshold(invG, invG, 30, 255, CV_THRESH_BINARY);
+    threshold(invG, invG, 10, 255, CV_THRESH_BINARY);
 
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
@@ -215,7 +217,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
         drawContours(maImage, contours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
         area = contourArea(contours.at(i));
         r = boundingRect(contours.at(i));
-        Scalar m = mean(image(r), maImage(r));
+        Scalar m = mean(tmpGC(r), maImage(r));
         if (r.height > r.width) {
             max = r.height;
             min = r.width;
@@ -225,7 +227,8 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
         }
 
         k = min / max;
-        if ((k >= 0.8) && area <= 800 && area >= 0.50 * r.height * r.width && area >= 20 && m.val[2] >= 50) filteredContours.push_back(contours.at(i));
+        //t=10 m=1.1 acc=73%
+        if ((k >= 0.8) && area <= 800 && area >= 0.50 * r.height * r.width && area >= 20 && m.val[0] >= mImg.val[0]*1.1) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
     }
@@ -238,7 +241,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     ci.areaDarkZone = countNonZero(maImage);
     ci.numberDarkZone = filteredContours.size();
 
-    imwrite("image/4-dark lession/image" + SSTR(ci.nImage) + ".tif", maImage);
+    //imwrite("image/4-dark lession/image" + SSTR(ci.nImage) + ".tif", maImage);
 
 }
 
@@ -759,7 +762,7 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     medianBlur(mask, mask, 5);
     erode(mask, mask, element);
     threshold(mask, mask, 5, 255, CV_THRESH_BINARY);*/
-
+    Scalar mImg=mean(greenChannel, mask);
     Mat lab;
     Mat l_chann;
 
@@ -865,9 +868,10 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
             max = r.width;
             min = r.height;
         }
-        Scalar m = mean(image(r), maImage(r));
+        Scalar m = mean(gc(r), maImage(r));
+        Scalar mImgOrig=mean(image(r),maImage(r));
         k = min / max;
-        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width ) filteredContours.push_back(contours.at(i));
+        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width && m.val[0]>=mImg.val[0] && mImgOrig.val[0]<=50) filteredContours.push_back(contours.at(i));
         //if (area>=10) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
@@ -878,7 +882,7 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     for (int i = 0; i < filteredContours.size(); i++) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
-    imwrite("image/6-bright lesion/image" + SSTR(ci.nImage) + ".tif", maImage);
+    //imwrite("image/6-bright lesion/image" + SSTR(ci.nImage) + ".tif", maImage);
     ci.areaBrightZone = countNonZero(maImage);
     ci.numberBrightZones = filteredContours.size();
 }
