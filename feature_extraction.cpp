@@ -183,6 +183,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
 
     bitwise_not(invG, invG, bgMask);
     invG.copyTo(tmpGC);
+    //imwrite("image/7-thesis/image" + SSTR(1) + ".tif", invG);
     Scalar mImg= mean(tmpGC, bgMask);
     //equalizeHist(invG,invG);
     Mat medianFilter, topHat;
@@ -190,6 +191,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     Ptr<CLAHE> ptr = createCLAHE();
     ptr->setClipLimit(5);
     ptr->apply(invG, invG);
+    //imwrite("image/7-thesis/image" + SSTR(2) + ".tif", invG);
     medianBlur(invG, medianFilter, 105);
     invG = invG - medianFilter;
     morphologyEx(invG, topHat, CV_MOP_TOPHAT, element);
@@ -240,7 +242,7 @@ void darkLessionSegmentation(Mat& bgMask, Mat& image, CharsImage& ci) {
     //dilate(maImage,maImage,element);
     ci.areaDarkZone = countNonZero(maImage);
     ci.numberDarkZone = filteredContours.size();
-
+    
     //imwrite("image/4-dark lession/image" + SSTR(ci.nImage) + ".tif", maImage);
 
 }
@@ -767,8 +769,10 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     Mat l_chann;
 
     cvtColor(image, lab, CV_BGR2Lab);
+    //imwrite("image/7-thesis/image" + SSTR(1) + ".tif", lab);
     split(lab, channels);
     l_chann = channels[0]; //assign L channel
+    //imwrite("image/7-thesis/image" + SSTR(2) + ".tif", l_chann);
     /*Ptr<CLAHE> ptr = createCLAHE();
     ptr->setClipLimit(4);
     ptr->apply(l_chann, l_chann);*/
@@ -792,6 +796,7 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     erode(closed, closed, element);
     //apply bottom hat
     bottomHat = closed - bottomHat;
+    //imwrite("image/7-thesis/image" + SSTR(1) + ".tif", bottomHat+30);
     l_chann = l_chann + topHat - bottomHat;
 
     //normalize(l_chann, l_chann, 0, 255, CV_MINMAX);
@@ -842,7 +847,7 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
     element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     erode(finalOutput, finalOutput, element);
     dilate(finalOutput, finalOutput, element);
-
+    //imwrite("image/7-thesis/image" + SSTR(2) + ".tif", finalOutput);
     //imwrite("image/6-bright lesion/image1.tif", finalOutput);
 
     vector<vector<Point> > contours;
@@ -871,7 +876,8 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
         Scalar m = mean(gc(r), maImage(r));
         Scalar mImgOrig=mean(image(r),maImage(r));
         k = min / max;
-        if ((k >= 0.3) && area >= 10 && area >= 0.3 * r.height * r.width && m.val[0]>=mImg.val[0] && mImgOrig.val[0]<=50) filteredContours.push_back(contours.at(i));
+        //area = 0.3 k=0.4 acc 80
+        if ((k >= 0.4) && area >= 10 && area >= 0.3 * r.height * r.width && m.val[0]>=mImg.val[0] && mImgOrig.val[0]<=50 && abs(mImgOrig.val[1]-mImgOrig[2])<=100) filteredContours.push_back(contours.at(i));
         //if (area>=10) filteredContours.push_back(contours.at(i));
         //if(area>=500) filteredContours.push_back(contours.at(i));
 
@@ -883,6 +889,7 @@ void brightLessionSegmentation(Mat& mask, Mat& image, CharsImage& ci) {
         drawContours(maImage, filteredContours, i, Scalar(255), CV_FILLED, 8, hierarchy, 0, Point());
     }
     //imwrite("image/6-bright lesion/image" + SSTR(ci.nImage) + ".tif", maImage);
+    //imwrite("image/7-thesis/image" + SSTR(3) + ".tif", maImage);
     ci.areaBrightZone = countNonZero(maImage);
     ci.numberBrightZones = filteredContours.size();
 }

@@ -34,7 +34,9 @@ using namespace cv::ml;
 void classifyBD();
 bool file_exists(const string& name);
 void generateTestFile();
+void printMatrix(int matrix[][4]);
 void getCharsFromTestFolder(string& svmFileName);
+
 
 int main(int argc, char *argv[]) {
     // initialize resources, if needed
@@ -65,13 +67,14 @@ int main(int argc, char *argv[]) {
     string trainingFileName = "training_data.csv";
     ifstream svmFile(svmFileName);
     ifstream trainingFile(trainingFileName);
+    ofstream trainingFileOutput;
     Ptr<TrainData> td;
     CharsImage ci;
     int ncols = 2240, nrows = 1488;
     int debugFlag = 0;
     if (!svmFile.is_open() || debugFlag) {
         if (!trainingFile.is_open() || debugFlag) {
-            ofstream trainingFileOutput(trainingFileName);
+            if (!debugFlag) trainingFileOutput.open(trainingFileName);
             for (int i = 0; i < nCategories; i++) {
                 switch (i) {
                     case 0:
@@ -122,8 +125,10 @@ int main(int argc, char *argv[]) {
                     trainingData[nImage][2] = ci.areaBrightZone;
                     trainingData[nImage][3] = ci.numberBrightZones;
                     nImage++;
-                    if (debugFlag)
+                    if (debugFlag){                        
                         return 0;
+                    }
+                       
                 }
 
             }
@@ -287,6 +292,7 @@ void getCharsFromTestFolder(string& svmFileName) {
     float acc = 0;
     int ncols = 2240, nrows = 1488;
     //VP=FP=VN=FN=0;
+    int confMatrix [4][4]={{0}};
     if (testDataFile.is_open()) {
         while (testDataFile >> fileName >> type) {           
             ci.nImage = nImage;
@@ -314,7 +320,8 @@ void getCharsFromTestFolder(string& svmFileName) {
             result = svm->predict(sampleMat);
             cout << "Imagen " << fileName << " " << nImage << ": (" << type << "," << result << ")" << endl;
             //if(nImage==20) return;
-            if (type == result)
+            confMatrix[type][(int)result]++;
+            if (type == (int)result)
                 acc++;
             nImage++;
         }
@@ -322,6 +329,20 @@ void getCharsFromTestFolder(string& svmFileName) {
         /* could not open directory */
         cout << "Error opening test data file..." << endl;
     }
-    cout << "Algorithm accuracy: " << acc / 100 << endl;
+    cout << "Algorithm accuracy: " << acc / 120 << endl;    
+    
     testDataFile.close();
+    
+    printMatrix(confMatrix);
+}
+
+void printMatrix(int matrix[][4]){
+      for (int i = 0; i < 4; ++i)
+    {
+        for (int j = 0; j < 4; ++j)
+        {
+            cout << matrix[i][j] << ' ';
+        }
+        cout << std::endl;
+    }
 }
