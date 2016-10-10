@@ -37,6 +37,9 @@ void generateTestFile();
 void printMatrix(int matrix[][4]);
 void getCharsFromTestFolder(string& svmFileName);
 
+int numberOfImages = 150;
+int nChars = 4;
+int nCategories = 4;
 
 int main(int argc, char *argv[]) {
     // initialize resources, if needed
@@ -52,9 +55,7 @@ int main(int argc, char *argv[]) {
     //generate testset file
     //generateTestFile();
     //return 0;
-    int numberOfImages = 30;
-    int nChars = 4;
-    int nCategories = 4;
+
     string urlBase = "";
     string image_name = "";
     Mat bgMask, image, tmp;
@@ -114,21 +115,21 @@ int main(int argc, char *argv[]) {
                     brightLessionSegmentation(tmp, image, ci);
 
 
-                    
-                    cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<" " << ci.numberBrightZones <<endl;
+
+                    cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << " " << ci.numberBrightZones << endl;
                     //cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<endl;
-                    trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones <<"," << i << endl;
+                    trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones << "," << i << endl;
                     //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
                     labels[nImage] = i;
                     trainingData[nImage][0] = ci.areaDarkZone;
                     trainingData[nImage][1] = ci.numberDarkZone;
                     trainingData[nImage][2] = ci.areaBrightZone;
-                    trainingData[nImage][3] = ci.numberBrightZones;
+                    trainingData[nImage][3] = ci.numberBrightZones; 
                     nImage++;
-                    if (debugFlag){                        
+                    if (debugFlag) {
                         return 0;
                     }
-                       
+
                 }
 
             }
@@ -146,7 +147,21 @@ int main(int argc, char *argv[]) {
         svm->setKernel(ml::SVM::POLY);
         svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1e-6));
         svm->setDegree(3);*/
-        svm->trainAuto(td, 12);
+        //svm->setKernel(ml::SVM::RBF);
+        svm->setGamma(3.3750000000000002e-002);
+        //svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1.1920928955078125e-007));
+        //svm->setC(2.5000000000000000e+000);
+        ParamGrid noParams;
+        noParams.logStep = 0;
+
+        svm->trainAuto(td, 600, SVM::getDefaultGrid(SVM::C),
+                noParams,
+                SVM::getDefaultGrid(SVM::P),
+                SVM::getDefaultGrid(SVM::NU),
+                SVM::getDefaultGrid(SVM::COEF),
+                SVM::getDefaultGrid(SVM::DEGREE),
+                true);
+        ;
         svm->save(svmFileName);
 
 
@@ -277,13 +292,13 @@ void generateTestFile() {
 
 void getCharsFromTestFolder(string& svmFileName) {
     //int numberOfImages = 100;
-    int nChars = 4, type;
+    int type;
     Mat image, bgMask, tmp;
     int flag = 1;
     CharsImage ci;
     int nImage = 0;
     string fileName = "";
-    ifstream testDataFile("testset.txt");
+
     float result;
     Ptr<SVM> svm = SVM::create();
     svm = SVM::load<SVM>(svmFileName);
@@ -292,55 +307,79 @@ void getCharsFromTestFolder(string& svmFileName) {
     float acc = 0;
     int ncols = 2240, nrows = 1488;
     //VP=FP=VN=FN=0;
-    int confMatrix [4][4]={{0}};
-    if (testDataFile.is_open()) {
-        while (testDataFile >> fileName >> type) {           
-            ci.nImage = nImage;
-            image = imread("image/0-dataset/test/" + fileName, 1);
-            if (image.cols != ncols || image.rows != nrows) {
-                resize(image, image, Size(ncols, nrows));
+    int confMatrix [4][4] = {
+        {0}
+    };
+
+    int debug = 1;
+    
+    if (!debug) {// verificar si se están realizando pruebas
+        ifstream testDataFile("testset.txt");
+        if (testDataFile.is_open()) {
+            while (testDataFile >> fileName >> type) {
+                ci.nImage = nImage;
+                image = imread("image/0-dataset/test/" + fileName, 1);
+                if (image.cols != ncols || image.rows != nrows) {
+                    resize(image, image, Size(ncols, nrows));
+                }
+                if (flag) {
+                    backgroundSegmentation(image, bgMask);
+                    flag = 0;
+                }
+
+                bgMask.copyTo(tmp);
+                opticDiscSegmentation(tmp, image, ci);
+                //cout<<ci.nImage+i*numberOfImages<<endl;
+                //imwrite("image/3-final mask/image" + SSTR(ci.nImage) + ".tif", tmp);
+                darkLessionSegmentation(tmp, image, ci);
+                brightLessionSegmentation(tmp, image, ci);
+                //cout << "Imagen " + fileName + " " << nImage << ": " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << " " << ci.numberBrightZones << endl;
+                testSample[0] = ci.areaDarkZone;
+                testSample[1] = ci.numberDarkZone;
+                testSample[2] = ci.areaBrightZone;
+                testSample[3] = ci.numberBrightZones;
+                Mat sampleMat(1, nChars, CV_32FC1, testSample);
+                result = svm->predict(sampleMat);
+                cout << "Imagen " << fileName << " " << nImage << ": (" << type << "," << result << ")" << endl;
+                //if(nImage==20) return;
+                confMatrix[type][(int) result]++;
+                if (type == (int) result)
+                    acc++;
+                nImage++;
             }
-            if (flag) {
-                backgroundSegmentation(image, bgMask);
-                flag = 0;
-            }
-            
-            bgMask.copyTo(tmp);
-            opticDiscSegmentation(tmp, image, ci);
-            //cout<<ci.nImage+i*numberOfImages<<endl;
-            imwrite("image/3-final mask/image"+SSTR(ci.nImage)+".tif", tmp);
-            darkLessionSegmentation(tmp, image, ci);
-            brightLessionSegmentation(tmp, image, ci);
-            //cout << "Imagen "+fileName+" " << nImage << ": " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << endl;
-            testSample[0] = ci.areaDarkZone;
-            testSample[1] = ci.numberDarkZone;
-            testSample[2] = ci.areaBrightZone;
-            testSample[3] = ci.numberBrightZones;
+        } else {
+            /* could not open directory */
+            cout << "Error opening test data file..." << endl;
+        }
+        testDataFile.close();
+    } else {
+        //ifstream trainChars("training_data.csv");
+
+        cout << "Classification test mode" << endl;
+        FILE *fp = fopen("training_data.csv", "r");
+        int dArea, dNum, bArea, bNum;
+        while (fscanf(fp, "%d,%d,%d,%d,%d", &dArea, &dNum, &bArea, &bNum, &type) != EOF) {
+            testSample[0] = dArea;
+            testSample[1] = dNum;
+            testSample[2] = bArea;
+            testSample[3] = bNum;
             Mat sampleMat(1, nChars, CV_32FC1, testSample);
             result = svm->predict(sampleMat);
-            cout << "Imagen " << fileName << " " << nImage << ": (" << type << "," << result << ")" << endl;
-            //if(nImage==20) return;
-            confMatrix[type][(int)result]++;
-            if (type == (int)result)
+            //cout << "Imagen " << nImage << ": (" << type << "," << result << ")" << endl;
+            if (type == (int) result)
                 acc++;
             nImage++;
+            confMatrix[type][(int) result]++;
         }
-    } else {
-        /* could not open directory */
-        cout << "Error opening test data file..." << endl;
+        fclose(fp);
     }
-    cout << "Algorithm accuracy: " << acc / 120 << endl;    
-    
-    testDataFile.close();
-    
+    cout << "Algorithm accuracy: " << acc / (numberOfImages*nCategories) << endl;
     printMatrix(confMatrix);
 }
 
-void printMatrix(int matrix[][4]){
-      for (int i = 0; i < 4; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
+void printMatrix(int matrix[][4]) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
             cout << matrix[i][j] << ' ';
         }
         cout << std::endl;

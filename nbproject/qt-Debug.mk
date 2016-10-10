@@ -448,13 +448,20 @@ moc_MainForm.cpp: ui_MainForm.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qbuttongroup.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialog \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialog.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialogButtonBox \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialogbuttonbox.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGraphicsView \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsview.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpainter.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsscene.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGroupBox \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgroupbox.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QHeaderView \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qheaderview.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemview.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qabstractitemmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qitemselectionmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemdelegate.h \
@@ -474,8 +481,11 @@ moc_MainForm.cpp: ui_MainForm.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qlineedit.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextcursor.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextformat.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QPushButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qpushbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QRadioButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qradiobutton.h \
 		MainForm.h
 	'C:\Qt\5.6\mingw49_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/5.6/mingw49_32/mkspecs/win32-g++ -IC:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathy/nbproject -IC:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathy/nbproject/sources/include -IC:/Qt/5.6/mingw49_32/include -IC:/Qt/5.6/mingw49_32/include/QtWidgets -IC:/Qt/5.6/mingw49_32/include/QtGui -IC:/Qt/5.6/mingw49_32/include/QtANGLE -IC:/Qt/5.6/mingw49_32/include/QtCore -I. MainForm.h -o moc_MainForm.cpp
 
@@ -620,13 +630,20 @@ build/Debug/MinGW-Windows/MainForm.cpp.o: MainForm.cpp.cc MainForm.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qbuttongroup.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialog \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialog.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialogButtonBox \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialogbuttonbox.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGraphicsView \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsview.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpainter.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsscene.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGroupBox \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgroupbox.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QHeaderView \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qheaderview.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemview.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qabstractitemmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qitemselectionmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemdelegate.h \
@@ -646,8 +663,11 @@ build/Debug/MinGW-Windows/MainForm.cpp.o: MainForm.cpp.cc MainForm.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qlineedit.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextcursor.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextformat.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QPushButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qpushbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QRadioButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qradiobutton.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/Debug/MinGW-Windows/MainForm.cpp.o MainForm.cpp.cc
 
 build/Debug/MinGW-Windows/feature_extraction.o: feature_extraction.cpp feature_extraction.h \
@@ -825,13 +845,20 @@ build/Debug/MinGW-Windows/main.o: main.cpp C:/Qt/5.6/mingw49_32/include/QtWidget
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qbuttongroup.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialog \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialog.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/QDialogButtonBox \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qdialogbuttonbox.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGraphicsView \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsview.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpainter.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h \
+		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgraphicsscene.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QGroupBox \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qgroupbox.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/QHeaderView \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qheaderview.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemview.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractscrollarea.h \
-		C:/Qt/5.6/mingw49_32/include/QtWidgets/qframe.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qabstractitemmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtCore/qitemselectionmodel.h \
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractitemdelegate.h \
@@ -851,8 +878,11 @@ build/Debug/MinGW-Windows/main.o: main.cpp C:/Qt/5.6/mingw49_32/include/QtWidget
 		C:/Qt/5.6/mingw49_32/include/QtWidgets/qlineedit.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextcursor.h \
 		C:/Qt/5.6/mingw49_32/include/QtGui/qtextformat.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qpen.h \
-		C:/Qt/5.6/mingw49_32/include/QtGui/qtextoption.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QPushButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qpushbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qabstractbutton.h \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/QRadioButton \
+		C:/Qt/5.6/mingw49_32/include/QtWidgets/qradiobutton.h \
 		sources/include/opencv2/opencv.hpp \
 		sources/include/opencv2/core.hpp \
 		sources/include/opencv2/core/cvdef.h \
