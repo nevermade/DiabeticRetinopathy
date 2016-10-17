@@ -6,41 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>775</width>
-    <height>587</height>
+    <width>892</width>
+    <height>630</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Clasificador de Retinopatía Diabética</string>
+   <string>MainForm</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QPushButton" name="btnSearch">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>60</y>
-     <width>131</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Seleccione una imagen:</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>60</y>
-     <width>321</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>60</y>
+     <x>590</x>
+     <y>80</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -49,114 +26,129 @@
     <string>Buscar</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>140</y>
-     <width>181</width>
-     <height>171</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Severidad</string>
-   </property>
-   <widget class="QRadioButton" name="radioButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>40</y>
-      <width>82</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Normal</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="radioButton_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>70</y>
-      <width>82</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Leve</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="radioButton_3">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>100</y>
-      <width>82</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Moderado</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="radioButton_4">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>130</y>
-      <width>82</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Severo</string>
-    </property>
-   </widget>
-  </widget>
   <widget class="QGraphicsView" name="graphicsView">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>130</y>
-     <width>461</width>
-     <height>401</height>
+     <y>150</y>
+     <width>531</width>
+     <height>451</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QLineEdit" name="txtPath">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>340</y>
-     <width>75</width>
-     <height>23</height>
+     <x>170</x>
+     <y>80</y>
+     <width>401</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>80</y>
+     <width>111</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Clasificar</string>
+    <string>Seleccionar Imagen:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>550</x>
-     <y>400</y>
-     <width>151</width>
+     <x>590</x>
+     <y>170</y>
+     <width>131</width>
      <height>16</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-     <italic>true</italic>
-    </font>
+   <property name="text">
+    <string>Seleccionar tipo de imagen:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>170</y>
+     <width>131</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Normal</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Leve</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Moderado</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Severo</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>260</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
    </property>
    <property name="text">
     <string>El resultado es:</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>340</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Resultado</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btnSearch</sender>
+   <signal>clicked()</signal>
+   <receiver>MainForm</receiver>
+   <slot>selectImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>642</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>740</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>selectImage()</slot>
+ </slots>
 </ui>

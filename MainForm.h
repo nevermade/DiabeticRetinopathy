@@ -8,7 +8,7 @@
  * File:   MainForm.h
  * Author: USER
  *
- * Created on 31 de agosto de 2016, 11:57 PM
+ * Created on 16 de octubre de 2016, 10:19 PM
  */
 
 #ifndef _MAINFORM_H
@@ -21,6 +21,10 @@ class MainForm : public QDialog {
 public:
     MainForm();
     virtual ~MainForm();
+
+public slots:
+    void clickBtnSearch();  
+    
 private:
     Ui::MainForm widget;
 };

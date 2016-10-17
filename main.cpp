@@ -45,9 +45,9 @@ int main(int argc, char *argv[]) {
     // initialize resources, if needed
     // Q_INIT_RESOURCE(resfile);
 
-    /*QApplication app(argc, argv);
+    QApplication app(argc, argv);
     MainForm mainForm;
-    mainForm.show();*/
+    mainForm.show();
 
     //clasificar bd
     //classifyBD();
@@ -104,7 +104,8 @@ int main(int argc, char *argv[]) {
                         resize(image, image, Size(ncols, nrows));
                     }
                     if (flag) {
-                        backgroundSegmentation(image, bgMask);
+                        //backgroundSegmentation(image, bgMask);
+                        readInGreenChannel("image/bgMask.tif",bgMask);
                         flag = 0;
                     }
                     bgMask.copyTo(tmp);
@@ -168,7 +169,7 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "File Exists" << endl;
 
-        getCharsFromTestFolder(svmFileName);
+        //getCharsFromTestFolder(svmFileName);
 
         /*int nrows = testChars.rows;
         //float* ptr;
@@ -194,7 +195,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    svmFile.close();
+    //svmFile.close();
 
 
     //svm->load("svm_result.xml");
@@ -202,9 +203,9 @@ int main(int argc, char *argv[]) {
 
 
 
-    waitKey(0);
-    //return app.exec();
-    return 0;
+    //waitKey(0);
+    return app.exec();
+    //return 0;
 }
 
 bool file_exists(const string& name) {
@@ -312,7 +313,6 @@ void getCharsFromTestFolder(string& svmFileName) {
     };
 
     int debug = 1;
-    
     if (!debug) {// verificar si se están realizando pruebas
         ifstream testDataFile("testset.txt");
         if (testDataFile.is_open()) {
@@ -323,11 +323,13 @@ void getCharsFromTestFolder(string& svmFileName) {
                     resize(image, image, Size(ncols, nrows));
                 }
                 if (flag) {
-                    backgroundSegmentation(image, bgMask);
+                   // backgroundSegmentation(image, bgMask);
+                    readInGreenChannel("image/bgMask.tif",bgMask);
                     flag = 0;
                 }
-
+                //backgroundSegmentation(image, bgMask);
                 bgMask.copyTo(tmp);
+                
                 opticDiscSegmentation(tmp, image, ci);
                 //cout<<ci.nImage+i*numberOfImages<<endl;
                 //imwrite("image/3-final mask/image" + SSTR(ci.nImage) + ".tif", tmp);
@@ -365,7 +367,7 @@ void getCharsFromTestFolder(string& svmFileName) {
             testSample[3] = bNum;
             Mat sampleMat(1, nChars, CV_32FC1, testSample);
             result = svm->predict(sampleMat);
-            //cout << "Imagen " << nImage << ": (" << type << "," << result << ")" << endl;
+            cout << "Imagen " << nImage << ": (" << type << "," << result << ")" << endl;
             if (type == (int) result)
                 acc++;
             nImage++;
