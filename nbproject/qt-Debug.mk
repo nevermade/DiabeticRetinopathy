@@ -725,7 +725,11 @@ build/Debug/MinGW-Windows/MainForm.cpp.o: MainForm.cpp.cc MainForm.h \
 		C:/Qt/5.7/mingw53_32/include/QtGui/qtextformat.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/QPushButton \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qpushbutton.h \
-		C:/Qt/5.7/mingw53_32/include/QtWidgets/qabstractbutton.h
+		C:/Qt/5.7/mingw53_32/include/QtWidgets/qabstractbutton.h \
+		C:/Qt/5.7/mingw53_32/include/QtWidgets/QFileDialog \
+		C:/Qt/5.7/mingw53_32/include/QtWidgets/qfiledialog.h \
+		C:/Qt/5.7/mingw53_32/include/QtCore/qdir.h \
+		C:/Qt/5.7/mingw53_32/include/QtCore/qfileinfo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/Debug/MinGW-Windows/MainForm.cpp.o MainForm.cpp.cc
 
 build/Debug/MinGW-Windows/feature_extraction.o: feature_extraction.cpp feature_extraction.h \

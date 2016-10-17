@@ -12,19 +12,21 @@
  */
 
 #include "MainForm.h"
-
-
+#include "QFileDialog"
 MainForm::MainForm() {
     widget.setupUi(this);
-    connect(widget.btnSearch, SIGNAL(clicked()),this, SLOT(clickBtnSearch()));
+    connect(widget.btnSearch, SIGNAL(clicked()), this, SLOT(clickBtnSearch()));
 }
 
-MainForm::~MainForm() {    
-    
+MainForm::~MainForm() {
+
 }
 
-void MainForm::clickBtnSearch(){
-    widget.txtPath->setText("Hola Daekef");
+void MainForm::clickBtnSearch() {
+    QString path = QFileDialog::getOpenFileName(this, tr("(*.tif)"), "/");
+    if (path.isNull() == false) {
+        widget.txtPath->setText(path);
+    }
 }
 
 
