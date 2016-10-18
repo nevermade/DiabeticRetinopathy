@@ -15,6 +15,16 @@
 #define _MAINFORM_H
 
 #include "ui_MainForm.h"
+#include "opencv2/opencv.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/ml.hpp"
+#include "preprocessing.h"
+#include "feature_extraction.h"
+using namespace std;
+using namespace cv;
+using namespace cv::ml;
 
 class MainForm : public QDialog {
     Q_OBJECT
@@ -23,10 +33,13 @@ public:
     virtual ~MainForm();
 
 public slots:
-    void clickBtnSearch();  
+    void clickBtnSearch();
+    
     
 private:
     Ui::MainForm widget;
+    Ptr<SVM> svm;
+    void showEvent( QShowEvent* event );
 };
 
 #endif /* _MAINFORM_H */

@@ -551,6 +551,60 @@ moc_MainForm.cpp: ui_MainForm.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/QPushButton \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qpushbutton.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qabstractbutton.h \
+		sources/include/opencv2/opencv.hpp \
+		sources/include/opencv2/core.hpp \
+		sources/include/opencv2/core/cvdef.h \
+		sources/include/opencv2/hal/defs.h \
+		sources/include/opencv2/core/version.hpp \
+		sources/include/opencv2/core/base.hpp \
+		sources/include/opencv2/core/cvstd.hpp \
+		sources/include/opencv2/core/ptr.inl.hpp \
+		sources/include/opencv2/hal.hpp \
+		sources/include/opencv2/core/sse_utils.hpp \
+		sources/include/opencv2/core/traits.hpp \
+		sources/include/opencv2/core/matx.hpp \
+		sources/include/opencv2/core/types.hpp \
+		sources/include/opencv2/core/mat.hpp \
+		sources/include/opencv2/core/bufferpool.hpp \
+		sources/include/opencv2/core/mat.inl.hpp \
+		sources/include/opencv2/core/persistence.hpp \
+		sources/include/opencv2/core/operations.hpp \
+		sources/include/opencv2/core/cvstd.inl.hpp \
+		sources/include/opencv2/core/utility.hpp \
+		sources/include/opencv2/core/core_c.h \
+		sources/include/opencv2/core/types_c.h \
+		sources/include/opencv2/core/optim.hpp \
+		sources/include/opencv2/imgproc.hpp \
+		sources/include/opencv2/imgproc/imgproc_c.h \
+		sources/include/opencv2/imgproc/types_c.h \
+		sources/include/opencv2/photo.hpp \
+		sources/include/opencv2/photo/photo_c.h \
+		sources/include/opencv2/video.hpp \
+		sources/include/opencv2/video/tracking.hpp \
+		sources/include/opencv2/video/background_segm.hpp \
+		sources/include/opencv2/video/tracking_c.h \
+		sources/include/opencv2/features2d.hpp \
+		sources/include/opencv2/flann/miniflann.hpp \
+		sources/include/opencv2/flann/defines.h \
+		sources/include/opencv2/flann/config.h \
+		sources/include/opencv2/objdetect.hpp \
+		sources/include/opencv2/objdetect/detection_based_tracker.hpp \
+		sources/include/opencv2/objdetect/objdetect_c.h \
+		sources/include/opencv2/calib3d.hpp \
+		sources/include/opencv2/core/affine.hpp \
+		sources/include/opencv2/calib3d/calib3d_c.h \
+		sources/include/opencv2/imgcodecs.hpp \
+		sources/include/opencv2/videoio.hpp \
+		sources/include/opencv2/highgui.hpp \
+		sources/include/opencv2/highgui/highgui_c.h \
+		sources/include/opencv2/imgcodecs/imgcodecs_c.h \
+		sources/include/opencv2/videoio/videoio_c.h \
+		sources/include/opencv2/ml.hpp \
+		sources/include/opencv2/core/core.hpp \
+		sources/include/opencv2/highgui/highgui.hpp \
+		sources/include/opencv2/imgproc/imgproc.hpp \
+		preprocessing.h \
+		feature_extraction.h \
 		MainForm.h \
 		C:/Qt/5.7/mingw53_32/bin/moc.exe
 	'C:\Qt\5.7\mingw53_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/5.7/mingw53_32/mkspecs/win32-g++ -IC:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathy/nbproject -IC:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathy/nbproject/sources/include -IC:/Qt/5.7/mingw53_32/include -IC:/Qt/5.7/mingw53_32/include/QtWidgets -IC:/Qt/5.7/mingw53_32/include/QtGui -IC:/Qt/5.7/mingw53_32/include/QtANGLE -IC:/Qt/5.7/mingw53_32/include/QtCore -I. MainForm.h -o moc_MainForm.cpp
@@ -726,6 +780,60 @@ build/Debug/MinGW-Windows/MainForm.cpp.o: MainForm.cpp.cc MainForm.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/QPushButton \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qpushbutton.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qabstractbutton.h \
+		sources/include/opencv2/opencv.hpp \
+		sources/include/opencv2/core.hpp \
+		sources/include/opencv2/core/cvdef.h \
+		sources/include/opencv2/hal/defs.h \
+		sources/include/opencv2/core/version.hpp \
+		sources/include/opencv2/core/base.hpp \
+		sources/include/opencv2/core/cvstd.hpp \
+		sources/include/opencv2/core/ptr.inl.hpp \
+		sources/include/opencv2/hal.hpp \
+		sources/include/opencv2/core/sse_utils.hpp \
+		sources/include/opencv2/core/traits.hpp \
+		sources/include/opencv2/core/matx.hpp \
+		sources/include/opencv2/core/types.hpp \
+		sources/include/opencv2/core/mat.hpp \
+		sources/include/opencv2/core/bufferpool.hpp \
+		sources/include/opencv2/core/mat.inl.hpp \
+		sources/include/opencv2/core/persistence.hpp \
+		sources/include/opencv2/core/operations.hpp \
+		sources/include/opencv2/core/cvstd.inl.hpp \
+		sources/include/opencv2/core/utility.hpp \
+		sources/include/opencv2/core/core_c.h \
+		sources/include/opencv2/core/types_c.h \
+		sources/include/opencv2/core/optim.hpp \
+		sources/include/opencv2/imgproc.hpp \
+		sources/include/opencv2/imgproc/imgproc_c.h \
+		sources/include/opencv2/imgproc/types_c.h \
+		sources/include/opencv2/photo.hpp \
+		sources/include/opencv2/photo/photo_c.h \
+		sources/include/opencv2/video.hpp \
+		sources/include/opencv2/video/tracking.hpp \
+		sources/include/opencv2/video/background_segm.hpp \
+		sources/include/opencv2/video/tracking_c.h \
+		sources/include/opencv2/features2d.hpp \
+		sources/include/opencv2/flann/miniflann.hpp \
+		sources/include/opencv2/flann/defines.h \
+		sources/include/opencv2/flann/config.h \
+		sources/include/opencv2/objdetect.hpp \
+		sources/include/opencv2/objdetect/detection_based_tracker.hpp \
+		sources/include/opencv2/objdetect/objdetect_c.h \
+		sources/include/opencv2/calib3d.hpp \
+		sources/include/opencv2/core/affine.hpp \
+		sources/include/opencv2/calib3d/calib3d_c.h \
+		sources/include/opencv2/imgcodecs.hpp \
+		sources/include/opencv2/videoio.hpp \
+		sources/include/opencv2/highgui.hpp \
+		sources/include/opencv2/highgui/highgui_c.h \
+		sources/include/opencv2/imgcodecs/imgcodecs_c.h \
+		sources/include/opencv2/videoio/videoio_c.h \
+		sources/include/opencv2/ml.hpp \
+		sources/include/opencv2/core/core.hpp \
+		sources/include/opencv2/highgui/highgui.hpp \
+		sources/include/opencv2/imgproc/imgproc.hpp \
+		preprocessing.h \
+		feature_extraction.h \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/QFileDialog \
 		C:/Qt/5.7/mingw53_32/include/QtWidgets/qfiledialog.h \
 		C:/Qt/5.7/mingw53_32/include/QtCore/qdir.h \

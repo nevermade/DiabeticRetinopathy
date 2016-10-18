@@ -27,46 +27,47 @@ class Ui_MainForm
 {
 public:
     QPushButton *btnSearch;
-    QGraphicsView *graphicsView;
+    QGraphicsView *canvasImage;
     QLineEdit *txtPath;
     QLabel *label;
     QLabel *label_2;
     QComboBox *comboBox;
     QLabel *label_3;
-    QLabel *label_4;
+    QLabel *txtResult;
 
     void setupUi(QDialog *MainForm)
     {
         if (MainForm->objectName().isEmpty())
             MainForm->setObjectName(QStringLiteral("MainForm"));
-        MainForm->resize(892, 630);
+        MainForm->resize(1076, 965);
         btnSearch = new QPushButton(MainForm);
         btnSearch->setObjectName(QStringLiteral("btnSearch"));
-        btnSearch->setGeometry(QRect(590, 80, 75, 23));
-        graphicsView = new QGraphicsView(MainForm);
-        graphicsView->setObjectName(QStringLiteral("graphicsView"));
-        graphicsView->setGeometry(QRect(40, 150, 531, 451));
+        btnSearch->setGeometry(QRect(910, 80, 75, 23));
+        canvasImage = new QGraphicsView(MainForm);
+        canvasImage->setObjectName(QStringLiteral("canvasImage"));
+        canvasImage->setGeometry(QRect(60, 200, 931, 730));
         txtPath = new QLineEdit(MainForm);
         txtPath->setObjectName(QStringLiteral("txtPath"));
-        txtPath->setGeometry(QRect(170, 80, 401, 20));
+        txtPath->setGeometry(QRect(170, 80, 681, 20));
+        txtPath->setReadOnly(true);
         label = new QLabel(MainForm);
         label->setObjectName(QStringLiteral("label"));
         label->setGeometry(QRect(60, 80, 111, 16));
         label_2 = new QLabel(MainForm);
         label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(590, 170, 131, 16));
+        label_2->setGeometry(QRect(60, 150, 131, 16));
         comboBox = new QComboBox(MainForm);
         comboBox->setObjectName(QStringLiteral("comboBox"));
-        comboBox->setGeometry(QRect(730, 170, 131, 22));
+        comboBox->setGeometry(QRect(200, 150, 131, 22));
         label_3 = new QLabel(MainForm);
         label_3->setObjectName(QStringLiteral("label_3"));
-        label_3->setGeometry(QRect(590, 260, 91, 16));
-        label_4 = new QLabel(MainForm);
-        label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setGeometry(QRect(710, 340, 47, 13));
+        label_3->setGeometry(QRect(450, 150, 91, 16));
+        txtResult = new QLabel(MainForm);
+        txtResult->setObjectName(QStringLiteral("txtResult"));
+        txtResult->setGeometry(QRect(630, 150, 47, 13));
 
         retranslateUi(MainForm);
-        QObject::connect(btnSearch, SIGNAL(clicked()), MainForm, SLOT(selectImage()));
+        QObject::connect(btnSearch, SIGNAL(clicked()), MainForm, SLOT(clickBtnSearch()));
 
         QMetaObject::connectSlotsByName(MainForm);
     } // setupUi
@@ -85,7 +86,7 @@ public:
          << QApplication::translate("MainForm", "Severo", 0)
         );
         label_3->setText(QApplication::translate("MainForm", "El resultado es:", 0));
-        label_4->setText(QApplication::translate("MainForm", "Resultado", 0));
+        txtResult->setText(QApplication::translate("MainForm", "Resultado", 0));
     } // retranslateUi
 
 };

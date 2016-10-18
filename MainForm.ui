@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>892</width>
-    <height>630</height>
+    <width>1076</width>
+    <height>965</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="btnSearch">
    <property name="geometry">
     <rect>
-     <x>590</x>
+     <x>910</x>
      <y>80</y>
      <width>75</width>
      <height>23</height>
@@ -26,13 +26,13 @@
     <string>Buscar</string>
    </property>
   </widget>
-  <widget class="QGraphicsView" name="graphicsView">
+  <widget class="QGraphicsView" name="canvasImage">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>150</y>
-     <width>531</width>
-     <height>451</height>
+     <x>60</x>
+     <y>200</y>
+     <width>931</width>
+     <height>730</height>
     </rect>
    </property>
   </widget>
@@ -41,9 +41,12 @@
     <rect>
      <x>170</x>
      <y>80</y>
-     <width>401</width>
+     <width>681</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -62,8 +65,8 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>170</y>
+     <x>60</x>
+     <y>150</y>
      <width>131</width>
      <height>16</height>
     </rect>
@@ -75,8 +78,8 @@
   <widget class="QComboBox" name="comboBox">
    <property name="geometry">
     <rect>
-     <x>730</x>
-     <y>170</y>
+     <x>200</x>
+     <y>150</y>
      <width>131</width>
      <height>22</height>
     </rect>
@@ -105,8 +108,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>260</y>
+     <x>450</x>
+     <y>150</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -115,11 +118,11 @@
     <string>El resultado es:</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="txtResult">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>340</y>
+     <x>630</x>
+     <y>150</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -135,7 +138,7 @@
    <sender>btnSearch</sender>
    <signal>clicked()</signal>
    <receiver>MainForm</receiver>
-   <slot>selectImage()</slot>
+   <slot>clickBtnSearch()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>642</x>
@@ -149,6 +152,7 @@
   </connection>
  </connections>
  <slots>
-  <slot>selectImage()</slot>
+  <signal>window_loaded()</signal>
+  <slot>clickBtnSearch()</slot>
  </slots>
 </ui>
