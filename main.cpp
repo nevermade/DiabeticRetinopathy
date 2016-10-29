@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 
                     cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << " " << ci.numberBrightZones << endl;
                     //cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<endl;
-                    trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones << "," << i << endl;
+                    trainingFileOutput << image_name <<","<< ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones << "," << i << endl;
                     //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
                     labels[nImage] = i;
                     trainingData[nImage][0] = ci.areaDarkZone;
@@ -148,19 +148,20 @@ int main(int argc, char *argv[]) {
         svm->setKernel(ml::SVM::POLY);
         svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1e-6));
         svm->setDegree(3);*/
-        //svm->setKernel(ml::SVM::RBF);
-        svm->setGamma(3.3750000000000002e-002);
-        //svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1.1920928955078125e-007));
-        //svm->setC(2.5000000000000000e+000);
+        svm->setType(ml::SVM::C_SVC);
+        svm->setKernel(ml::SVM::RBF);
+        svm->setGamma(9.3750000000000002e-002);
+        svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 1000, 1.1920928955078125e-007));
+        svm->setC(2.5000000000000000e+000);
         ParamGrid noParams;
         noParams.logStep = 0;
 
-        svm->trainAuto(td, 600, SVM::getDefaultGrid(SVM::C),
+        svm->trainAuto(td, 10, noParams,
                 noParams,
-                SVM::getDefaultGrid(SVM::P),
-                SVM::getDefaultGrid(SVM::NU),
-                SVM::getDefaultGrid(SVM::COEF),
-                SVM::getDefaultGrid(SVM::DEGREE),
+                noParams,
+                noParams,
+                noParams,
+                noParams,
                 true);
         ;
         svm->save(svmFileName);
@@ -360,14 +361,17 @@ void getCharsFromTestFolder(string& svmFileName) {
         cout << "Classification test mode" << endl;
         FILE *fp = fopen("training_data.csv", "r");
         int dArea, dNum, bArea, bNum;
-        while (fscanf(fp, "%d,%d,%d,%d,%d", &dArea, &dNum, &bArea, &bNum, &type) != EOF) {
+        
+        while (fscanf(fp, "%d,%d,%d,%d,%d",&dArea, &dNum, &bArea, &bNum, &type) != EOF) {
             testSample[0] = dArea;
             testSample[1] = dNum;
             testSample[2] = bArea;
             testSample[3] = bNum;
             Mat sampleMat(1, nChars, CV_32FC1, testSample);
             result = svm->predict(sampleMat);
-            cout << "Imagen " << nImage << ": (" << type << "," << result << ")" << endl;
+            
+            cout << "Imagen " << ": (" << type << "," << result << ")" << endl;
+            //cout << name << " "<< dArea << " "<<dNum << " "<< bArea << " "<<bNum << " " << type << endl;
             if (type == (int) result)
                 acc++;
             nImage++;

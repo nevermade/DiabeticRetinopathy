@@ -34,6 +34,7 @@ public:
     QComboBox *comboBox;
     QLabel *label_3;
     QLabel *txtResult;
+    QPushButton *btnClassify;
 
     void setupUi(QDialog *MainForm)
     {
@@ -61,20 +62,24 @@ public:
         comboBox->setGeometry(QRect(200, 150, 131, 22));
         label_3 = new QLabel(MainForm);
         label_3->setObjectName(QStringLiteral("label_3"));
-        label_3->setGeometry(QRect(450, 150, 91, 16));
+        label_3->setGeometry(QRect(570, 150, 91, 16));
         txtResult = new QLabel(MainForm);
         txtResult->setObjectName(QStringLiteral("txtResult"));
-        txtResult->setGeometry(QRect(630, 150, 47, 13));
+        txtResult->setGeometry(QRect(750, 150, 47, 13));
+        btnClassify = new QPushButton(MainForm);
+        btnClassify->setObjectName(QStringLiteral("btnClassify"));
+        btnClassify->setGeometry(QRect(380, 150, 75, 23));
 
         retranslateUi(MainForm);
         QObject::connect(btnSearch, SIGNAL(clicked()), MainForm, SLOT(clickBtnSearch()));
+        QObject::connect(btnClassify, SIGNAL(clicked()), MainForm, SLOT(classify()));
 
         QMetaObject::connectSlotsByName(MainForm);
     } // setupUi
 
     void retranslateUi(QDialog *MainForm)
     {
-        MainForm->setWindowTitle(QApplication::translate("MainForm", "MainForm", 0));
+        MainForm->setWindowTitle(QApplication::translate("MainForm", "Retinopat\303\255a diab\303\251tica - Detecci\303\263n y Clasificaci\303\263n", 0));
         btnSearch->setText(QApplication::translate("MainForm", "Buscar", 0));
         label->setText(QApplication::translate("MainForm", "Seleccionar Imagen:", 0));
         label_2->setText(QApplication::translate("MainForm", "Seleccionar tipo de imagen:", 0));
@@ -87,6 +92,7 @@ public:
         );
         label_3->setText(QApplication::translate("MainForm", "El resultado es:", 0));
         txtResult->setText(QApplication::translate("MainForm", "Resultado", 0));
+        btnClassify->setText(QApplication::translate("MainForm", "Clasificar", 0));
     } // retranslateUi
 
 };

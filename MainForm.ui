@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainForm</string>
+   <string>Retinopatía diabética - Detección y Clasificación</string>
   </property>
   <widget class="QPushButton" name="btnSearch">
    <property name="geometry">
@@ -108,7 +108,7 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>450</x>
+     <x>570</x>
      <y>150</y>
      <width>91</width>
      <height>16</height>
@@ -121,7 +121,7 @@
   <widget class="QLabel" name="txtResult">
    <property name="geometry">
     <rect>
-     <x>630</x>
+     <x>750</x>
      <y>150</y>
      <width>47</width>
      <height>13</height>
@@ -129,6 +129,19 @@
    </property>
    <property name="text">
     <string>Resultado</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnClassify">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>150</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Clasificar</string>
    </property>
   </widget>
  </widget>
@@ -150,9 +163,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnClassify</sender>
+   <signal>clicked()</signal>
+   <receiver>MainForm</receiver>
+   <slot>classify()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>426</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>494</x>
+     <y>127</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>window_loaded()</signal>
   <slot>clickBtnSearch()</slot>
+  <slot>classify()</slot>
  </slots>
 </ui>

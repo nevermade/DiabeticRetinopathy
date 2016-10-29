@@ -34,12 +34,14 @@ public:
 
 public slots:
     void clickBtnSearch();
+    void classify();
     
     
 private:
     Ui::MainForm widget;
     Ptr<SVM> svm;
     void showEvent( QShowEvent* event );
+    Mat retina;
 };
 
 #endif /* _MAINFORM_H */
