@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1076</width>
-    <height>965</height>
+    <width>749</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="btnSearch">
    <property name="geometry">
     <rect>
-     <x>910</x>
-     <y>80</y>
+     <x>600</x>
+     <y>20</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -30,9 +30,9 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>200</y>
-     <width>931</width>
-     <height>730</height>
+     <y>140</y>
+     <width>621</width>
+     <height>471</height>
     </rect>
    </property>
   </widget>
@@ -40,8 +40,8 @@
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>80</y>
-     <width>681</width>
+     <y>20</y>
+     <width>421</width>
      <height>20</height>
     </rect>
    </property>
@@ -53,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>80</y>
+     <y>20</y>
      <width>111</width>
      <height>16</height>
     </rect>
@@ -66,7 +66,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>150</y>
+     <y>90</y>
      <width>131</width>
      <height>16</height>
     </rect>
@@ -79,7 +79,7 @@
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>150</y>
+     <y>90</y>
      <width>131</width>
      <height>22</height>
     </rect>
@@ -108,8 +108,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>570</x>
-     <y>150</y>
+     <x>450</x>
+     <y>90</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -121,11 +121,18 @@
   <widget class="QLabel" name="txtResult">
    <property name="geometry">
     <rect>
-     <x>750</x>
-     <y>150</y>
-     <width>47</width>
-     <height>13</height>
+     <x>580</x>
+     <y>80</y>
+     <width>121</width>
+     <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Resultado</string>
@@ -134,8 +141,8 @@
   <widget class="QPushButton" name="btnClassify">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>150</y>
+     <x>350</x>
+     <y>90</y>
      <width>75</width>
      <height>23</height>
     </rect>

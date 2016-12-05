@@ -44,11 +44,14 @@ int nCategories = 4;
 int main(int argc, char *argv[]) {
     // initialize resources, if needed
     // Q_INIT_RESOURCE(resfile);
-
-    QApplication app(argc, argv);
+    cout<<"se inicia aplicacion"<<endl;
+    QApplication app(argc, argv); 
+    app.setQuitOnLastWindowClosed(true);    
+    cout<<"se declara form"<<endl;
     MainForm mainForm;
+    cout<<"se muestra ventana"<<endl;
     mainForm.show();
-
+    cout<<"se mostro ventana"<<endl;
     //clasificar bd
     //classifyBD();
     //return 0;
@@ -119,7 +122,7 @@ int main(int argc, char *argv[]) {
 
                     cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone << " " << ci.areaBrightZone << " " << ci.numberBrightZones << endl;
                     //cout << "Imagen " << nImage << ": " << "(Tipo - " << i << ") " << ci.areaDarkZone << " " << ci.numberDarkZone <<" " << ci.areaBrightZone <<endl;
-                    trainingFileOutput << image_name <<","<< ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones << "," << i << endl;
+                    trainingFileOutput << ci.areaDarkZone << "," << ci.numberDarkZone << "," << ci.areaBrightZone << "," << ci.numberBrightZones << "," << i << endl;
                     //cout<<ci.areaDarkZone<<" "<<ci.areaBrightZone<<endl;
                     labels[nImage] = i;
                     trainingData[nImage][0] = ci.areaDarkZone;
@@ -205,7 +208,9 @@ int main(int argc, char *argv[]) {
 
 
     //waitKey(0);
-    return app.exec();
+    cout << "App exec:"<<app.exec()<<endl;
+    return 0;
+    
     //return 0;
 }
 
@@ -379,7 +384,7 @@ void getCharsFromTestFolder(string& svmFileName) {
         }
         fclose(fp);
     }
-    cout << "Algorithm accuracy: " << acc / (numberOfImages*nCategories) << endl;
+    cout << "Sensibilidad del algoritmo " << acc / (numberOfImages*nCategories) << endl;
     printMatrix(confMatrix);
 }
 

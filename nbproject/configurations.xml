@@ -42,6 +42,8 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <qt>
+        <destdir>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}</destdir>
+        <target>DiabeticRetinopathy</target>
         <modules>core gui widgets</modules>
       </qt>
       <compileType>
@@ -53,68 +55,68 @@
         </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_calib3d300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_calib3d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_core300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_core_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_features2d300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_features2d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_flann300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_flann_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_hal300.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_hal_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_highgui300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_highgui_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgcodecs300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgcodecs_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgproc300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_imgproc_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ml300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ml_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_objdetect300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_objdetect_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_calib3d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_core_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_features2d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_imgcodecs_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_imgproc_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_objdetect_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_photo_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_stitching_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_superres_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_video_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_perf_videoio_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_photo300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_photo_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_shape300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_shape_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_stitching300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_stitching_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_superres300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_superres_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_calib3d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_core_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_features2d_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_flann_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_highgui_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_imgcodecs_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_imgproc_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_ml_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_objdetect_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_photo_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_shape_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_stitching_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_superres_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_video_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_test_videoio_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ts300.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_ts_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_video300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_video_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videoio300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videoio_pch_dephelp.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videostab300.dll.a</linkerLibFileItem>
-            <linkerLibFileItem>C:/Users/USER/Documents/NetBeansProjects/DiabeticRetinopathyUI/sources/lib/libopencv_videostab_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_calib3d300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_calib3d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_core300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_core_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_features2d300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_features2d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_flann300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_flann_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_hal300.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_hal_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_highgui300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_highgui_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_imgcodecs300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_imgcodecs_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_imgproc300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_imgproc_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_ml300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_ml_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_objdetect300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_objdetect_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_calib3d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_core_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_features2d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_imgcodecs_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_imgproc_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_objdetect_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_photo_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_stitching_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_superres_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_video_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_perf_videoio_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_photo300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_photo_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_shape300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_shape_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_stitching300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_stitching_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_superres300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_superres_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_calib3d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_core_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_features2d_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_flann_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_highgui_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_imgcodecs_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_imgproc_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_ml_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_objdetect_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_photo_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_shape_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_stitching_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_superres_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_video_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_test_videoio_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_ts300.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_ts_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_video300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_video_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_videoio300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_videoio_pch_dephelp.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_videostab300.dll.a</linkerLibFileItem>
+            <linkerLibFileItem>sources/lib/libopencv_videostab_pch_dephelp.a</linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

@@ -16,12 +16,13 @@
 
 MainForm::MainForm() {
     widget.setupUi(this);
+    
     //connect(widget.btnSearch, SIGNAL(clicked()), this, SLOT(clickBtnSearch()));
     //connect(this, SIGNAL(window_loaded), this, SLOT(onLoadWindow()), Qt::ConnectionType(Qt::QueuedConnection | Qt::UniqueConnection));
 }
 
 MainForm::~MainForm() {
-
+   
 }
 
 void MainForm::clickBtnSearch() {
@@ -87,9 +88,9 @@ void MainForm::classify() {
         cv::resize(image, image, Size(2240, 1488));
     }
     Mat bgMask, tmp;
-    readInGreenChannel("image/bgMask.tif", bgMask);
+    //readInGreenChannel("image/bgMask.tif", bgMask);
 
-    //backgroundSegmentation(image, bgMask);
+    backgroundSegmentation(image, bgMask);
     bgMask.copyTo(tmp);
 
     opticDiscSegmentation(tmp, image, ci);
